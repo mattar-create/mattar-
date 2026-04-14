@@ -73,7 +73,7 @@
         "É justamente aí que reside sua força: criar uma experiência capaz de tocar o público de forma sensível, afetiva e duradoura.",
       ],
     },
-    { id: "slide-08", type: "stage", number: "08", layout: "image-only", kicker: "Futuro", headline: "Futuro", subheadline: "Exercícios de futuros possíveis", theme: "dark", cardClass: "stage__card--center-media", media: { src: "./assets/electrolux-slides/46924ccf74dd36146ae29b9ab5acde20.gif", alt: "Pulso de luz", variant: "square-small" } },
+    { id: "slide-08", type: "stage", number: "08", layout: "image-only", kicker: "Futuro", headline: "Futuro", subheadline: "Exercícios de futuros possíveis", theme: "dark", cardClass: "stage__card--center-media stage__card--chapter", media: { src: "./assets/electrolux-slides/46924ccf74dd36146ae29b9ab5acde20.gif", alt: "Pulso de luz", variant: "square-small" } },
     {
       id: "slide-09",
       type: "stage",
@@ -109,7 +109,7 @@
         "Desta forma, pensando na sustentabilidade como um grande desafio para as próximas gerações, seria algo natural imaginar o futuro em relação às questões que desafiam nossa existência.",
       ],
     },
-    { id: "slide-12", type: "stage", number: "12", layout: "image-only", kicker: "Natureza Técnica", headline: "Natureza Técnica", subheadline: "Natural e artificial como continuidade", theme: "dark", cardClass: "stage__card--center-media", media: { src: "./assets/electrolux-slides/27bf478a3400002b729b23f275fddbf7.gif", alt: "Radiação central", variant: "square-small" } },
+    { id: "slide-12", type: "stage", number: "12", layout: "image-only", kicker: "Natureza Técnica", headline: "Natureza Técnica", subheadline: "Natural e artificial como continuidade", theme: "dark", cardClass: "stage__card--center-media stage__card--chapter", media: { src: "./assets/electrolux-slides/27bf478a3400002b729b23f275fddbf7.gif", alt: "Radiação central", variant: "square-small" } },
     {
       id: "slide-13",
       type: "stage",
@@ -148,7 +148,7 @@
         "Ao observar padrões que atravessam do mineral aos sistemas vivos e informacionais, reconhece-se uma lógica relacional comum, onde formas emergem sem controle central.",
       ],
     },
-    { id: "slide-16", type: "stage", number: "16", layout: "image-only", kicker: "Lux", headline: "Lux", subheadline: "Cone de luz e confluência temporal", theme: "dark", cardClass: "stage__card--center-media", media: { src: assetSrc("1dd3258200a7401a8e6ca9cbb79dee88 1.png"), alt: "Lux", variant: "square-small" } },
+    { id: "slide-16", type: "stage", number: "16", layout: "image-only", kicker: "Lux", headline: "Lux", subheadline: "Cone de luz e confluência temporal", theme: "dark", cardClass: "stage__card--center-media stage__card--chapter", media: { src: assetSrc("1dd3258200a7401a8e6ca9cbb79dee88 1.png"), alt: "Lux", variant: "square-small" } },
     {
       id: "slide-17",
       type: "stage",
@@ -211,7 +211,7 @@
       headline: "Poiesis",
       subheadline: "Criação como matéria do projeto",
       theme: "dark",
-      cardClass: "stage__card--center-media",
+      cardClass: "stage__card--center-media stage__card--chapter",
       media: { src: "./assets/electrolux-slides/22ffde53c1bdabdbc1ee7660e91d7fa3.gif", alt: "Poiesis", variant: "square-small" },
     },
     {
@@ -494,7 +494,7 @@
       headline: "Atos",
       subheadline: "Cinco movimentos da apresentação",
       theme: "dark",
-      cardClass: "stage__card--center-media",
+      cardClass: "stage__card--center-media stage__card--chapter",
       gallery: {
         columns: 1,
         items: [
@@ -548,6 +548,7 @@
       kicker: "2º Ato - Indivíduo",
       headline: "2º Ato - Indivíduo",
       subheadline: "Individuação, cristalização e metaestabilidade",
+      cardClass: "stage__card--chapter",
       media: { src: assetSrc("Frame 427321384-1.png"), alt: "Indivíduo", variant: "reference" },
     },
     {
@@ -630,6 +631,7 @@
       headline: "3º Ato - Redes",
       subheadline: "Continuidade entre natureza, técnica e relação",
       theme: "dark",
+      cardClass: "stage__card--chapter",
       gallery: {
         columns: 2,
         items: [
@@ -672,7 +674,8 @@
       layout: "gallery-only",
       kicker: "4º Ato - Enxame",
       headline: "4º Ato - Enxame",
-      theme: "dark",
+      subheadline: "Inteligência coletiva e organização distribuída",
+      cardClass: "stage__card--chapter",
       gallery: {
         columns: 1,
         items: [

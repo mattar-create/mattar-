@@ -273,8 +273,8 @@ a {
   left: var(--page-x);
   top: clamp(28px, 8vh, 84px);
   z-index: 2;
-  max-width: min(46vw, 540px);
-  gap: 0.8rem;
+  max-width: min(42vw, 500px);
+  gap: 0.65rem;
 }
 
 .stage__card--image-only {
@@ -284,6 +284,37 @@ a {
 .stage__card--image-only .stage__headline,
 .stage__card--image-only .stage__subheadline {
   max-width: none;
+}
+
+.stage__card--chapter .stage__headline,
+.stage__card--chapter .stage__headline--section {
+  max-width: 8.5ch;
+  font-size: clamp(3.5rem, 5vw, 4.7rem);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.stage__card--chapter .stage__subheadline {
+  max-width: 30ch;
+  font-size: 0.92rem;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.stage__card--chapter .stage__layout--gallery-only {
+  align-content: start;
+  padding-top: clamp(110px, 18vh, 170px);
+}
+
+.stage__card--chapter .stage__gallery--1 {
+  justify-items: center;
+}
+
+.stage__card--chapter .stage__gallery--1 .stage__gallery-item {
+  width: 100%;
+  max-width: min(100%, 880px);
 }
 
 .stage__prose {
@@ -495,10 +526,20 @@ a {
   mix-blend-mode: multiply;
 }
 
+.stage__card:not(.stage__card--dark) .stage__media-figure,
+.stage__card:not(.stage__card--dark) .stage__media-link,
 .stage__card:not(.stage__card--dark) .stage__image,
 .stage__card:not(.stage__card--dark) .stage__gallery-image {
   mix-blend-mode: multiply;
   background: transparent;
+}
+
+.stage__card:not(.stage__card--dark) .stage__image--reference,
+.stage__card:not(.stage__card--dark) .stage__image--contain,
+.stage__card:not(.stage__card--dark) .stage__gallery-image--contain,
+.stage__card:not(.stage__card--dark) .stage__gallery-image--portrait,
+.stage__card:not(.stage__card--dark) .stage__gallery-image--tall {
+  filter: brightness(0.98) contrast(1.04);
 }
 
 .stage__gallery {
@@ -700,13 +741,17 @@ a {
   .stage__layout--gallery-text,
   .stage__layout--gallery-only,
   .stage__layout--board {
-    gap: 20px;
+    gap: 32px;
     align-content: start;
   }
 
   .stage__copy,
   .stage__prose {
-    gap: 1rem;
+    gap: 1.45rem;
+  }
+
+  .stage__gallery {
+    gap: 24px;
   }
 
   .stage__media-figure--portrait,
@@ -757,7 +802,24 @@ a {
     top: auto;
     max-width: 100%;
     padding: 0 var(--page-x);
-    margin: 0 0 14px;
+    margin: 0 0 26px;
+    gap: 0.9rem;
+  }
+
+  .stage__card--chapter .stage__headline,
+  .stage__card--chapter .stage__headline--section {
+    max-width: none;
+    font-size: clamp(2.5rem, 12vw, 3.6rem);
+  }
+
+  .stage__card--chapter .stage__subheadline {
+    max-width: none;
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+
+  .stage__card--chapter .stage__layout--gallery-only {
+    padding-top: 0;
   }
 
   .stage__gallery--2,
