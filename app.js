@@ -17,6 +17,20 @@
     return el;
   }
 
+  function buildClassName(...parts) {
+    return parts.filter(Boolean).join(" ");
+  }
+
+  function wrapMediaNode(node, href) {
+    if (!href) return node;
+    const link = createEl("a", "stage__media-link");
+    link.href = href;
+    link.target = "_blank";
+    link.rel = "noreferrer noopener";
+    link.appendChild(node);
+    return link;
+  }
+
   function getStages() {
     return page.sections.filter((section) => section.type === "stage");
   }
@@ -67,7 +81,7 @@
 
   function renderImage(media, className) {
     const image = document.createElement("img");
-    image.className = className || "stage__image";
+    image.className = buildClassName(className || "stage__image", media.className);
     image.src = media.src;
     image.alt = media.alt || "";
     image.loading = "lazy";
@@ -98,15 +112,25 @@
     const copy = createEl("div", className || "stage__copy");
     if (section.headline) copy.appendChild(createText("h2", "stage__headline", section.headline));
     if (section.subheadline) copy.appendChild(createText("p", "stage__subheadline", section.subheadline));
-    if (section.paragraphs && section.paragraphs.length) copy.appendChild(renderParagraphs(section.paragraphs));
+    if (section.paragraphs && section.paragraphs.length) {
+      const proseClass = buildClassName(
+        "stage__prose",
+        section.copyColumns ? `stage__prose--cols-${section.copyColumns}` : "",
+        section.proseClass || ""
+      );
+      copy.appendChild(renderParagraphs(section.paragraphs, proseClass));
+    }
     if (section.note) copy.appendChild(createText("p", "stage__note", section.note));
     return copy;
   }
 
   function renderSingleMedia(media, variant) {
-    const figure = createEl("figure", `stage__media-figure stage__media-figure--${variant || "default"}`);
+    const figure = createEl(
+      "figure",
+      buildClassName(`stage__media-figure stage__media-figure--${variant || "default"}`, media.figureClass)
+    );
     if (media.src) {
-      figure.appendChild(renderImage(media, `stage__image stage__image--${variant || "default"}`));
+      figure.appendChild(wrapMediaNode(renderImage(media, `stage__image stage__image--${variant || "default"}`), media.href));
     } else {
       figure.appendChild(renderPlaceholder(media.box, media.title || "MEDIA"));
     }
@@ -118,9 +142,14 @@
     const columns = gallery.columns || Math.min((gallery.items || []).length || 1, 3);
     const wrap = createEl("div", `${className || "stage__gallery"} stage__gallery--${columns}`);
     (gallery.items || []).forEach((item) => {
-      const tile = createEl("figure", "stage__gallery-item");
+      const tile = createEl("figure", buildClassName("stage__gallery-item", item.figureClass));
       if (item.src) {
-        tile.appendChild(renderImage(item, "stage__gallery-image"));
+        tile.appendChild(
+          wrapMediaNode(
+            renderImage(item, buildClassName("stage__gallery-image", item.variant ? `stage__gallery-image--${item.variant}` : "")),
+            item.href
+          )
+        );
       } else {
         tile.appendChild(renderPlaceholder(item.box, item.title || "MEDIA"));
       }
@@ -131,8 +160,8 @@
   }
 
   function renderTitleImageRight(section) {
-    const card = createEl("div", "stage__card");
-    const body = createEl("div", "stage__layout stage__layout--title-image-right");
+    const card = createEl("div", buildClassName("stage__card", section.theme === "dark" ? "stage__card--dark" : "", section.cardClass));
+    const body = createEl("div", buildClassName("stage__layout stage__layout--title-image-right", section.layoutClass));
     body.appendChild(renderCopy(section, "stage__copy stage__copy--hero"));
     body.appendChild(renderSingleMedia(section.media, "portrait"));
     card.appendChild(body);
@@ -140,18 +169,18 @@
   }
 
   function renderTextPage(section) {
-    const card = createEl("div", "stage__card");
-    const body = createEl("div", "stage__layout stage__layout--text-page");
+    const card = createEl("div", buildClassName("stage__card", section.theme === "dark" ? "stage__card--dark" : "", section.cardClass));
+    const body = createEl("div", buildClassName("stage__layout stage__layout--text-page", section.layoutClass));
     body.appendChild(renderCopy(section));
     card.appendChild(body);
     return card;
   }
 
   function renderSplit(section) {
-    const card = createEl("div", "stage__card");
+    const card = createEl("div", buildClassName("stage__card", section.theme === "dark" ? "stage__card--dark" : "", section.cardClass));
     const body = createEl(
       "div",
-      `stage__layout stage__layout--split ${section.mediaPosition === "right" ? "is-reverse" : ""}`
+      buildClassName("stage__layout stage__layout--split", section.mediaPosition === "right" ? "is-reverse" : "", section.layoutClass)
     );
     const media = renderSingleMedia(section.media, section.media?.variant || "editorial");
     const copy = renderCopy(section);
@@ -169,8 +198,8 @@
   }
 
   function renderGalleryText(section) {
-    const card = createEl("div", "stage__card");
-    const body = createEl("div", "stage__layout stage__layout--gallery-text");
+    const card = createEl("div", buildClassName("stage__card", section.theme === "dark" ? "stage__card--dark" : "", section.cardClass));
+    const body = createEl("div", buildClassName("stage__layout stage__layout--gallery-text", section.layoutClass));
     body.appendChild(renderGallery(section.gallery));
     const copy = renderCopy(section);
     if (section.galleryLabel) copy.prepend(createText("p", "stage__subheadline stage__subheadline--label", section.galleryLabel));
@@ -180,8 +209,9 @@
   }
 
   function renderGalleryOnly(section) {
-    const card = createEl("div", "stage__card");
-    const body = createEl("div", "stage__layout stage__layout--gallery-only");
+    const card = createEl("div", buildClassName("stage__card", section.theme === "dark" ? "stage__card--dark" : "", section.cardClass));
+    const body = createEl("div", buildClassName("stage__layout stage__layout--gallery-only", section.layoutClass));
+    if (section.subheadline) body.appendChild(createText("p", "stage__subheadline", section.subheadline));
     if (section.headline) body.appendChild(createText("h2", "stage__headline stage__headline--section", section.headline));
     body.appendChild(renderGallery(section.gallery));
     if (section.paragraphs?.length) body.appendChild(renderParagraphs(section.paragraphs, "stage__prose stage__prose--wide"));
@@ -190,8 +220,8 @@
   }
 
   function renderBoard(section) {
-    const card = createEl("div", "stage__card");
-    const body = createEl("div", "stage__layout stage__layout--board");
+    const card = createEl("div", buildClassName("stage__card", section.theme === "dark" ? "stage__card--dark" : "", section.cardClass));
+    const body = createEl("div", buildClassName("stage__layout stage__layout--board", section.layoutClass));
     const hero = createEl("div", "stage__board-hero");
     hero.appendChild(renderSingleMedia(section.media, "board"));
     body.appendChild(hero);
@@ -215,10 +245,17 @@
   }
 
   function renderImageOnly(section) {
-    const card = createEl(`div`, `stage__card stage__card--image-only ${section.theme === "dark" ? "stage__card--dark" : ""}`);
+    const isBleed = section.media?.variant === "cover";
+    const card = createEl(
+      "div",
+      buildClassName("stage__card stage__card--image-only", isBleed ? "stage__card--bleed" : "", section.theme === "dark" ? "stage__card--dark" : "", section.cardClass)
+    );
     const figure = renderSingleMedia(section.media, section.media?.variant || "full");
     figure.classList.add("stage__media-figure--image-only");
     card.appendChild(figure);
+    if (section.headline || section.subheadline) {
+      card.appendChild(renderCopy(section, "stage__copy stage__copy--chapter"));
+    }
     return card;
   }
 

@@ -1,9 +1,9 @@
 (() => {
   const slideSrc = (number) =>
-    `file:///G:/Meu%20Drive/Mattar/Electrolux_Slides/${String(number).padStart(2, "0")}.png`;
+    `./assets/electrolux-slides/${String(number).padStart(2, "0")}.png`;
 
   const assetSrc = (name) =>
-    `file:///G:/Meu%20Drive/Mattar/Electrolux_Slides/img/${encodeURIComponent(name)}`;
+    `./assets/electrolux-slides/img/${encodeURIComponent(name)}`;
 
   const nav = [
     { id: "slide-03", label: "Intro" },
@@ -15,13 +15,14 @@
   ];
 
   const sections = [
-    { id: "slide-01", type: "stage", number: "01", layout: "image-only", kicker: "Abertura", media: { src: slideSrc(1), alt: "Abertura", variant: "full" } },
-    { id: "slide-02", type: "stage", number: "02", layout: "image-only", kicker: "Centenário", media: { src: slideSrc(2), alt: "Centenário", variant: "full" } },
+    { id: "slide-01", type: "stage", number: "01", layout: "image-only", kicker: "Abertura", media: { src: slideSrc(1), alt: "Abertura", variant: "reference", className: "stage__image--blend" } },
+    { id: "slide-02", type: "stage", number: "02", layout: "image-only", kicker: "Centenário", media: { src: slideSrc(2), alt: "Centenário", variant: "cover" } },
     {
       id: "slide-03",
       type: "stage",
       number: "03",
       layout: "title-image-right",
+      layoutClass: "is-center",
       kicker: "Intro",
       headline: "A casa bem vivida",
       subheadline: "Celebração de 100 anos da Electrolux no Brasil",
@@ -72,7 +73,7 @@
         "É justamente aí que reside sua força: criar uma experiência capaz de tocar o público de forma sensível, afetiva e duradoura.",
       ],
     },
-    { id: "slide-08", type: "stage", number: "08", layout: "image-only", kicker: "Futuro", theme: "dark", media: { src: assetSrc("39b16b66744a89df3e51cebfbfca8a3c 1.png"), alt: "Pulso de luz", variant: "full" } },
+    { id: "slide-08", type: "stage", number: "08", layout: "image-only", kicker: "Futuro", headline: "Futuro", subheadline: "Exercícios de futuros possíveis", theme: "dark", cardClass: "stage__card--center-media", media: { src: "./assets/electrolux-slides/46924ccf74dd36146ae29b9ab5acde20.gif", alt: "Pulso de luz", variant: "square-small" } },
     {
       id: "slide-09",
       type: "stage",
@@ -99,22 +100,16 @@
       id: "slide-11",
       type: "stage",
       number: "11",
-      layout: "gallery-text",
+      layout: "split",
       kicker: "Sustentabilidade",
-      gallery: {
-        columns: 3,
-        items: [
-          { src: assetSrc("516-fe0220-swarms-01 1.png"), alt: "Padrão emergente" },
-          { src: assetSrc("622830795_031e8bd9-cf9e-4bb9-8230-6b9565aef17d 1.png"), alt: "Estrutura viva" },
-          { src: assetSrc("Frame 427321384.png"), alt: "Irradiação" },
-        ],
-      },
+      mediaPosition: "right",
+      media: { src: assetSrc("ego-eco-seva 1.png"), alt: "Ego eco seva", variant: "editorial-large" },
       paragraphs: [
         "Imaginar um futuro sustentável é reconhecer e reconstruir essa relação de continuidade.",
         "Desta forma, pensando na sustentabilidade como um grande desafio para as próximas gerações, seria algo natural imaginar o futuro em relação às questões que desafiam nossa existência.",
       ],
     },
-    { id: "slide-12", type: "stage", number: "12", layout: "image-only", kicker: "Natureza Técnica", theme: "dark", media: { src: assetSrc("27bf478a3400002b729b23f275fddbf7 1.png"), alt: "Radiação central", variant: "full" } },
+    { id: "slide-12", type: "stage", number: "12", layout: "image-only", kicker: "Natureza Técnica", headline: "Natureza Técnica", subheadline: "Natural e artificial como continuidade", theme: "dark", cardClass: "stage__card--center-media", media: { src: "./assets/electrolux-slides/27bf478a3400002b729b23f275fddbf7.gif", alt: "Radiação central", variant: "square-small" } },
     {
       id: "slide-13",
       type: "stage",
@@ -134,7 +129,7 @@
       layout: "split",
       kicker: "O Futuro",
       mediaPosition: "left",
-      media: { src: assetSrc("46924ccf74dd36146ae29b9ab5acde20 1.png"), alt: "Reservatório de potenciais", variant: "portrait" },
+      media: { src: "./assets/electrolux-slides/4e2806206a26ede382c99d783d4d74b0.gif", alt: "Reservatório de potenciais", variant: "portrait" },
       paragraphs: [
         "O futuro deixa de ser imaginado como forma pronta a ser alcançada. Ele aparece como pré-individual: um reservatório de potenciais ainda não atualizados.",
         "Pensar o tempo como contínuo significa compreender que passado, presente e futuro não estão separados, mas operam em camadas de informação, tensão e emergência.",
@@ -147,13 +142,13 @@
       layout: "split",
       kicker: "Coexistência",
       mediaPosition: "left",
-      media: { src: assetSrc("1dd3258200a7401a8e6ca9cbb79dee88 1.png"), alt: "Coexistência entre matéria, vida e técnica", variant: "portrait" },
+      media: { src: "./assets/electrolux-slides/4e2806206a26ede382c99d783d4d74b0.gif", alt: "Coexistência entre matéria, vida e técnica", variant: "portrait" },
       paragraphs: [
         "Imaginar futuros através da coexistência é deslocar o olhar das separações para um continuum entre matéria, vida e técnica.",
         "Ao observar padrões que atravessam do mineral aos sistemas vivos e informacionais, reconhece-se uma lógica relacional comum, onde formas emergem sem controle central.",
       ],
     },
-    { id: "slide-16", type: "stage", number: "16", layout: "image-only", kicker: "Lux", theme: "dark", media: { src: assetSrc("1dd3258200a7401a8e6ca9cbb79dee88 1.png"), alt: "Lux", variant: "full" } },
+    { id: "slide-16", type: "stage", number: "16", layout: "image-only", kicker: "Lux", headline: "Lux", subheadline: "Cone de luz e confluência temporal", theme: "dark", cardClass: "stage__card--center-media", media: { src: assetSrc("1dd3258200a7401a8e6ca9cbb79dee88 1.png"), alt: "Lux", variant: "square-small" } },
     {
       id: "slide-17",
       type: "stage",
@@ -161,7 +156,7 @@
       layout: "split",
       kicker: "Cone de Luz",
       mediaPosition: "left",
-      media: { src: assetSrc("49620a3f7420f9d7e95975801fbd3c5e 1.png"), alt: "Faixa espectral", variant: "editorial" },
+      media: { src: "./assets/electrolux-slides/49620a3f7420f9d7e95975801fbd3c5e.gif", alt: "Faixa espectral", variant: "editorial" },
       paragraphs: [
         "Ao amanhecer, o raio de Sol não só se espalha sobre a terra, mas para o matemático Minkowski, sua luz irradia transversalmente pelo tempo.",
         "Ela irrompe a noite de ontem e cruza o dia de amanhã, alcançando o pôr do Sol de dois dias consecutivos.",
@@ -174,7 +169,7 @@
       layout: "split",
       kicker: "Relatividade",
       mediaPosition: "right",
-      media: { src: assetSrc("image 916.png"), alt: "Diagrama do cone de luz", variant: "editorial" },
+      media: { src: assetSrc("image 916.png"), alt: "Diagrama do cone de luz", variant: "contain", className: "stage__image--blend" },
       paragraphs: [
         "Em 1908, Minkowski descreveu o movimento da luz pelo espaço-tempo em um diagrama conhecido como Cone de Luz.",
         "Sua formulação abriu caminho para a Teoria da Relatividade, posteriormente desenvolvida por seu aluno, Einstein.",
@@ -188,7 +183,7 @@
       layout: "split",
       kicker: "Irradiação",
       mediaPosition: "left",
-      media: { src: assetSrc("2e715bfa3440a668e2b125dd050104ab 1.png"), alt: "Irradiação azul", variant: "portrait" },
+      media: { src: "./assets/electrolux-slides/2e715bfa3440a668e2b125dd050104ab.gif", alt: "Irradiação azul", variant: "portrait" },
       paragraphs: [
         "Nós constantemente irradiamos ações.",
         "Sobre nós incidem irradiações do futuro e do passado, como a luz de corpos celestes no macro, e o movimento dos corpos terrestres no micro.",
@@ -211,10 +206,13 @@
       id: "slide-21",
       type: "stage",
       number: "21",
-      layout: "divider",
+      layout: "image-only",
       kicker: "Poiesis",
       headline: "Poiesis",
-      media: { src: assetSrc("22ffde53c1bdabdbc1ee7660e91d7fa3 1.png"), alt: "Poiesis", variant: "divider" },
+      subheadline: "Criação como matéria do projeto",
+      theme: "dark",
+      cardClass: "stage__card--center-media",
+      media: { src: "./assets/electrolux-slides/22ffde53c1bdabdbc1ee7660e91d7fa3.gif", alt: "Poiesis", variant: "square-small" },
     },
     {
       id: "slide-22",
@@ -223,7 +221,7 @@
       layout: "split",
       kicker: "Poíesis",
       mediaPosition: "left",
-      media: { src: assetSrc("6001a0cd585401fd91b13adfc601c56a 1.png"), alt: "Poíesis", variant: "portrait" },
+      media: { src: "./assets/electrolux-slides/6001a0cd585401fd91b13adfc601c56a.gif", alt: "Poíesis", variant: "portrait-large" },
       headline: "Poíesis",
       paragraphs: [
         "Poíesis é um termo grego que significa “criação”, refere-se ao processo de trazer algo à existência que antes não existia.",
@@ -236,7 +234,7 @@
       layout: "split",
       kicker: "Casa",
       mediaPosition: "left",
-      media: { src: assetSrc("mesa verde 2.png"), alt: "Casa como corpo expandido", variant: "portrait" },
+      media: { src: assetSrc("mesa verde 2.png"), alt: "Casa como corpo expandido", variant: "portrait-large" },
       paragraphs: [
         "Ao longo de um século, a Electrolux não apenas desenvolveu tecnologias, mas participou da invenção de modos de viver.",
         "Hábitos cotidianos, interações táteis, ativações sonoras e coreografias espaciais compõem uma memória compartilhada da casa como expansão tecnológica do corpo, uma consciência coletiva que se manifesta no espaço doméstico e fora dele.",
@@ -259,7 +257,7 @@
       layout: "split",
       kicker: "Tecnopoiesis",
       mediaPosition: "left",
-      media: { src: assetSrc("4e6283f2d4222b27b8ac3e9602af7fc 1.png"), alt: "Tecnopoiesis", variant: "editorial" },
+      media: { src: "./assets/electrolux-slides/4fe6283f2d4222b27b8ac3e9602af7fc.gif", alt: "Tecnopoiesis", variant: "editorial" },
       paragraphs: [
         "POESIS parte dessa consciência como matéria.",
         "Recolhe, articula e transforma conceitos que não só atravessam a trajetória da marca, mas dizem respeito à nossa história como humanos, a fim de dar forma a uma experiência artístico-gastronômica onde passado, presente e futuro coexistem.",
@@ -273,7 +271,7 @@
       layout: "split",
       kicker: "Corpo Expandido",
       mediaPosition: "left",
-      media: { src: assetSrc("25f4df3f05201e96836437549c80e9f5 1.png"), alt: "Corpo expandido", variant: "editorial" },
+      media: { src: "./assets/electrolux-slides/25f4df3f05201e96836437549c80e9f5.gif", alt: "Corpo expandido", variant: "editorial" },
       paragraphs: [
         "Aqui, a casa se revela como um corpo expandido e como expressão de uma inteligência coletiva: um organismo híbrido onde matéria, tecnologia e vida se articulam, prolongando o corpo para além de seus limites biológicos.",
         "A casa se torna um sistema vivo, que sente, organiza e devolve experiências.",
@@ -286,7 +284,7 @@
       layout: "split",
       kicker: "Projeção",
       mediaPosition: "left",
-      media: { src: assetSrc("7bfdd93f6a79daf21a8df98f404b02ae 1.png"), alt: "Projeção", variant: "editorial" },
+      media: { src: "./assets/electrolux-slides/7bfdd93f6a79daf21a8df98f404b02ae.gif", alt: "Projeção", variant: "editorial" },
       paragraphs: [
         "Cada pessoa carrega em si a memória de uma casa: gestos repetidos, saberes transmitidos, ritmos herdados, futuros imaginados.",
         "Assim, POESIS não representa uma história passada, mas a projeção de futuros imaginados que se atualizam continuamente em cada presente.",
@@ -318,18 +316,9 @@
       id: "slide-29",
       type: "stage",
       number: "29",
-      layout: "board",
+      layout: "image-only",
       kicker: "Projeto",
-      media: { src: assetSrc("Mesa Electrolux com Refs 16-9 1.png"), alt: "Prancha de referências espaciais", variant: "board" },
-      gallery: {
-        columns: 2,
-        items: [
-          { src: assetSrc("CONVERSATION PIT 2.png"), alt: "Referência 1" },
-          { src: assetSrc("image 918.png"), alt: "Render 1" },
-          { src: assetSrc("image 919.png"), alt: "Render 2" },
-          { src: assetSrc("image 921.png"), alt: "Simulação" },
-        ],
-      },
+      media: { src: assetSrc("Mesa Electrolux com Refs 16-9 1.png"), alt: "Prancha de referências espaciais", variant: "reference" },
     },
     { id: "slide-30", type: "stage", number: "30", layout: "image-only", kicker: "Planta", media: { src: assetSrc("Planta Electrolux 13_04 1.png"), alt: "Planta", variant: "full" } },
     { id: "slide-31", type: "stage", number: "31", layout: "image-only", kicker: "Espaço", media: { src: assetSrc("Mesa Electrolux Desenho 1.png"), alt: "Desenho espacial", variant: "full" } },
@@ -358,8 +347,8 @@
       gallery: {
         columns: 2,
         items: [
+          { src: assetSrc("tumblr_ngdv7uhECg1sorxqho1_640 1.png"), alt: "Luminária orgânica" },
           { src: assetSrc("a733a8f5-4d9d-4cb8-97f0-eea90a49e830_rw_1920 1.png"), alt: "Luminária orgânica" },
-          { src: assetSrc("Screenshot 2026-04-12 at 11.35.51 PM 1.png"), alt: "Luminária orgânica" },
         ],
       },
     },
@@ -386,15 +375,15 @@
       gallery: {
         columns: 3,
         items: [
-          { src: assetSrc("ecf57726995a82cccbad079c6a694786 1.png"), alt: "Cena 1" },
-          { src: assetSrc("16fba2-baf9eb-72a9c7.banner 1.png"), alt: "Cena 2" },
-          { src: assetSrc("8b4ceff6c80c45b8eaade5705ae74a41 1.png"), alt: "Cena 3" },
+          { src: assetSrc("ecf57726995a82cccbad079c6a694786 1.png"), alt: "Cena 1", variant: "tall" },
+          { src: assetSrc("16fba2-baf9eb-72a9c7.banner 1.png"), alt: "Cena 2", variant: "tall" },
+          { src: assetSrc("8b4ceff6c80c45b8eaade5705ae74a41 1.png"), alt: "Cena 3", variant: "tall" },
         ],
       },
     },
-    { id: "slide-38", type: "stage", number: "38", layout: "image-only", kicker: "Performance", media: { src: assetSrc("image 918.png"), alt: "Performance render", variant: "full" } },
-    { id: "slide-39", type: "stage", number: "39", layout: "image-only", kicker: "Performance", media: { src: assetSrc("image 919.png"), alt: "Performance render", variant: "full" } },
-    { id: "slide-40", type: "stage", number: "40", layout: "image-only", kicker: "Performance", media: { src: assetSrc("image 869.png"), alt: "Performance render", variant: "full" } },
+    { id: "slide-38", type: "stage", number: "38", layout: "image-only", kicker: "Performance", media: { src: slideSrc(38), alt: "Performance render", variant: "full" } },
+    { id: "slide-39", type: "stage", number: "39", layout: "image-only", kicker: "Performance", media: { src: slideSrc(39), alt: "Performance render", variant: "full" } },
+    { id: "slide-40", type: "stage", number: "40", layout: "image-only", kicker: "Performance", media: { src: slideSrc(40), alt: "Performance render", variant: "full" } },
     { id: "slide-41", type: "stage", number: "41", layout: "image-only", kicker: "Performance", media: { src: slideSrc(41), alt: "Cena performática", variant: "full" } },
     { id: "slide-42", type: "stage", number: "42", layout: "image-only", kicker: "Performance", media: { src: slideSrc(42), alt: "Cena performática", variant: "full" } },
     { id: "slide-43", type: "stage", number: "43", layout: "image-only", kicker: "Performance", media: { src: slideSrc(43), alt: "Cena performática", variant: "full" } },
@@ -407,12 +396,12 @@
       gallery: {
         columns: 3,
         items: [
-          { src: slideSrc(41), alt: "Vista 1" },
-          { src: slideSrc(42), alt: "Vista 2" },
-          { src: slideSrc(43), alt: "Vista 3" },
-          { src: assetSrc("image 918.png"), alt: "Vista 4" },
-          { src: assetSrc("image 869.png"), alt: "Vista 5" },
-          { src: assetSrc("image 919.png"), alt: "Vista 6" },
+          { src: slideSrc(38), alt: "Vista 1" },
+          { src: slideSrc(39), alt: "Vista 2" },
+          { src: slideSrc(40), alt: "Vista 3" },
+          { src: slideSrc(41), alt: "Vista 4" },
+          { src: slideSrc(42), alt: "Vista 5" },
+          { src: slideSrc(43), alt: "Vista 6" },
         ],
       },
     },
@@ -420,10 +409,8 @@
       id: "slide-45",
       type: "stage",
       number: "45",
-      layout: "split",
+      layout: "text-page",
       kicker: "Conceito Gastronômico",
-      mediaPosition: "left",
-      media: { src: assetSrc("image 816.png"), alt: "Fermentação e raiz", variant: "editorial" },
       paragraphs: [
         "Inspirado na relação simbólica que a cultura coreana estabelece com a fermentação, o projeto incorpora o tempo como elemento central da experiência gastronômica.",
         "A fermentação expressa um tempo que exige espera, materializando-se no alimento. Nesse contexto, o processo é pensado à luz da individuação, em que a forma emerge ao longo do devir, e da swarm intelligence, como uma inteligência distribuída, onde múltiplos agentes operam simultaneamente sem controle central, fazendo surgir o todo a partir das interações locais ao longo do tempo.",
@@ -436,7 +423,7 @@
       layout: "split",
       kicker: "Conceito Gastronômico",
       mediaPosition: "left",
-      media: { src: assetSrc("6479a84a19316c882d55da8b9d3f4f38 1.png"), alt: "Prato fermentado", variant: "editorial" },
+      media: { src: assetSrc("6479a84a19316c882d55da8b9d3f4f38 1.png"), alt: "Prato fermentado", variant: "contain" },
       paragraphs: [
         "Desenvolvido para a celebração dos 100 anos da Electrolux, o projeto parte da ideia de relativizar o tempo, compreendendo-o não apenas como um marco cronológico, mas como uma matéria ativa que atravessa toda a experiência.",
         "Na cultura coreana, a fermentação revela o tempo como um processo contínuo de transformação que acontece a partir de dentro. Ao fermentar, o tempo deixa de ser uma medida externa e passa a atuar como agente: reorganiza a matéria, altera estruturas e aprofunda sabores.",
@@ -451,8 +438,8 @@
       gallery: {
         columns: 2,
         items: [
-          { src: assetSrc("92443818199e738b16a403430fef0c5a 1.png"), alt: "Prato 1" },
-          { src: assetSrc("82dfcdb3a4684746a7640abb3b7d8e0d 1.png"), alt: "Prato 2" },
+          { src: assetSrc("92443818199e738b16a403430fef0c5a 1.png"), alt: "Prato 1", variant: "contain" },
+          { src: assetSrc("82dfcdb3a4684746a7640abb3b7d8e0d 1.png"), alt: "Prato 2", variant: "contain" },
         ],
       },
     },
@@ -465,8 +452,8 @@
       gallery: {
         columns: 2,
         items: [
-          { src: assetSrc("655ea5d2b592bdfe30f14cbeb0708ab5 1.png"), alt: "Prato 3" },
-          { src: assetSrc("5634c5d2391f6139654e8174829d19f0 1.png"), alt: "Prato 4" },
+          { src: assetSrc("655ea5d2b592bdfe30f14cbeb0708ab5 1.png"), alt: "Prato 3", variant: "contain" },
+          { src: assetSrc("5634c5d2391f6139654e8174829d19f0 1.png"), alt: "Prato 4", variant: "contain" },
         ],
       },
     },
@@ -479,8 +466,8 @@
       gallery: {
         columns: 2,
         items: [
-          { src: assetSrc("429b3b8a4d1de32ecd5d07d144ace2df 1.png"), alt: "Prato 5" },
-          { src: assetSrc("7be9fe1de4e1cbeaa975bde568a80e1b 1.png"), alt: "Prato 6" },
+          { src: assetSrc("429b3b8a4d1de32ecd5d07d144ace2df 1.png"), alt: "Prato 5", variant: "contain" },
+          { src: assetSrc("7be9fe1de4e1cbeaa975bde568a80e1b 1.png"), alt: "Prato 6", variant: "contain" },
         ],
       },
     },
@@ -493,8 +480,8 @@
       gallery: {
         columns: 2,
         items: [
-          { src: assetSrc("d570a08e9c56ab09f11b9988e4c2370b 1.png"), alt: "Prato 7" },
-          { src: assetSrc("c293b0bd921ffec9a320f3999523281b 1.png"), alt: "Prato 8" },
+          { src: assetSrc("d570a08e9c56ab09f11b9988e4c2370b 1.png"), alt: "Prato 7", variant: "contain" },
+          { src: assetSrc("c293b0bd921ffec9a320f3999523281b 1.png"), alt: "Prato 8", variant: "contain" },
         ],
       },
     },
@@ -502,11 +489,18 @@
       id: "slide-51",
       type: "stage",
       number: "51",
-      layout: "divider",
+      layout: "gallery-only",
       kicker: "Atos",
       headline: "Atos",
-      subheadline: "Utopia · Indivíduo · Redes · Enxame · Poiesis",
-      media: { src: assetSrc("Frame 427321384.png"), alt: "Abertura dos atos", variant: "divider" },
+      subheadline: "Cinco movimentos da apresentação",
+      theme: "dark",
+      cardClass: "stage__card--center-media",
+      gallery: {
+        columns: 1,
+        items: [
+          { src: assetSrc("Frame 427321384.gif"), alt: "Abertura dos atos", variant: "contain" },
+        ],
+      },
     },
     {
       id: "slide-52",
@@ -532,9 +526,9 @@
       gallery: {
         columns: 3,
         items: [
-          { src: assetSrc("image 916.png"), alt: "Cone de luz" },
-          { src: assetSrc("140310d001b7cba4b2fbee3a57801169 1.png"), alt: "Estrutura cristalina" },
-          { src: assetSrc("dd2eac6ffc4d7ba28194dab2e31fd41c 1.png"), alt: "Estrutura invertida" },
+          { src: assetSrc("5a0e2fc58a5cf70b57abb7fe3f34e8bc 1.png"), alt: "Cone de luz", variant: "tall" },
+          { src: assetSrc("140310d001b7cba4b2fbee3a57801169 1.png"), alt: "Estrutura cristalina", variant: "tall" },
+          { src: assetSrc("dd2eac6ffc4d7ba28194dab2e31fd41c 1.png"), alt: "Estrutura invertida", variant: "tall" },
         ],
       },
     },
@@ -542,28 +536,19 @@
       id: "slide-55",
       type: "stage",
       number: "55",
-      layout: "gallery-only",
+      layout: "image-only",
       kicker: "1º Ato - Utopia",
-      gallery: {
-        columns: 3,
-        items: [
-          { src: assetSrc("93c2c74b583c6decfc307fafc05240ff 1.png"), alt: "Símbolo" },
-          { src: assetSrc("9fdca69351b4bfa92a26d81fade2d061 1.png"), alt: "Cristal" },
-          { src: assetSrc("81106a360a3089d0ce02528eef7eff4f 1.png"), alt: "Luminária" },
-          { src: assetSrc("image 921.png"), alt: "Simulação" },
-          { src: assetSrc("image 917.png"), alt: "Luz" },
-          { src: assetSrc("Frame 427321384.png"), alt: "Irradiação" },
-        ],
-      },
+      media: { src: assetSrc("Frame 427321409.png"), alt: "Utopia", variant: "reference" },
     },
     {
       id: "slide-56",
       type: "stage",
       number: "56",
-      layout: "divider",
+      layout: "image-only",
       kicker: "2º Ato - Indivíduo",
       headline: "2º Ato - Indivíduo",
-      media: { src: assetSrc("Frame 427321385.png"), alt: "Indivíduo", variant: "divider" },
+      subheadline: "Individuação, cristalização e metaestabilidade",
+      media: { src: assetSrc("Frame 427321384-1.png"), alt: "Indivíduo", variant: "reference" },
     },
     {
       id: "slide-57",
@@ -586,7 +571,7 @@
       layout: "split",
       kicker: "2º Ato - Indivíduo",
       mediaPosition: "left",
-      media: { src: assetSrc("dadf053ee1bc3a44e3b4bc1064b47217 1.png"), alt: "Campo pré-individual", variant: "editorial" },
+      media: { src: assetSrc("dadf053ee1bc3a44e3b4bc1064b47217.gif"), alt: "Campo pré-individual", variant: "editorial" },
       paragraphs: [
         "Nesse movimento, indivíduo e meio surgem juntos e seguem se transformando. Esse processo nunca se encerra completamente: todo indivíduo conserva um resto de potencial que possibilita novas transformações, mantendo-se em contínuo tornar-se.",
         "Mais do que perguntar o que algo é, trata-se de perguntar como se torna.",
@@ -602,8 +587,8 @@
       gallery: {
         columns: 2,
         items: [
-          { src: assetSrc("6dd700711b5f79bbdc714271e011a235 1.png"), alt: "Gelo" },
-          { src: assetSrc("monoammonium-phosphate-crystals-research 1.png"), alt: "Cristais" },
+          { src: assetSrc("6dd700711b5f79bbdc714271e011a235 1.png"), alt: "Gelo", variant: "contain" },
+          { src: assetSrc("monoammonium-phosphate-crystals-research 1.png"), alt: "Cristais", variant: "contain" },
         ],
       },
     },
@@ -616,8 +601,8 @@
       gallery: {
         columns: 2,
         items: [
-          { src: assetSrc("70a47eccd053da476eeacf46387d58c9 1.png"), alt: "Espelhos" },
-          { src: assetSrc("a48020b99d9f4c184b50e4e51b213c7f 1.png"), alt: "Cristal translúcido" },
+          { src: assetSrc("70a47eccd053da476eeacf46387d58c9 1.png"), alt: "Espelhos", variant: "contain" },
+          { src: assetSrc("Group 30.png"), alt: "Cristal translúcido", variant: "contain" },
         ],
       },
     },
@@ -640,10 +625,18 @@
       id: "slide-62",
       type: "stage",
       number: "62",
-      layout: "divider",
+      layout: "gallery-only",
       kicker: "3º Ato - Redes",
       headline: "3º Ato - Redes",
-      media: { src: assetSrc("Frame 427321384-2.png"), alt: "Redes", variant: "divider" },
+      subheadline: "Continuidade entre natureza, técnica e relação",
+      theme: "dark",
+      gallery: {
+        columns: 2,
+        items: [
+          { src: assetSrc("Frame 427321384-2.png"), alt: "Redes 1", variant: "contain" },
+          { src: assetSrc("image 816-1.png"), alt: "Redes 2", variant: "contain" },
+        ],
+      },
     },
     {
       id: "slide-63",
@@ -652,10 +645,10 @@
       layout: "split",
       kicker: "3º Ato - Redes",
       mediaPosition: "left",
-      media: { src: assetSrc("44cb629b3224e34340eede43ef267e26 1.png"), alt: "Rede ontológica", variant: "editorial" },
+      media: { src: assetSrc("44cb629b3224e34340eede43ef267e26.gif"), alt: "Rede ontológica", variant: "editorial" },
       paragraphs: [
-        "Em vez de perguntar apenas o que uma coisa é, Simondon nos ensina a perguntar como ela se torna.",
-        "Para o pensador, os objetos técnicos também se formam, se transformam e se organizam segundo dinâmicas próprias. Eles possuem modo de existência, história e lógica de desenvolvimento.",
+        "Em vez de perguntar apenas o que uma coisa é, Simondon nos ensina a perguntar como ela se torna. Para o pensador, os objetos técnicos não constituem uma exceção: também eles se formam, se transformam e se organizam segundo dinâmicas próprias.",
+        "Simondon recusa a ideia de que os objetos técnicos sejam apenas instrumentos frios, subordinados ao homem como coisas sem espessura própria. Para ele, os objetos técnicos também possuem um modo de existência, uma história, uma lógica de desenvolvimento.",
       ],
     },
     {
@@ -665,37 +658,31 @@
       layout: "split",
       kicker: "3º Ato - Redes",
       mediaPosition: "left",
-      media: { src: assetSrc("b8294a0aacf3a07e6701c0fe3d16cc3e 1.png"), alt: "Diagrama de relações", variant: "editorial" },
+      media: { src: assetSrc("b8294a0aacf3a07e6701c0fe3d16cc3e.gif"), alt: "Diagrama de relações", variant: "editorial" },
       paragraphs: [
         "Segundo essa perspectiva, o que chamamos de “natural” e “artificial” não são categorias absolutas, mas modos distintos de continuidade de um mesmo processo de formação.",
         "Ao invés de instaurar uma ruptura, a técnica é uma continuidade da natureza, transmutada pelo humano. A tecnologia amadurece, se articula e nos reorganiza, por isso deve ser compreendida como mediação viva entre o humano e o mundo.",
       ],
     },
-    { id: "slide-65", type: "stage", number: "65", layout: "image-only", kicker: "3º Ato - Redes", media: { src: slideSrc(65), alt: "Referências para redes", variant: "full" } },
+    { id: "slide-65", type: "stage", number: "65", layout: "image-only", kicker: "3º Ato - Redes", media: { src: assetSrc("Group 31.png"), alt: "Referências para redes", variant: "reference", href: "https://br.pinterest.com/pin/20195898327606031/" } },
     {
       id: "slide-66",
       type: "stage",
       number: "66",
-      layout: "divider",
+      layout: "image-only",
       kicker: "4º Ato - Enxame",
       headline: "4º Ato - Enxame",
-      media: { src: assetSrc("516-fe0220-swarms-01 1.png"), alt: "Enxame", variant: "divider" },
+      subheadline: "Inteligência coletiva e organização distribuída",
+      media: { src: assetSrc("516-fe0220-swarms-01 1.png"), alt: "Enxame", variant: "reference" },
     },
     {
       id: "slide-67",
       type: "stage",
       number: "67",
-      layout: "gallery-text",
+      layout: "split",
       kicker: "4º Ato - Enxame",
-      gallery: {
-        columns: 2,
-        items: [
-          { src: assetSrc("começo murmuração ref ato 4 1.png"), alt: "Murmuração 1" },
-          { src: assetSrc("Murmurações mais fortes ref ato 4 1.png"), alt: "Murmuração 2" },
-          { src: assetSrc("Murmuração transborda ref ato 4 1.png"), alt: "Murmuração 3" },
-          { src: assetSrc("ChatGPT Image 12 de abr. de 2026, 23_27_56 1.png"), alt: "Estrutura coletiva" },
-        ],
-      },
+      mediaPosition: "left",
+      media: { src: assetSrc("Group 32.png"), alt: "Enxame", variant: "editorial-large" },
       paragraphs: [
         "O termo swarm intelligence descreve a inteligência coletiva que emerge da interação entre múltiplos agentes simples. Ele foi inicialmente utilizado para explicar comportamentos de espécies sociais como abelhas, formigas e pássaros.",
         "Em uma colmeia, cada abelha responde a estímulos locais. Não há um centro de comando que distribui ordens. Ainda assim, o sistema regula sua própria dinâmica com eficiência.",
@@ -708,14 +695,15 @@
       layout: "split",
       kicker: "4º Ato - Enxame",
       mediaPosition: "left",
-      media: { src: assetSrc("Forma abstrata em tons de cinza 1.png"), alt: "Potência do conjunto", variant: "editorial" },
+      media: { src: assetSrc("fff89a36c5ea09ba6369f29311acb29e.gif"), alt: "Potência do conjunto", variant: "editorial" },
+      copyColumns: 2,
       paragraphs: [
-        "Essa inteligência relacional pode ser observada em inúmeros modos de existência biológica. Abelhas, corais, camaleões e tantos outros sistemas naturais revelam formas de organização que não se apoiam em um centro único de comando, mas emergem de interações contínuas com o meio.",
-        "O que chamamos de inteligência coletiva pode ser entendido, então, como a potência de um conjunto que se transforma e se mantém a partir das relações entre suas partes.",
+        "Essa inteligência relacional pode ser observada em inúmeros modos de existência biológica. Abelhas, corais, camaleões e tantos outros sistemas naturais revelam formas de organização que não se apoiam em um centro único de comando, mas emergem de interações contínuas com o meio. Nesses sistemas, há uma sabedoria distribuída, construída ao longo do tempo, que sustenta sua continuidade e capacidade de adaptação.",
+        "O que chamamos de inteligência coletiva pode ser entendido, então, como a potência de um conjunto que se transforma e se mantém a partir das relações entre suas partes. Modelos computacionais demonstraram que padrões complexos podem surgir de regras mínimas aplicadas em paralelo. Essa lógica inspirou algoritmos de otimização, sistemas descentralizados e pesquisas em robótica cooperativa.",
         "Para além da biologia, esse conceito sugere que inteligência não precisa estar localizada em um ponto fixo. Ela pode existir na relação entre agentes, na circulação de informação e na adaptação contínua ao ambiente.",
       ],
     },
-    { id: "slide-69", type: "stage", number: "69", layout: "image-only", kicker: "4º Ato - Enxame", media: { src: assetSrc("fff89a36c5ea09ba6369f29311acb29e 1.png"), alt: "Padrão de enxame", variant: "full" } },
+    { id: "slide-69", type: "stage", number: "69", layout: "image-only", kicker: "4º Ato - Enxame", media: { src: assetSrc("fff89a36c5ea09ba6369f29311acb29e.gif"), alt: "Padrão de enxame", variant: "reference" } },
     {
       id: "slide-70",
       type: "stage",
@@ -723,11 +711,10 @@
       layout: "split",
       kicker: "5º Ato - Poiesis",
       mediaPosition: "left",
-      media: { src: assetSrc("image 868.png"), alt: "Autopoiesis", variant: "editorial" },
+      media: { src: assetSrc("image 868.png"), alt: "Autopoiesis", variant: "contain", className: "stage__image--blend" },
       paragraphs: [
-        "O livro Autopoiesis and Cognition: The Realization of the Living (1972), de Humberto Maturana e Francisco Varela, foi fundamental para a cibernética.",
-        "Eles cunham autopoiesis como a capacidade dos organismos vivos de manter e regular sua composição e definir seus limites; uma capacidade dos sistemas que surge espontaneamente de componentes e processos independentes, porém inter-relacionados.",
-        "Isso implica que as propriedades isoladas dos elementos individuais não determinam os sistemas vivos. Em vez disso, essas redes, tanto vivas quanto não vivas, são compostas por elementos distribuídos.",
+        "O livro Autopoiesis and Cognition: The Realization of the Living (1972) dos autores, Humberto Maturana e Francisco Varela, foi fundamental para a cibernética.",
+        "Eles cunham autopoiesis como a capacidade dos organismos vivos de manter e regular sua composição e definir seus limites; uma capacidade dos sistemas que surge espontaneamente de componentes e processos independentes, porém inter-relacionados. Isso implica que as propriedades isoladas dos elementos individuais não determinam os sistemas vivos. Em vez disso, essas redes, tanto vivas quanto não vivas, são compostas por elementos distribuídos.",
       ],
     },
     {
@@ -737,11 +724,10 @@
       layout: "split",
       kicker: "5º Ato - Poiesis",
       mediaPosition: "right",
-      media: { src: slideSrc(71), alt: "Livro e diagrama", variant: "editorial" },
+      media: { src: assetSrc("Screenshot 2026-04-13 at 13.53.41 1.png"), alt: "Livro e diagrama", variant: "contain", className: "stage__image--blend" },
       paragraphs: [
         "A autopoiesis traz à tona uma nova noção de cognição como incorporada pela diversidade de comportamentos que esses sistemas realizam.",
-        "Assim, definimos a cognição quimérica como distribuída e materializada em todos os seus membros e cabeças parcialmente autônomos, alheia aos padrões de processos de pensamento de alto nível.",
-        "Essa natureza heterogênea da cognição quimérica parece apresentar um potencial cauteloso em direção a uma síntese simbiótica.",
+        "Assim, definimos a cognição quimérica como distribuída e materializada em todos os seus membros e cabeças parcialmente autônomos, alheia aos padrões de processos de pensamento de alto nível. Essa natureza heterogênea da cognição quimérica, possibilitada por cabeças e corpos coexistentes que não se substituem, parece apresentar um potencial cauteloso em direção a uma síntese simbiótica.",
       ],
     },
     {
@@ -762,49 +748,30 @@
       id: "slide-73",
       type: "stage",
       number: "73",
-      layout: "gallery-only",
+      layout: "image-only",
       kicker: "5º Ato - Poiesis",
-      gallery: {
-        columns: 3,
-        items: [
-          { src: assetSrc("Disposição interna de dispositivo eletrônico futurista 1.png"), alt: "Dispositivo 1" },
-          { src: assetSrc("ChatGPT Image 12 de abr. de 2026, 23_27_56 1.png"), alt: "Dispositivo 2" },
-          { src: assetSrc("Forma abstrata em tons de cinza 1.png"), alt: "Dispositivo 3" },
-        ],
-      },
+      media: { src: assetSrc("Frame 427321410.png"), alt: "Mesa interativa 1", variant: "reference" },
     },
     {
       id: "slide-74",
       type: "stage",
       number: "74",
-      layout: "gallery-text",
+      layout: "split",
       kicker: "5º Ato - Poiesis",
-      gallery: {
-        columns: 3,
-        items: [
-          { src: assetSrc("Screenshot 2026-04-13 at 13.21.51 1.png"), alt: "Playtronica 1" },
-          { src: assetSrc("Screenshot 2026-04-13 at 13.23.58 1.png"), alt: "Playtronica 2" },
-          { src: assetSrc("Screenshot 2026-04-13 at 13.25.11 1.png"), alt: "Playtronica 3" },
-        ],
-      },
+      mediaPosition: "left",
+      media: { src: assetSrc("Frame 427321411.png"), alt: "Playtronica", variant: "editorial-large" },
       paragraphs: [
-        "Playtronica — toque gera som.",
-        "O ato final aproxima superfície, gesto e resposta sensorial. O sistema reage ao toque e transforma contato em paisagem sonora.",
+        "PLAYTRONICA - TOQUE GERA SOM",
       ],
+      note: "https://www.instagram.com/p/DIcoRYRCN5t/?img_index=1",
     },
     {
       id: "slide-75",
       type: "stage",
       number: "75",
-      layout: "split",
+      layout: "image-only",
       kicker: "Simulação de Videomapeamento",
-      mediaPosition: "left",
-      media: { src: assetSrc("image 921.png"), alt: "Simulação de videomapeamento", variant: "editorial" },
-      paragraphs: [
-        "Simulação do videomapeamento sobre a mesa.",
-        "Base de navegação e teste espacial para comportamento das superfícies projetadas e relações entre mesas, pratos e luz.",
-      ],
-      note: "Referência: vitormoreiran.github.io/mattar/mesa-stack.html",
+      media: { src: assetSrc("image 921.png"), alt: "Simulação de videomapeamento", variant: "reference", href: "https://vitormoreiran.github.io/mattar/mesa-stack.html" },
     },
     {
       id: "slide-76",
@@ -813,13 +780,12 @@
       layout: "split",
       kicker: "Institucional",
       mediaPosition: "right",
-      media: { src: assetSrc("image 886.png"), alt: "Electrolux", variant: "editorial" },
+      media: { src: assetSrc("Group 34.png"), alt: "Electrolux", variant: "editorial-large" },
       paragraphs: [
-        "Ao final da experiência, todas as luzes se apagam por alguns segundos.",
-        "Quando as luzes retornam gradualmente, é projetado em cada mesa o logo da Electrolux com uma sutil intervenção inspirada pelo projeto.",
+        "Group 34",
       ],
     },
-    { id: "slide-77", type: "stage", number: "77", layout: "image-only", kicker: "Encerramento", media: { src: slideSrc(77), alt: "Encerramento", variant: "full" } },
+    { id: "slide-77", type: "stage", number: "77", layout: "image-only", kicker: "Encerramento", media: { src: slideSrc(77), alt: "Encerramento", variant: "reference", className: "stage__image--blend" } },
   ];
 
   window.LAB_MATTAR_PAGE = {
