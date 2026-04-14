@@ -669,11 +669,16 @@
       id: "slide-66",
       type: "stage",
       number: "66",
-      layout: "image-only",
+      layout: "gallery-only",
       kicker: "4º Ato - Enxame",
       headline: "4º Ato - Enxame",
-      subheadline: "Inteligência coletiva e organização distribuída",
-      media: { src: assetSrc("516-fe0220-swarms-01 1.png"), alt: "Enxame", variant: "reference" },
+      theme: "dark",
+      gallery: {
+        columns: 1,
+        items: [
+          { src: assetSrc("516-fe0220-swarms-01 1.png"), alt: "Enxame", variant: "contain" },
+        ],
+      },
     },
     {
       id: "slide-67",
@@ -782,7 +787,8 @@
       mediaPosition: "right",
       media: { src: assetSrc("Group 34.png"), alt: "Electrolux", variant: "editorial-large" },
       paragraphs: [
-        "Group 34",
+        "Ao final da experiência, todas as luzes se apagam por alguns segundos.",
+        "Quando as luzes retornam gradualmente, é projetado em cada mesa o logo da Electrolux com uma sutil intervenção inspirada pelo projeto.",
       ],
     },
     { id: "slide-77", type: "stage", number: "77", layout: "image-only", kicker: "Encerramento", media: { src: slideSrc(77), alt: "Encerramento", variant: "reference", className: "stage__image--blend" } },
