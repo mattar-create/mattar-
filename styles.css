@@ -61,6 +61,7 @@ a {
   background: rgba(246, 243, 239, 0.965);
   border-bottom: 1px solid rgba(229, 56, 43, 0.8);
   backdrop-filter: blur(10px);
+  isolation: isolate;
 }
 
 .topbar__inner {
@@ -71,6 +72,8 @@ a {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 1rem;
   align-items: center;
+  position: relative;
+  z-index: 2;
 }
 
 .topbar__brand {
@@ -105,6 +108,9 @@ a {
   overflow-x: auto;
   scrollbar-width: none;
   align-items: center;
+  position: relative;
+  z-index: 3;
+  pointer-events: auto;
 }
 
 .topbar__nav::-webkit-scrollbar {
@@ -121,6 +127,10 @@ a {
   border-radius: 999px;
   background: transparent;
   transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+  position: relative;
+  z-index: 4;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .nav-link:hover,
@@ -138,6 +148,7 @@ a {
 .stage-stack {
   position: relative;
   min-height: calc(100vh + (max(var(--stage-count, 1) - 1, 0) * 92vh));
+  z-index: 1;
 }
 
 .stage-stack__viewport {
@@ -697,11 +708,17 @@ a {
     padding: 0.1rem 0 0.45rem;
     white-space: nowrap;
     scroll-padding-inline: 16px;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
   }
 
   .nav-link {
     padding: 0.48rem 0.8rem;
     font-size: 0.82rem;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .page__content {

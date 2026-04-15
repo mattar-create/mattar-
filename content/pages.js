@@ -15,7 +15,7 @@
     { id: "slide-56", label: "Indivíduo" },
     { id: "slide-62", label: "Redes" },
     { id: "slide-66", label: "Enxame" },
-    { id: "slide-72", label: "Poiesis V" },
+    { id: "slide-72", label: "5º Ato" },
   ];
 
   const sections = [
@@ -715,7 +715,6 @@
         "Para além da biologia, esse conceito sugere que inteligência não precisa estar localizada em um ponto fixo. Ela pode existir na relação entre agentes, na circulação de informação e na adaptação contínua ao ambiente.",
       ],
     },
-    { id: "slide-69", type: "stage", number: "69", layout: "image-only", kicker: "4º Ato - Enxame", media: { src: assetSrc("fff89a36c5ea09ba6369f29311acb29e.gif"), alt: "Padrão de enxame", variant: "reference" } },
     {
       id: "slide-72",
       type: "stage",

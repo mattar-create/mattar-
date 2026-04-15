@@ -54,6 +54,37 @@
     return activeNavId;
   }
 
+  function scrollToStageById(stageId) {
+    const stages = getStages();
+    const targetIndex = stages.findIndex((section) => section.id === stageId);
+    if (targetIndex === -1) return;
+
+    const targetStage = refs.stages[targetIndex];
+    if (!targetStage) return;
+
+    if (window.innerWidth <= 760) {
+      targetStage.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else if (refs.stack) {
+      const stackTop = window.scrollY + refs.stack.getBoundingClientRect().top;
+      const viewportHeight = window.innerHeight;
+      const targetY =
+        targetIndex === 0
+          ? stackTop
+          : stackTop + (targetIndex * viewportHeight * 0.92) - (viewportHeight * 0.18);
+
+      window.scrollTo({
+        top: Math.max(0, targetY),
+        behavior: "smooth",
+      });
+    }
+
+    if (window.history?.replaceState) {
+      window.history.replaceState(null, "", `#${stageId}`);
+    } else {
+      window.location.hash = stageId;
+    }
+  }
+
   function renderTopbar() {
     const header = createEl("header", "topbar");
     const inner = createEl("div", "topbar__inner");
@@ -71,6 +102,10 @@
       const link = createText("a", "nav-link", item.label);
       link.href = `#${item.id}`;
       link.dataset.navId = item.id;
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        scrollToStageById(item.id);
+      });
       nav.appendChild(link);
       refs.navLinks.push(link);
     });
@@ -273,6 +308,7 @@
 
   function renderStage(section) {
     const wrap = createEl("article", "stage");
+    wrap.id = section.id;
     wrap.dataset.stageId = section.id;
 
     let card;
@@ -321,7 +357,7 @@
 
     sections.forEach((section) => {
       const marker = createEl("div", "stage-stack__marker");
-      marker.id = section.id;
+      marker.dataset.stageMarkerId = section.id;
       markers.appendChild(marker);
       const stage = renderStage(section);
       layers.appendChild(stage);
@@ -406,6 +442,12 @@
     app.appendChild(frame);
 
     setupStageStack();
+
+    if (window.location.hash) {
+      window.requestAnimationFrame(() => {
+        scrollToStageById(window.location.hash.slice(1));
+      });
+    }
   }
 
   renderPage();
