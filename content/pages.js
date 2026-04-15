@@ -8,10 +8,14 @@
   const nav = [
     { id: "slide-03", label: "Intro" },
     { id: "slide-08", label: "Futuro" },
-    { id: "slide-12", label: "Natureza Técnica" },
+    { id: "slide-12", label: "Natureza" },
     { id: "slide-16", label: "Lux" },
     { id: "slide-21", label: "Poiesis" },
-    { id: "slide-51", label: "Atos" },
+    { id: "slide-51", label: "Utopia" },
+    { id: "slide-56", label: "Indivíduo" },
+    { id: "slide-62", label: "Redes" },
+    { id: "slide-66", label: "Enxame" },
+    { id: "slide-72", label: "Poiesis V" },
   ];
 
   const sections = [
@@ -115,7 +119,7 @@
       type: "stage",
       number: "13",
       layout: "text-page",
-      kicker: "Natural = Artificial",
+      kicker: "Natural e Artificial",
       paragraphs: [
         "A partir de uma ampla pesquisa, pensou-se que há uma imensa dicotomia em relação às noções de natural e artificial, homem-máquina e outras separações estruturais. É nessa ambiguidade que está o coração deste projeto.",
         "Nele há um deslocamento fundamental: o homem não está separado da natureza, ele está inscrito nela.",
@@ -185,7 +189,7 @@
       mediaPosition: "left",
       media: { src: "./assets/electrolux-slides/2e715bfa3440a668e2b125dd050104ab.gif", alt: "Irradiação azul", variant: "portrait" },
       paragraphs: [
-        "Nós constantemente irradiamos ações.",
+        "Nós constantemente irradiamos ações para o futuro e para o passado.",
         "Sobre nós incidem irradiações do futuro e do passado, como a luz de corpos celestes no macro, e o movimento dos corpos terrestres no micro.",
         "O presente se projeta no futuro, expandindo continuamente o campo de encontros possíveis.",
       ],
@@ -199,7 +203,7 @@
       paragraphs: [
         "Este ano é o vértice de uma confluência temporal.",
         "2026 é o ponto de simetria entre centenários.",
-        "100 anos Electrolux.",
+        "100 anos de Electrolux no Brasil.",
       ],
     },
     {
@@ -224,7 +228,7 @@
       media: { src: "./assets/electrolux-slides/6001a0cd585401fd91b13adfc601c56a.gif", alt: "Poíesis", variant: "portrait-large" },
       headline: "Poíesis",
       paragraphs: [
-        "Poíesis é um termo grego que significa “criação”, refere-se ao processo de trazer algo à existência que antes não existia.",
+        "Poíesis é um termo grego que significa “criação” e refere-se ao processo de trazer algo à existência que antes não existia.",
       ],
     },
     {
@@ -259,7 +263,7 @@
       mediaPosition: "left",
       media: { src: "./assets/electrolux-slides/4fe6283f2d4222b27b8ac3e9602af7fc.gif", alt: "Tecnopoiesis", variant: "editorial" },
       paragraphs: [
-        "POESIS parte dessa consciência como matéria.",
+        "POÉSIS parte dessa consciência como matéria.",
         "Recolhe, articula e transforma conceitos que não só atravessam a trajetória da marca, mas dizem respeito à nossa história como humanos, a fim de dar forma a uma experiência artístico-gastronômica onde passado, presente e futuro coexistem.",
       ],
       note: "*Tecnopoiético refere-se à capacidade criativa e poética das tecnologias na vida humana, indo além da função meramente instrumental. O conceito foca no potencial de transformação, interação e produção de sentidos (poiesis), onde máquinas e humanos co-criam novos conhecimentos e formas de vida.",
@@ -287,7 +291,7 @@
       media: { src: "./assets/electrolux-slides/7bfdd93f6a79daf21a8df98f404b02ae.gif", alt: "Projeção", variant: "editorial" },
       paragraphs: [
         "Cada pessoa carrega em si a memória de uma casa: gestos repetidos, saberes transmitidos, ritmos herdados, futuros imaginados.",
-        "Assim, POESIS não representa uma história passada, mas a projeção de futuros imaginados que se atualizam continuamente em cada presente.",
+        "Assim, POÉSIS não representa uma história passada, mas a projeção de futuros imaginados que se atualizam continuamente em cada presente.",
       ],
     },
     {
@@ -307,7 +311,7 @@
       },
       paragraphs: [
         "Os participantes se sentam em mesas não convencionais, mais baixas que o padrão, inspiradas no conversation pit, ambiente doméstico típico dos anos 60 e 70 pensado para criar proximidade, favorecer conversas face a face e um estado mais relaxado.",
-        "São 5 mesas de 6 pessoas, totalizando 30 participantes.",
+        "São cinco mesas de seis pessoas, totalizando 30 participantes.",
         "O espaço é inteiramente imersivo, com projeções que ocupam tanto as mesas quanto estruturas orgânicas suspensas no teto, concebidas para videomapeamento. As imagens constroem a narrativa visual dos atos, alternando-se entre essas superfícies.",
         "A operação da gastronomia é empratada à mesa, mas se desvia do formato tradicional.",
       ],
@@ -490,9 +494,9 @@
       type: "stage",
       number: "51",
       layout: "gallery-only",
-      kicker: "Atos",
-      headline: "Atos",
-      subheadline: "Cinco movimentos da apresentação",
+      kicker: "1º Ato - Utopia",
+      headline: "1º Ato - Utopia",
+      subheadline: "A esperança como tecnologia para futuros possíveis",
       theme: "dark",
       cardClass: "stage__card--center-media stage__card--chapter",
       gallery: {
@@ -713,6 +717,23 @@
     },
     { id: "slide-69", type: "stage", number: "69", layout: "image-only", kicker: "4º Ato - Enxame", media: { src: assetSrc("fff89a36c5ea09ba6369f29311acb29e.gif"), alt: "Padrão de enxame", variant: "reference" } },
     {
+      id: "slide-72",
+      type: "stage",
+      number: "72",
+      layout: "gallery-only",
+      kicker: "5º Ato - Poiesis",
+      headline: "5º Ato - Poiesis",
+      subheadline: "Criação, ativação e experiência sensorial integrada",
+      cardClass: "stage__card--chapter",
+      gallery: {
+        columns: 2,
+        items: [
+          { src: assetSrc("image 869.png"), alt: "Mesa interativa 1" },
+          { src: assetSrc("image 870.png"), alt: "Mesa interativa 2" },
+        ],
+      },
+    },
+    {
       id: "slide-70",
       type: "stage",
       number: "70",
@@ -721,8 +742,8 @@
       mediaPosition: "left",
       media: { src: assetSrc("image 868.png"), alt: "Autopoiesis", variant: "contain", className: "stage__image--blend" },
       paragraphs: [
-        "O livro Autopoiesis and Cognition: The Realization of the Living (1972) dos autores, Humberto Maturana e Francisco Varela, foi fundamental para a cibernética.",
-        "Eles cunham autopoiesis como a capacidade dos organismos vivos de manter e regular sua composição e definir seus limites; uma capacidade dos sistemas que surge espontaneamente de componentes e processos independentes, porém inter-relacionados. Isso implica que as propriedades isoladas dos elementos individuais não determinam os sistemas vivos. Em vez disso, essas redes, tanto vivas quanto não vivas, são compostas por elementos distribuídos.",
+        "O livro Autopoiesis and Cognition: The Realization of the Living (1972), de Humberto Maturana e Francisco Varela, foi fundamental para a cibernética.",
+        "Os autores definem autopoiesis como a capacidade dos organismos vivos de manter e regular sua composição e definir seus limites; uma capacidade sistêmica que surge espontaneamente de componentes e processos independentes, porém inter-relacionados. Isso implica que as propriedades isoladas dos elementos individuais não determinam os sistemas vivos. Em vez disso, essas redes, tanto vivas quanto não vivas, são compostas por elementos distribuídos.",
       ],
     },
     {
@@ -734,23 +755,9 @@
       mediaPosition: "right",
       media: { src: assetSrc("Screenshot 2026-04-13 at 13.53.41 1.png"), alt: "Livro e diagrama", variant: "contain", className: "stage__image--blend" },
       paragraphs: [
-        "A autopoiesis traz à tona uma nova noção de cognição como incorporada pela diversidade de comportamentos que esses sistemas realizam.",
+        "A autopoiesis traz à tona uma nova noção de cognição, incorporada pela diversidade de comportamentos que esses sistemas realizam.",
         "Assim, definimos a cognição quimérica como distribuída e materializada em todos os seus membros e cabeças parcialmente autônomos, alheia aos padrões de processos de pensamento de alto nível. Essa natureza heterogênea da cognição quimérica, possibilitada por cabeças e corpos coexistentes que não se substituem, parece apresentar um potencial cauteloso em direção a uma síntese simbiótica.",
       ],
-    },
-    {
-      id: "slide-72",
-      type: "stage",
-      number: "72",
-      layout: "gallery-only",
-      kicker: "5º Ato - Poiesis",
-      gallery: {
-        columns: 2,
-        items: [
-          { src: assetSrc("image 869.png"), alt: "Mesa interativa 1" },
-          { src: assetSrc("image 870.png"), alt: "Mesa interativa 2" },
-        ],
-      },
     },
     {
       id: "slide-73",
@@ -769,7 +776,7 @@
       mediaPosition: "left",
       media: { src: assetSrc("Frame 427321411.png"), alt: "Playtronica", variant: "editorial-large" },
       paragraphs: [
-        "PLAYTRONICA - TOQUE GERA SOM",
+        "Playtronica: toque gera som",
       ],
       note: "https://www.instagram.com/p/DIcoRYRCN5t/?img_index=1",
     },
@@ -791,7 +798,7 @@
       media: { src: assetSrc("Group 34.png"), alt: "Electrolux", variant: "editorial-large" },
       paragraphs: [
         "Ao final da experiência, todas as luzes se apagam por alguns segundos.",
-        "Quando as luzes retornam gradualmente, é projetado em cada mesa o logo da Electrolux com uma sutil intervenção inspirada pelo projeto.",
+        "Quando as luzes retornam gradualmente, é projetado sobre cada mesa o logotipo da Electrolux com uma sutil intervenção inspirada pelo projeto.",
       ],
     },
     { id: "slide-77", type: "stage", number: "77", layout: "image-only", kicker: "Encerramento", media: { src: slideSrc(77), alt: "Encerramento", variant: "reference", className: "stage__image--blend" } },

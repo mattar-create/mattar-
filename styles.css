@@ -101,9 +101,10 @@ a {
 
 .topbar__nav {
   display: flex;
-  gap: 1rem;
+  gap: 0.65rem;
   overflow-x: auto;
   scrollbar-width: none;
+  align-items: center;
 }
 
 .topbar__nav::-webkit-scrollbar {
@@ -112,17 +113,21 @@ a {
 
 .nav-link {
   flex: 0 0 auto;
-  padding: 0.18rem 0;
+  padding: 0.34rem 0.7rem;
   color: #7b736d;
   font-size: 0.8rem;
   line-height: 1.2;
-  border-bottom: 1px solid transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
 }
 
 .nav-link:hover,
 .nav-link.is-active {
   color: var(--text);
-  border-bottom-color: rgba(229, 56, 43, 0.72);
+  border-color: rgba(229, 56, 43, 0.28);
+  background: rgba(229, 56, 43, 0.08);
 }
 
 .page__content {
@@ -274,7 +279,7 @@ a {
   top: clamp(28px, 8vh, 84px);
   z-index: 2;
   max-width: min(42vw, 500px);
-  gap: 0.65rem;
+  gap: 0.8rem;
 }
 
 .stage__card--image-only {
@@ -298,14 +303,19 @@ a {
 .stage__card--chapter .stage__subheadline {
   max-width: 30ch;
   font-size: 0.92rem;
-  line-height: 1.3;
-  letter-spacing: 0.04em;
+  line-height: 1.38;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .stage__card--chapter .stage__layout--gallery-only {
   align-content: start;
   padding-top: clamp(110px, 18vh, 170px);
+}
+
+.stage__card--chapter .stage__layout--gallery-only > .stage__subheadline,
+.stage__card--chapter .stage__layout--gallery-only > .stage__headline--section {
+  max-width: min(42vw, 540px);
 }
 
 .stage__card--chapter .stage__gallery--1 {
@@ -683,9 +693,15 @@ a {
   }
 
   .topbar__nav {
-    gap: 0.7rem;
-    padding-bottom: 0.2rem;
+    gap: 0.5rem;
+    padding: 0.1rem 0 0.45rem;
     white-space: nowrap;
+    scroll-padding-inline: 16px;
+  }
+
+  .nav-link {
+    padding: 0.48rem 0.8rem;
+    font-size: 0.82rem;
   }
 
   .page__content {
@@ -714,6 +730,14 @@ a {
     display: block;
     opacity: 1;
     pointer-events: auto;
+    padding-bottom: 12px;
+    scroll-margin-top: 120px;
+  }
+
+  .stage + .stage {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(229, 56, 43, 0.12);
   }
 
   .stage.is-active {
@@ -722,7 +746,7 @@ a {
 
   .stage__card {
     min-height: auto;
-    padding: var(--frame-y) var(--page-x) 28px;
+    padding: 22px var(--page-x) 46px;
   }
 
   .stage__card--bleed {
@@ -741,13 +765,13 @@ a {
   .stage__layout--gallery-text,
   .stage__layout--gallery-only,
   .stage__layout--board {
-    gap: 32px;
+    gap: 40px;
     align-content: start;
   }
 
   .stage__copy,
   .stage__prose {
-    gap: 1.45rem;
+    gap: 1.6rem;
   }
 
   .stage__gallery {
@@ -802,24 +826,25 @@ a {
     top: auto;
     max-width: 100%;
     padding: 0 var(--page-x);
-    margin: 0 0 26px;
-    gap: 0.9rem;
+    margin: 0 0 34px;
+    gap: 1rem;
   }
 
   .stage__card--chapter .stage__headline,
   .stage__card--chapter .stage__headline--section {
     max-width: none;
-    font-size: clamp(2.5rem, 12vw, 3.6rem);
+    font-size: clamp(2.7rem, 12vw, 3.9rem);
   }
 
   .stage__card--chapter .stage__subheadline {
     max-width: none;
-    font-size: 0.88rem;
-    line-height: 1.45;
+    font-size: 0.9rem;
+    line-height: 1.52;
   }
 
   .stage__card--chapter .stage__layout--gallery-only {
     padding-top: 0;
+    gap: 28px;
   }
 
   .stage__gallery--2,

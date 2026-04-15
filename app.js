@@ -41,11 +41,13 @@
 
   function getActiveNavId(stage) {
     if (!stage) return null;
+    const stages = getStages();
+    const activeStageIndex = stages.findIndex((section) => section.id === stage.id);
     let activeNavId = page.nav[0]?.id || null;
     page.nav.forEach((item) => {
-      const target = getStageById(item.id);
-      if (!target) return;
-      if (parseInt(target.number, 10) <= parseInt(stage.number, 10)) {
+      const targetIndex = stages.findIndex((section) => section.id === item.id);
+      if (targetIndex === -1) return;
+      if (targetIndex <= activeStageIndex) {
         activeNavId = item.id;
       }
     });
