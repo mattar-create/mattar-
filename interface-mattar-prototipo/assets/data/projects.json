@@ -33,7 +33,11 @@
         "coverRow": 2.1,
         "coverWidth": 3,
         "coverHeight": 8.9,
-        "coverPosition": "center center"
+        "coverPosition": "center center",
+        "textCol": 0.94,
+        "textRow": 6.48,
+        "textWidth": 5.85,
+        "textScale": 1
       }
     }
   ]
