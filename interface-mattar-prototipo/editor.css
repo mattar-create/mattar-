@@ -262,6 +262,76 @@ output {
   padding: 8px 10px;
 }
 
+.asset-library {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.asset-library__header {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  justify-content: space-between;
+}
+
+.asset-library__header p {
+  margin: 4px 0 0;
+  color: rgba(16, 16, 16, 0.58);
+  font-size: 12px;
+}
+
+.asset-library__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 10px;
+  max-height: 340px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.asset-card {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid rgba(16, 16, 16, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.asset-card.is-suggested {
+  border-color: rgba(206, 33, 26, 0.45);
+  background: rgba(206, 33, 26, 0.06);
+}
+
+.asset-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  object-fit: cover;
+  background: rgba(16, 16, 16, 0.08);
+}
+
+.asset-card span {
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.asset-card div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.asset-card button {
+  min-height: 30px;
+  padding: 6px 8px;
+  font-size: 11px;
+}
+
 .preview-shell {
   display: grid;
   grid-template-rows: auto 1fr;

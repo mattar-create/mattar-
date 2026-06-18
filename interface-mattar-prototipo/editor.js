@@ -55,6 +55,7 @@ const elements = {
   form: document.querySelector("#project-form"),
   galleryEditor: document.querySelector("#gallery-editor"),
   mediaAssets: document.querySelector("#media-assets"),
+  assetLibrary: document.querySelector("#asset-library"),
   preview: document.querySelector("#preview-page"),
   previewFrame: document.querySelector("#preview-frame"),
   status: document.querySelector("#editor-status"),
@@ -119,6 +120,34 @@ function normalizeMediaPath(value = "") {
 
   const normalized = path.startsWith("assets/") ? path : `assets/project-media/${path.replace(/^\/+/, "")}`;
   return MEDIA_PATH_ALIASES[normalized] || normalized;
+}
+
+function projectSearchTerms(project = currentProject()) {
+  const slug = slugify(project?.title || project?.id || "");
+  const terms = new Set([slug, project?.id].filter(Boolean));
+
+  if (slug.includes("dadiva")) terms.add("dadiva");
+  if (slug.includes("concha")) terms.add("concha");
+  if (slug.includes("concreto")) terms.add("concreto");
+  if (slug.includes("fome")) terms.add("fome");
+  if (slug.includes("gel")) terms.add("gelu");
+  if (slug.includes("soviet") || slug.includes("chernobil")) terms.add("soviet");
+
+  return [...terms];
+}
+
+function isSuggestedAsset(path, project = currentProject()) {
+  const lowerPath = path.toLowerCase();
+  return projectSearchTerms(project).some((term) => lowerPath.includes(term));
+}
+
+function isCoverAsset(path) {
+  return /(?:capa|cover)\.(png|jpe?g|webp|gif)$/i.test(path);
+}
+
+function suggestedAssets(project = currentProject()) {
+  const matches = PROJECT_MEDIA_ASSETS.filter((path) => isSuggestedAsset(path, project));
+  return matches.length ? matches : PROJECT_MEDIA_ASSETS;
 }
 
 function setStatus(message, isError = false) {
@@ -245,6 +274,7 @@ function fillForm() {
   updateOutputs();
   updateTextMeter();
   renderGalleryEditor();
+  renderAssetLibrary();
   renderPreview();
 }
 
@@ -293,6 +323,30 @@ function renderGalleryEditor() {
       </div>
     `;
   }).join("");
+}
+
+function renderAssetLibrary() {
+  if (!elements.assetLibrary) {
+    return;
+  }
+
+  const project = currentProject();
+  const assets = PROJECT_MEDIA_ASSETS.map((path) => ({
+    path,
+    isSuggested: isSuggestedAsset(path, project),
+    isCover: isCoverAsset(path),
+  })).sort((a, b) => Number(b.isSuggested) - Number(a.isSuggested) || Number(b.isCover) - Number(a.isCover) || a.path.localeCompare(b.path));
+
+  elements.assetLibrary.innerHTML = assets.map(({ path, isSuggested, isCover }) => `
+    <article class="asset-card${isSuggested ? " is-suggested" : ""}">
+      <img src="${path}" alt="" loading="lazy" />
+      <span>${path.replace("assets/project-media/", "")}</span>
+      <div>
+        <button type="button" data-asset-cover="${path}">${isCover ? "usar capa" : "capa"}</button>
+        <button type="button" data-asset-gallery="${path}">+ galeria</button>
+      </div>
+    </article>
+  `).join("");
 }
 
 function renderPreview() {
@@ -468,6 +522,52 @@ function addGalleryPath() {
   scheduleLocalAutosave();
 }
 
+function setCoverPath(path) {
+  const project = currentProject();
+  project.cover = normalizeMediaPath(path);
+  delete project.previewCover;
+  field("coverPath").value = project.cover;
+  renderPreview();
+  publishPreviewData();
+  scheduleLocalAutosave();
+  setStatus("Capa atualizada.");
+}
+
+function addGalleryAsset(path) {
+  const src = normalizeMediaPath(path);
+  const project = currentProject();
+  const exists = project.gallery.some((item) => normalizeMediaItem(item).src === src);
+
+  if (!exists) {
+    project.gallery.push({ type: inferMediaType(src), src });
+  }
+
+  renderGalleryEditor();
+  publishPreviewData();
+  scheduleLocalAutosave();
+  setStatus(exists ? "Essa mídia já está na galeria." : "Mídia adicionada à galeria.");
+}
+
+function addSuggestedGalleryAssets() {
+  const project = currentProject();
+  const assets = suggestedAssets(project).filter((path) => !isCoverAsset(path));
+  let added = 0;
+
+  assets.forEach((path) => {
+    const src = normalizeMediaPath(path);
+    const exists = project.gallery.some((item) => normalizeMediaItem(item).src === src);
+    if (!exists) {
+      project.gallery.push({ type: inferMediaType(src), src });
+      added += 1;
+    }
+  });
+
+  renderGalleryEditor();
+  publishPreviewData();
+  scheduleLocalAutosave();
+  setStatus(added ? `${added} mídia(s) adicionada(s).` : "As mídias sugeridas já estavam na galeria.");
+}
+
 function cleanProject(project) {
   const copy = cloneProject(project);
   delete copy.previewCover;
@@ -602,6 +702,8 @@ document.addEventListener("click", (event) => {
   const action = event.target.closest("[data-action]")?.dataset.action;
   const selectProject = event.target.closest("[data-select-project]")?.dataset.selectProject;
   const removeGallery = event.target.closest("[data-remove-gallery]")?.dataset.removeGallery;
+  const assetCover = event.target.closest("[data-asset-cover]")?.dataset.assetCover;
+  const assetGallery = event.target.closest("[data-asset-gallery]")?.dataset.assetGallery;
 
   if (selectProject !== undefined) {
     state.selectedIndex = Number(selectProject);
@@ -617,10 +719,21 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  if (assetCover) {
+    setCoverPath(assetCover);
+    return;
+  }
+
+  if (assetGallery) {
+    addGalleryAsset(assetGallery);
+    return;
+  }
+
   if (action === "add") addProject();
   if (action === "duplicate") duplicateProject();
   if (action === "delete") deleteProject();
   if (action === "add-gallery-path") addGalleryPath();
+  if (action === "add-suggested-gallery") addSuggestedGalleryAssets();
   if (action === "save-draft") saveDraft();
   if (action === "save-local") saveLocalRepository().catch((error) => setStatus(error.message, true));
   if (action === "export") exportJson();
