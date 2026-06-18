@@ -249,11 +249,17 @@ output {
   text-align: center;
 }
 
-.gallery-row span {
+.gallery-row span,
+.gallery-row__path {
   overflow: hidden;
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.gallery-row__path {
+  min-width: 0;
+  padding: 8px 10px;
 }
 
 .preview-shell {

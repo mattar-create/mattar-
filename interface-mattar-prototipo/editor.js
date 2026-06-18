@@ -2,6 +2,7 @@ const DATA_PATH = "assets/data/projects.json";
 const DRAFT_KEY = "mattar-project-editor-draft";
 const PREVIEW_KEY = "mattar-projects-preview";
 const API_BASE = location.protocol === "file:" ? "http://127.0.0.1:4174" : "";
+const canWriteRepositoryFiles = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname);
 
 const state = {
   projects: [],
@@ -72,6 +73,14 @@ function slugify(value) {
 function setStatus(message, isError = false) {
   elements.status.textContent = message;
   elements.status.style.color = isError ? "#ce211a" : "";
+}
+
+function escapeHtml(value = "") {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 function scheduleLocalAutosave() {
@@ -167,9 +176,10 @@ function fillForm() {
   field("coverWidth").value = project.layout.coverWidth;
   field("coverHeight").value = project.layout.coverHeight;
   field("coverPosition").value = project.layout.coverPosition;
+  field("coverPath").value = project.cover || "";
   field("coverFile").value = "";
   field("galleryFiles").value = "";
-  field("externalVideo").value = "";
+  field("galleryPath").value = "";
   updateOutputs();
   updateTextMeter();
   renderGalleryEditor();
@@ -216,7 +226,7 @@ function renderGalleryEditor() {
     return `
       <div class="gallery-row">
         ${mediaPreviewMarkup(item, index)}
-        <span>${media.src}</span>
+        <input class="gallery-row__path" value="${escapeHtml(media.src)}" data-gallery-src="${index}" aria-label="Caminho da mídia ${index + 1}" />
         <button type="button" data-remove-gallery="${index}">remover</button>
       </div>
     `;
@@ -265,6 +275,8 @@ function updateProjectFromForm() {
   project.year = field("year").value;
   project.description = field("description").value;
   project.id = slugify(project.title || project.id);
+  project.cover = field("coverPath").value.trim();
+  delete project.previewCover;
   project.layout.textCol = Number(field("textCol").value);
   project.layout.textRow = Number(field("textRow").value);
   project.layout.textWidth = Number(field("textWidth").value);
@@ -332,6 +344,12 @@ function handleCoverFile(file) {
     return;
   }
 
+  if (!canWriteRepositoryFiles) {
+    field("coverFile").value = "";
+    setStatus("No online, use o campo Caminho/URL da capa para imagens já publicadas.", true);
+    return;
+  }
+
   const project = currentProject();
   const path = projectMediaPath(project, `cover.${fileExtension(file)}`);
 
@@ -344,6 +362,12 @@ function handleCoverFile(file) {
 }
 
 function handleGalleryFiles(files) {
+  if (!canWriteRepositoryFiles) {
+    field("galleryFiles").value = "";
+    setStatus("No online, adicione imagens pelo caminho/URL já publicado.", true);
+    return;
+  }
+
   const project = currentProject();
   const startIndex = project.gallery.length;
 
@@ -365,18 +389,18 @@ function handleGalleryFiles(files) {
   scheduleLocalAutosave();
 }
 
-function addExternalVideo() {
-  const value = field("externalVideo").value.trim();
+function addGalleryPath() {
+  const value = field("galleryPath").value.trim();
 
   if (!value) {
     return;
   }
 
   currentProject().gallery.push({
-    type: "externalVideo",
+    type: inferMediaType(value),
     src: value,
   });
-  field("externalVideo").value = "";
+  field("galleryPath").value = "";
   renderGalleryEditor();
   publishPreviewData();
   scheduleLocalAutosave();
@@ -449,6 +473,12 @@ async function apiPost(path, body) {
 }
 
 async function saveLocalRepository(options = {}) {
+  if (!canWriteRepositoryFiles) {
+    saveDraft();
+    setStatus("Online: salvo neste navegador. Para publicar para todos, exporte o JSON e faça deploy.");
+    return;
+  }
+
   if (state.isSaving) {
     return;
   }
@@ -486,6 +516,20 @@ elements.form.addEventListener("input", (event) => {
     return;
   }
 
+  if (event.target.matches("[data-gallery-src]")) {
+    const index = Number(event.target.dataset.gallerySrc);
+    const item = currentProject().gallery[index];
+    if (item) {
+      item.src = event.target.value.trim();
+      item.type = inferMediaType(item.src);
+      delete item.previewSrc;
+      renderPreview();
+      publishPreviewData();
+      scheduleLocalAutosave();
+    }
+    return;
+  }
+
   updateProjectFromForm();
 });
 
@@ -514,7 +558,7 @@ document.addEventListener("click", (event) => {
   if (action === "add") addProject();
   if (action === "duplicate") duplicateProject();
   if (action === "delete") deleteProject();
-  if (action === "add-external-video") addExternalVideo();
+  if (action === "add-gallery-path") addGalleryPath();
   if (action === "save-draft") saveDraft();
   if (action === "save-local") saveLocalRepository().catch((error) => setStatus(error.message, true));
   if (action === "export") exportJson();

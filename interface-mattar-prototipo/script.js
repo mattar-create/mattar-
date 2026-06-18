@@ -419,7 +419,10 @@ const mediaState = new Map();
 let appInitialized = false;
 const PREVIEW_KEY = "mattar-projects-preview";
 const isLocalPreviewHost = ["", "localhost", "127.0.0.1"].includes(window.location.hostname);
-const shouldUseLocalPreview = isLocalPreviewHost || urlParams.get("preview") === "local";
+const shouldUseLocalPreview = () => {
+  const previewMode = urlParams.get("preview");
+  return previewMode === "local" || (previewMode !== "json" && Boolean(localStorage.getItem(PREVIEW_KEY)));
+};
 
 function normalizeProject(project, index = 0, total = 1) {
   const id = project.id || slugify(project.title || `projeto-${index + 1}`);
@@ -545,7 +548,7 @@ function escapeAttribute(value) {
 
 async function loadProjects() {
   try {
-    const previewData = shouldUseLocalPreview ? localStorage.getItem(PREVIEW_KEY) : null;
+    const previewData = shouldUseLocalPreview() ? localStorage.getItem(PREVIEW_KEY) : null;
     const data = previewData ? JSON.parse(previewData) : await fetchProjectsData();
     const sourceProjects = Array.isArray(data) ? data : data.projects;
 
@@ -1276,7 +1279,7 @@ async function initializeApp() {
 
 window.addEventListener("load", initializeApp);
 window.addEventListener("storage", (event) => {
-  if (event.key === PREVIEW_KEY && shouldUseLocalPreview) {
+  if (event.key === PREVIEW_KEY && shouldUseLocalPreview()) {
     refreshProjectsFromDataSource();
   }
 });
