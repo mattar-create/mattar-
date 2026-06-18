@@ -113,10 +113,10 @@ async function loadDefaultData() {
   try {
     if (location.protocol === "file:") return clone(DEFAULT_BUDGET_DATA);
     const response = await fetch(DATA_PATH, { cache: "no-store" });
-    if (!response.ok) throw new Error("Nao foi possivel carregar o modelo.");
+    if (!response.ok) throw new Error("Não foi possível carregar o modelo.");
     return response.json();
   } catch (error) {
-    console.warn("Usando modelo embutido do orcamento.", error);
+    console.warn("Usando modelo embutido do orçamento.", error);
     return clone(DEFAULT_BUDGET_DATA);
   }
 }
@@ -137,7 +137,7 @@ function syncFromDom() {
 
 function setPdfTitle() {
   const client = state?.cover.details.find((item) => item.label.toLowerCase().includes("cliente"))?.value || state?.meta.client || "Cliente";
-  document.title = `${state?.meta.documentTitle || "Estimativa Or?ament?ria"} - ${client}`;
+  document.title = `${state?.meta.documentTitle || "Estimativa Orçamentária"} - ${client}`;
 }
 
 function editable(path, value, tag = "span", className = "") {
@@ -153,7 +153,7 @@ function renderTopics(sectionName) {
 }
 
 function renderTopicControls(sectionName) {
-  const label = sectionName === "composition" ? "composi??o" : "etapa";
+  const label = sectionName === "composition" ? "composição" : "etapa";
   return `<div class="page-controls" data-section="${sectionName}"><span>Editar ${label}</span><button class="inline-action" type="button" data-action="add-topic" data-section="${sectionName}">+ adicionar</button><button class="inline-action" type="button" data-action="remove-topic" data-section="${sectionName}">- remover selecionado</button></div>`;
 }
 
@@ -179,21 +179,21 @@ async function resetModel() { localStorage.removeItem(STORAGE_KEY); history.repl
 function addTopic(section, index = selectedTopic.section === section ? selectedTopic.index : state[section].items.length - 1) {
   syncFromDom();
   const insertAt = Math.max(0, Number(index)) + 1;
-  state[section].items.splice(insertAt, 0, { heading: "Novo t?pico", body: "Descreva este item." });
+  state[section].items.splice(insertAt, 0, { heading: "Novo tópico", body: "Descreva este item." });
   selectedTopic = { section, index: insertAt };
   render();
 }
 
 function removeTopic(section, index = selectedTopic.section === section ? selectedTopic.index : state[section].items.length - 1) {
   syncFromDom();
-  if (state[section].items.length <= 1) return setStatus("Mantenha ao menos um t?pico.");
+  if (state[section].items.length <= 1) return setStatus("Mantenha ao menos um tópico.");
   const removeAt = Math.max(0, Number(index));
   state[section].items.splice(removeAt, 1);
   selectedTopic = { section, index: Math.max(0, Math.min(removeAt, state[section].items.length - 1)) };
   render();
 }
 
-function addDetail() { syncFromDom(); state.cover.details.push({ label: "NOVO CAMPO", value: "Informa??o" }); render(); }
+function addDetail() { syncFromDom(); state.cover.details.push({ label: "NOVO CAMPO", value: "Informação" }); render(); }
 function removeDetail() { syncFromDom(); if (state.cover.details.length <= 1) return setStatus("Mantenha ao menos um campo."); state.cover.details.pop(); render(); }
 function exportPdf() { syncFromDom(); setPdfTitle(); window.print(); }
 
