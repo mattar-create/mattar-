@@ -179,6 +179,20 @@ textarea {
   resize: vertical;
 }
 
+.form-section-title {
+  margin: 4px 0 -2px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.text-meter {
+  margin: -6px 0 2px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
 input[type="range"] {
   padding: 0;
 }
@@ -311,9 +325,9 @@ output {
 
 .preview-copy {
   position: absolute;
-  left: calc(var(--col) * 0.94);
-  top: calc(var(--row) * 6.48);
-  width: calc(var(--col) * 5.85);
+  left: calc(var(--col) * var(--text-col, 0.94));
+  top: calc(var(--row) * var(--text-row, 6.48));
+  width: calc(var(--col) * var(--text-width, 5.85));
 }
 
 .preview-copy h2,
@@ -326,11 +340,11 @@ output {
 
 .preview-copy h2 {
   margin-bottom: calc(var(--row) * 0.28);
-  font-size: clamp(16px, 1.46vw, 28px);
+  font-size: calc(clamp(16px, 1.46vw, 28px) * var(--text-scale, 1));
 }
 
 .preview-copy p {
-  font-size: clamp(14px, 1.28vw, 24px);
+  font-size: calc(clamp(14px, 1.28vw, 24px) * var(--text-scale, 1));
 }
 
 .preview-cover {

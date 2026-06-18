@@ -439,6 +439,10 @@ function normalizeProject(project, index = 0, total = 1) {
       coverWidth: Number(project.layout?.coverWidth ?? 3),
       coverHeight: Number(project.layout?.coverHeight ?? 8.9),
       coverPosition: project.layout?.coverPosition || "center center",
+      textCol: Number(project.layout?.textCol ?? 0.94),
+      textRow: Number(project.layout?.textRow ?? 6.48),
+      textWidth: Number(project.layout?.textWidth ?? 5.85),
+      textScale: Number(project.layout?.textScale ?? 1),
     },
   };
 }
@@ -600,6 +604,12 @@ function buildDeckMarkup() {
       `--cover-height:${project.layout.coverHeight}`,
       `--cover-position:${project.layout.coverPosition}`,
     ].join(";");
+    const textStyle = [
+      `--text-col:${project.layout.textCol}`,
+      `--text-row:${project.layout.textRow}`,
+      `--text-width:${project.layout.textWidth}`,
+      `--text-scale:${project.layout.textScale}`,
+    ].join(";");
     const slides = project.slides
       .map((slide, index) => renderMediaItem(slide, project, index))
       .join("");
@@ -612,7 +622,7 @@ function buildDeckMarkup() {
           <button type="button" data-close-deck>voltar &agrave; galeria</button>
         </header>
         <section class="deck-project">
-          <div class="deck-project__copy">
+          <div class="deck-project__copy" style="${textStyle}">
             <h2>${projectTitle}</h2>
             <p>${project.description}</p>
           </div>

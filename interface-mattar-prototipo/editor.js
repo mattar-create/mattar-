@@ -39,6 +39,10 @@ const templateProject = {
     coverWidth: 3,
     coverHeight: 8.9,
     coverPosition: "center center",
+    textCol: 0.94,
+    textRow: 6.48,
+    textWidth: 5.85,
+    textScale: 1,
   },
 };
 
@@ -153,6 +157,10 @@ function fillForm() {
   field("title").value = project.title || "";
   field("year").value = project.year || "";
   field("description").value = project.description || "";
+  field("textCol").value = project.layout.textCol;
+  field("textRow").value = project.layout.textRow;
+  field("textWidth").value = project.layout.textWidth;
+  field("textScale").value = project.layout.textScale;
   field("coverCol").value = project.layout.coverCol;
   field("coverRow").value = project.layout.coverRow;
   field("coverWidth").value = project.layout.coverWidth;
@@ -162,14 +170,25 @@ function fillForm() {
   field("galleryFiles").value = "";
   field("externalVideo").value = "";
   updateOutputs();
+  updateTextMeter();
   renderGalleryEditor();
   renderPreview();
 }
 
 function updateOutputs() {
-  ["coverCol", "coverRow", "coverWidth", "coverHeight"].forEach((name) => {
+  ["textCol", "textRow", "textWidth", "textScale", "coverCol", "coverRow", "coverWidth", "coverHeight"].forEach((name) => {
     document.querySelector(`[data-output="${name}"]`).textContent = field(name).value;
   });
+}
+
+function updateTextMeter() {
+  const meter = document.querySelector("#text-meter");
+  const text = field("description").value.trim();
+  const characters = text.length;
+  const words = text ? text.split(/\s+/).length : 0;
+  const status = characters > 620 ? "texto longo: ajuste largura/escala ou reduza um pouco" : "faixa confortável para o card";
+
+  meter.textContent = `${characters} caracteres / ${words} palavras - ${status}`;
 }
 
 function mediaPreviewMarkup(item, index) {
@@ -214,9 +233,15 @@ function renderPreview() {
     `--cover-height:${project.layout.coverHeight}`,
     `--cover-position:${project.layout.coverPosition}`,
   ].join(";");
+  const textStyle = [
+    `--text-col:${project.layout.textCol}`,
+    `--text-row:${project.layout.textRow}`,
+    `--text-width:${project.layout.textWidth}`,
+    `--text-scale:${project.layout.textScale}`,
+  ].join(";");
 
   elements.preview.innerHTML = `
-    <section class="preview-copy">
+    <section class="preview-copy" style="${textStyle}">
       <h2>${title}</h2>
       <p>${project.description || ""}</p>
     </section>
@@ -239,12 +264,17 @@ function updateProjectFromForm() {
   project.year = field("year").value;
   project.description = field("description").value;
   project.id = slugify(project.title || project.id);
+  project.layout.textCol = Number(field("textCol").value);
+  project.layout.textRow = Number(field("textRow").value);
+  project.layout.textWidth = Number(field("textWidth").value);
+  project.layout.textScale = Number(field("textScale").value);
   project.layout.coverCol = Number(field("coverCol").value);
   project.layout.coverRow = Number(field("coverRow").value);
   project.layout.coverWidth = Number(field("coverWidth").value);
   project.layout.coverHeight = Number(field("coverHeight").value);
   project.layout.coverPosition = field("coverPosition").value;
   updateOutputs();
+  updateTextMeter();
   renderProjectList();
   renderPreview();
   scheduleLocalAutosave();

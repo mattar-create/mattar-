@@ -44,7 +44,33 @@
             Texto
             <textarea name="description" rows="8"></textarea>
           </label>
+          <p class="text-meter" id="text-meter"></p>
 
+          <h2 class="form-section-title">Caixa de texto</h2>
+          <div class="field-grid">
+            <label>
+              Coluna do texto
+              <input name="textCol" type="range" min="0.5" max="6" step="0.01" />
+              <output data-output="textCol"></output>
+            </label>
+            <label>
+              Linha do texto
+              <input name="textRow" type="range" min="4.2" max="8.4" step="0.01" />
+              <output data-output="textRow"></output>
+            </label>
+            <label>
+              Largura do texto
+              <input name="textWidth" type="range" min="3.2" max="7" step="0.01" />
+              <output data-output="textWidth"></output>
+            </label>
+            <label>
+              Escala do texto
+              <input name="textScale" type="range" min="0.72" max="1.12" step="0.01" />
+              <output data-output="textScale"></output>
+            </label>
+          </div>
+
+          <h2 class="form-section-title">Imagem de capa</h2>
           <div class="field-grid">
             <label>
               Coluna da capa
