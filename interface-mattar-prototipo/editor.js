@@ -1,5 +1,6 @@
 const DATA_PATH = "assets/data/projects.json";
 const DRAFT_KEY = "mattar-project-editor-draft";
+const PREVIEW_KEY = "mattar-projects-preview";
 const API_BASE = location.protocol === "file:" ? "http://127.0.0.1:4174" : "";
 
 const state = {
@@ -277,6 +278,7 @@ function updateProjectFromForm() {
   updateTextMeter();
   renderProjectList();
   renderPreview();
+  publishPreviewData();
   scheduleLocalAutosave();
 }
 
@@ -289,6 +291,7 @@ function addProject() {
   state.projects.push(normalizeProject(next));
   state.selectedIndex = state.projects.length - 1;
   renderAll();
+  publishPreviewData();
   scheduleLocalAutosave();
 }
 
@@ -299,6 +302,7 @@ function duplicateProject() {
   state.projects.push(normalizeProject(source));
   state.selectedIndex = state.projects.length - 1;
   renderAll();
+  publishPreviewData();
   scheduleLocalAutosave();
 }
 
@@ -311,6 +315,7 @@ function deleteProject() {
   state.projects.splice(state.selectedIndex, 1);
   state.selectedIndex = Math.max(0, state.selectedIndex - 1);
   renderAll();
+  publishPreviewData();
   scheduleLocalAutosave();
 }
 
@@ -334,6 +339,7 @@ function handleCoverFile(file) {
   project.previewCover = URL.createObjectURL(file);
   state.pendingFiles.set(path, file);
   renderPreview();
+  publishPreviewData();
   scheduleLocalAutosave();
 }
 
@@ -355,6 +361,7 @@ function handleGalleryFiles(files) {
   });
 
   renderGalleryEditor();
+  publishPreviewData();
   scheduleLocalAutosave();
 }
 
@@ -371,6 +378,7 @@ function addExternalVideo() {
   });
   field("externalVideo").value = "";
   renderGalleryEditor();
+  publishPreviewData();
   scheduleLocalAutosave();
 }
 
@@ -391,8 +399,14 @@ function cleanData() {
   };
 }
 
+function publishPreviewData() {
+  localStorage.setItem(PREVIEW_KEY, JSON.stringify(cleanData()));
+}
+
 function saveDraft() {
-  localStorage.setItem(DRAFT_KEY, JSON.stringify(cleanData(), null, 2));
+  const data = cleanData();
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(data, null, 2));
+  localStorage.setItem(PREVIEW_KEY, JSON.stringify(data));
   setStatus("Rascunho salvo neste navegador.");
 }
 
@@ -455,6 +469,7 @@ async function saveLocalRepository(options = {}) {
     await apiPost("/api/save-projects", cleanData());
     state.pendingFiles.clear();
     localStorage.removeItem(DRAFT_KEY);
+    publishPreviewData();
     setStatus(options.silent ? "Salvo automaticamente no repositório local." : "Salvo no repositório local.");
   } finally {
     state.isSaving = false;
@@ -491,6 +506,7 @@ document.addEventListener("click", (event) => {
   if (removeGallery !== undefined) {
     currentProject().gallery.splice(Number(removeGallery), 1);
     renderGalleryEditor();
+    publishPreviewData();
     scheduleLocalAutosave();
     return;
   }
@@ -508,6 +524,7 @@ document.addEventListener("click", (event) => {
 async function init() {
   await loadProjects();
   renderAll();
+  publishPreviewData();
   setStatus("Editor pronto. Para salvar no disco, use o servidor local do projeto.");
 }
 

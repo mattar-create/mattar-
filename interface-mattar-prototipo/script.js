@@ -198,8 +198,6 @@ let ACTIVE_PROJECTS = [
   },
 ];
 
-ACTIVE_PROJECTS = ACTIVE_PROJECTS.filter((project) => project.id === "dadiva");
-
 const COLORS = {
   red: [206, 33, 26],
   paper: [246, 243, 239],
@@ -419,6 +417,9 @@ const galleryState = {
 };
 const mediaState = new Map();
 let appInitialized = false;
+const PREVIEW_KEY = "mattar-projects-preview";
+const isLocalPreviewHost = ["", "localhost", "127.0.0.1"].includes(window.location.hostname);
+const shouldUseLocalPreview = isLocalPreviewHost || urlParams.get("preview") === "local";
 
 function normalizeProject(project, index = 0, total = 1) {
   const id = project.id || slugify(project.title || `projeto-${index + 1}`);
@@ -544,13 +545,8 @@ function escapeAttribute(value) {
 
 async function loadProjects() {
   try {
-    const response = await fetch(`assets/data/projects.json?v=${Date.now()}`, { cache: "no-store" });
-
-    if (!response.ok) {
-      throw new Error(`projects.json ${response.status}`);
-    }
-
-    const data = await response.json();
+    const previewData = shouldUseLocalPreview ? localStorage.getItem(PREVIEW_KEY) : null;
+    const data = previewData ? JSON.parse(previewData) : await fetchProjectsData();
     const sourceProjects = Array.isArray(data) ? data : data.projects;
 
     if (!Array.isArray(sourceProjects) || !sourceProjects.length) {
@@ -561,6 +557,23 @@ async function loadProjects() {
   } catch (error) {
     ACTIVE_PROJECTS = ACTIVE_PROJECTS.map((project, index) => normalizeProject(project, index, ACTIVE_PROJECTS.length));
   }
+}
+
+async function fetchProjectsData() {
+  const response = await fetch(`assets/data/projects.json?v=${Date.now()}`, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`projects.json ${response.status}`);
+  }
+
+  return response.json();
+}
+
+async function refreshProjectsFromDataSource() {
+  await loadProjects();
+  renderGallery();
+  buildDeckMarkup();
+  preloadDeckImages();
 }
 
 function renderGallery() {
@@ -1262,5 +1275,10 @@ async function initializeApp() {
 }
 
 window.addEventListener("load", initializeApp);
+window.addEventListener("storage", (event) => {
+  if (event.key === PREVIEW_KEY && shouldUseLocalPreview) {
+    refreshProjectsFromDataSource();
+  }
+});
 
 initializeApp();
