@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "documentTitle": "Estimativa Orçamentária - Gastroperformance",
+    "client": "Boticário",
+    "projectType": "Gastroperformance",
+    "guests": "80 paxs"
+  },
+  "cover": {
+    "titlePrefix": "Estimativa Orçamentária para",
+    "titleHighlight": "Gastroperformance",
+    "titleSuffix": "para 80 paxs",
+    "details": [
+      {
+        "label": "CLIENTE",
+        "value": "Boticário"
+      },
+      {
+        "label": "DATA",
+        "value": "16 ou dia 22/09 (a definir)"
+      },
+      {
+        "label": "QUANTIDADE DE PAX",
+        "value": "80 total"
+      },
+      {
+        "label": "DIÁRIAS",
+        "value": "1 para ensaio e Apresentação"
+      },
+      {
+        "label": "DURAÇÃO",
+        "value": "até 2 horas aproximadamente."
+      },
+      {
+        "label": "HORÁRIO",
+        "value": "A definir"
+      },
+      {
+        "label": "LOCAL",
+        "value": "Gymnasium"
+      },
+      {
+        "label": "SERVIÇO PRESTADO",
+        "value": "Evento exclusivo para convidados através de espetáculo e jantar empratado em 5 tempos: couvert, entrada, primeiro prato, segundo prato e sobremesa."
+      }
+    ]
+  },
+  "composition": {
+    "title": "Composição do Orçamento",
+    "items": [
+      {
+        "heading": "Conceito criativo do projeto:",
+        "body": "Ampla pesquisa, desenvolvimento criativo e artístico, argumentação e defesa para a proposta criativa para o projeto da gastroperformance."
+      },
+      {
+        "heading": "A&B:",
+        "body": "Desenvolvimento do cardápio, receitas e testes de comidas; Serviço de buffet com bebidas (sem bebidas alcoólicas), garçons e equipe de cozinha."
+      },
+      {
+        "heading": "Audiovisual:",
+        "body": "Execução do projeto audiovisual, fotógrafo/vídeo para registro do evento; Execução Artística dentro do conceito criado para o projeto; Execução das peças estruturais, trilha sonora, locuções, músicos e atores."
+      },
+      {
+        "heading": "Operação e Produção:",
+        "body": "Desenvolvimento de receitas/cardápio, direção artística, aluguel equipamentos de cozinha, aluguel pratos, talheres, taças e utensílios, moldes, silk, esculturas, mesas e cadeiras, equipes, cardápio físico, convites, gestão comercial, atendimento, produção executiva e reserva técnica"
+      }
+    ]
+  },
+  "stages": {
+    "title": "Etapas do Projeto",
+    "items": [
+      {
+        "heading": "Etapa 1: Conceito Criativo",
+        "body": "Contratação para o desenvolvimento do conceito criativo: R$ 80k (descontado do valor total do projeto)\nPrazo estimado: 15 dias para apresentação e 15 dias para refinos/ajustes para a aprovação final."
+      },
+      {
+        "heading": "Etapa 2: Aprovação do Projeto",
+        "body": "Formalização para o aceite e contratação, definição de forma de pagamento e assinatura de contrato para início das etapas seguintes.\nPrazo estimado: 15 dias."
+      },
+      {
+        "heading": "Etapa 3: Desenvolvimento",
+        "body": "Início do desenvolvimento dos projetos de audiovisual, de gastronomia e toda a produção do evento.\nPrazo estimado: 45/60 dias."
+      },
+      {
+        "heading": "Etapa 4: Realização da Gastroperformance",
+        "body": "Data: 16 ou 22/09."
+      }
+    ],
+    "payment": "Forma de pagamento: Criação à vista e Projeto até 30 dias antes do evento.\nEstimativa de orçamento válida por 10 dias."
+  },
+  "contact": {
+    "name": "Sergio Saad",
+    "site": "gastroperformance.com",
+    "email": "Sergio@saadcd.com",
+    "phone": "cel. 11 99966-2704"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "projects": [
+    {
+      "id": "dadiva",
+      "title": "DÁDIVA",
+      "year": "2022",
+      "description": "A gastroperformance Dádiva, apresentada no pavilhão da Bienal durante o evento Geração Senac, propôs uma experiência sensorial inspirada na teoria da reciprocidade de Marcel Mauss. Os participantes percorriam um túnel de labaredas após receberem um fósforo comestível de chocolate e, no ato final, eram convidados a refletir sobre uma vontade interna, depositando simbolicamente sua chama em um pote de ouro. A ação terminava com a escolha entre um biscoito de água ou de fogo, representando permanência ou início.",
+      "cover": "assets/covers/dadiva-cover.png",
+      "gallery": [
+        {
+          "type": "image",
+          "src": "assets/project-media/dadiva-01.png"
+        },
+        {
+          "type": "image",
+          "src": "assets/project-media/dadiva-02.png"
+        },
+        {
+          "type": "image",
+          "src": "assets/project-media/dadiva-03.png"
+        },
+        {
+          "type": "image",
+          "src": "assets/project-media/dadiva-04.png"
+        },
+        {
+          "type": "image",
+          "src": "assets/project-media/dadiva-05.png"
+        }
+      ],
+      "layout": {
+        "coverCol": 7.35,
+        "coverRow": 2.1,
+        "coverWidth": 3,
+        "coverHeight": 8.9,
+        "coverPosition": "center center"
+      }
+    }
+  ]
+}

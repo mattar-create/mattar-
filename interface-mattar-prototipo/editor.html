@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mattar | Editor de Projetos</title>
+    <link rel="icon" href="assets/brand/Logo-Vector.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="editor.css" />
+  </head>
+  <body>
+    <main class="editor-shell">
+      <aside class="editor-panel" aria-label="Editor de projetos">
+        <header class="editor-header">
+          <img src="assets/brand/Logo-Vector.svg" alt="Mattar" />
+          <div>
+            <h1>Editor de projetos</h1>
+            <p>Conteúdo editável. Layout protegido pelo grid aprovado.</p>
+          </div>
+        </header>
+
+        <section class="editor-block editor-shortcuts" aria-label="Atalhos do editor">
+          <a class="editor-link editor-link--budget" href="budget.html">Abrir orçamento / exportar PDF</a>
+        </section>
+
+        <section class="editor-block">
+          <div class="editor-actions">
+            <button type="button" data-action="add">Novo projeto</button>
+            <button type="button" data-action="duplicate">Duplicar template</button>
+            <button type="button" data-action="delete">Excluir</button>
+          </div>
+          <div class="project-list" id="project-list"></div>
+        </section>
+
+        <form id="project-form" class="editor-form">
+          <label>
+            Título
+            <input name="title" autocomplete="off" />
+          </label>
+          <label>
+            Ano
+            <input name="year" autocomplete="off" />
+          </label>
+          <label>
+            Texto
+            <textarea name="description" rows="8"></textarea>
+          </label>
+
+          <div class="field-grid">
+            <label>
+              Coluna da capa
+              <input name="coverCol" type="range" min="6" max="9" step="0.05" />
+              <output data-output="coverCol"></output>
+            </label>
+            <label>
+              Linha da capa
+              <input name="coverRow" type="range" min="1.6" max="3.2" step="0.05" />
+              <output data-output="coverRow"></output>
+            </label>
+            <label>
+              Largura da capa
+              <input name="coverWidth" type="range" min="2" max="4.2" step="0.05" />
+              <output data-output="coverWidth"></output>
+            </label>
+            <label>
+              Altura máxima
+              <input name="coverHeight" type="range" min="5" max="9.5" step="0.05" />
+              <output data-output="coverHeight"></output>
+            </label>
+          </div>
+
+          <label>
+            Enquadramento da capa
+            <select name="coverPosition">
+              <option value="center center">centro</option>
+              <option value="center top">topo</option>
+              <option value="center bottom">base</option>
+              <option value="left center">esquerda</option>
+              <option value="right center">direita</option>
+            </select>
+          </label>
+
+          <label>
+            Trocar capa
+            <input name="coverFile" type="file" accept="image/*" />
+          </label>
+
+          <label>
+            Adicionar imagens ou vídeos locais na galeria
+            <input name="galleryFiles" type="file" accept="image/*,video/*" multiple />
+          </label>
+
+          <div class="external-video-row">
+            <label>
+              Link de vídeo externo
+              <input name="externalVideo" type="url" placeholder="https://youtube.com/..." />
+            </label>
+            <button type="button" data-action="add-external-video">Adicionar link</button>
+          </div>
+
+          <div class="gallery-editor" id="gallery-editor"></div>
+        </form>
+
+        <section class="editor-block save-block">
+          <h2>Salvar no repositório local</h2>
+          <div class="editor-actions">
+            <button type="button" data-action="save-draft">Salvar rascunho</button>
+            <button type="button" data-action="save-local">Salvar no repositório</button>
+            <button type="button" data-action="export">Exportar JSON</button>
+          </div>
+          <p class="editor-status" id="editor-status" role="status"></p>
+        </section>
+      </aside>
+
+      <section class="preview-shell" aria-label="Preview em tempo real">
+        <div class="preview-toolbar">
+          <span>Preview em tempo real</span>
+          <button type="button" data-action="toggle-grid">grid</button>
+        </div>
+        <div class="preview-frame is-grid-visible" id="preview-frame">
+          <div class="preview-line"></div>
+          <img class="preview-logo" src="assets/brand/Logo-Vector.svg" alt="" aria-hidden="true" />
+          <article class="preview-page" id="preview-page"></article>
+        </div>
+      </section>
+    </main>
+    <script src="editor.js"></script>
+  </body>
+</html>

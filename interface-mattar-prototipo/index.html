@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mattar | Interface de Leitura</title>
+    <style>
+      html,
+      body {
+        min-height: 100%;
+        margin: 0;
+        background: #ce211a;
+      }
+
+      .stage {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .shape-layer {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .red-shape {
+        fill: #ce211a;
+      }
+    </style>
+    <script>
+      document.documentElement.classList.add("js-ready");
+      if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+      }
+    </script>
+    <link rel="icon" href="assets/brand/Logo-Vector.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="stage" aria-hidden="true">
+      <svg class="shape-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path id="red-shape" class="red-shape" d="M 0 0 H 100 V 100 H 0 Z" />
+      </svg>
+      <div class="paper-counterform"></div>
+      <div class="topline">
+        <div class="topline__track"></div>
+        <div class="topline__accent"></div>
+      </div>
+    </div>
+
+    <img class="interface-icon" src="assets/brand/Logo-Vector.svg" alt="Mattar" aria-hidden="true" />
+
+    <section class="entry-screen" aria-label="Entrada Mattar">
+      <img src="assets/photos/entry-cover.png" alt="Capa da apresenta??o Mattar" />
+    </section>
+
+    <main class="reader" aria-label="Apresentação Mattar">
+      <section id="comissionamento" class="read-section read-section--intro is-current">
+        <p class="copy copy--intro">
+          <span>Uma Gastroperformance ? um projeto art?stico.</span>
+          <span>Por essa raz?o, os termos de sua contrata??o diferem dos projetos corporativos.</span>
+          <span>A obra de Simone Mattar costuma ser comissionada por empresas e institui??es</span>
+          <span>que compartilham os valores que alicer?am sua po?tica: o compromisso com o</span>
+          <span>desenvolvimento humano, o fortalecimento dos la?os sociais, do pertencimento</span>
+          <span>cultural e a promo??o de a??es no campo da sa?de e da educa??o, com ?nfase</span>
+          <span>nas quest?es alimentares.</span>
+        </p>
+      </section>
+
+      <section id="pesquisa" class="read-section">
+        <p class="copy">
+          O processo de concep??o da gastroperformance comissionada se baseia em
+          uma pesquisa profunda, de car?ter hist?rico e art?stico, que se desdobra em
+          uma narrativa multissensorial na qual convergem os valores da artista e os da
+          marca. Todo processo de comunica??o das a??es pactuadas pode ser discutido
+          ao longo do processo de negocia??o e produ??o do projeto.
+        </p>
+      </section>
+
+      <section id="producao" class="read-section">
+        <p class="copy copy--narrow">
+          Realizada a pesquisa, a artista apresenta sua proposta para aprova??o
+          e eventuais ajustes, garantindo que o processo criativo, marcado por
+          uma grande liberdade, atenda ?s expectativas e necessidades da
+          empresa que comissionar? o projeto. Uma vez o projeto aprovado e o
+          termo de comissionamento firmado, tem in?cio a produ??o do evento.
+        </p>
+      </section>
+
+      <section id="registros" class="read-section read-section--gallery">
+        <div class="gallery-shell">
+          <div class="gallery" aria-label="Registros visuais de projetos" tabindex="0"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <aside class="deck-overlay" aria-hidden="true" aria-label="P&aacute;ginas expandidas da galeria"></aside>
+    <script src="script.js"></script>
+  </body>
+</html>

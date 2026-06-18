@@ -1,0 +1,363 @@
+@font-face {
+  font-family: "Univers LT";
+  src: url("assets/fonts/UniversLTStd.otf") format("opentype");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+:root {
+  --red: #ce211a;
+  --paper: #f6f3ef;
+  --ink: #101010;
+  --muted: #77736d;
+  --line: rgba(16, 16, 16, 0.22);
+  --panel: #ebe7df;
+  --col: calc(100% / 12);
+  --row: calc(100% / 12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: "Univers LT", Arial, Helvetica, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+}
+
+button:hover,
+button:focus-visible {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.editor-shell {
+  display: grid;
+  grid-template-columns: minmax(360px, 430px) 1fr;
+  min-height: 100svh;
+}
+
+.editor-panel {
+  height: 100svh;
+  overflow-y: auto;
+  padding: 28px;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.editor-header {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 28px;
+}
+
+.editor-header img {
+  width: 36px;
+}
+
+.editor-header h1,
+.editor-header p,
+.editor-block h2 {
+  margin: 0;
+}
+
+.editor-header h1 {
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.editor-header p,
+.editor-status {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.editor-block,
+.editor-form {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.editor-shortcuts {
+  margin-top: -12px;
+}
+
+.editor-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border: 1px solid var(--red);
+  border-radius: 999px;
+  padding: 10px 14px;
+  color: var(--paper);
+  background: var(--red);
+  text-decoration: none;
+  line-height: 1;
+}
+
+.editor-link:hover,
+.editor-link:focus-visible {
+  color: var(--red);
+  background: transparent;
+  outline: none;
+}
+
+.project-list {
+  display: grid;
+  gap: 8px;
+}
+
+.project-button {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  border-radius: 14px;
+  padding: 12px;
+  text-align: left;
+}
+
+.project-button.is-active {
+  color: var(--paper);
+  border-color: var(--red);
+  background: var(--red);
+}
+
+.editor-form label,
+.github-block label {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  line-height: 1;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 11px 12px;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+textarea {
+  line-height: 1.2;
+  resize: vertical;
+}
+
+input[type="range"] {
+  padding: 0;
+}
+
+output {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.external-video-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.gallery-editor {
+  display: grid;
+  gap: 8px;
+}
+
+.gallery-row {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.gallery-row img,
+.gallery-row video,
+.gallery-row .gallery-row__external {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.gallery-row__external {
+  display: grid;
+  place-items: center;
+  color: var(--paper);
+  background: var(--red);
+  font-size: 10px;
+  line-height: 1;
+  text-align: center;
+}
+
+.gallery-row span {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-shell {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+  background: #5f5f5c;
+}
+
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  color: var(--paper);
+  font-size: 13px;
+}
+
+.preview-toolbar button {
+  color: var(--paper);
+  border-color: rgba(246, 243, 239, 0.55);
+}
+
+.preview-frame {
+  position: relative;
+  width: min(100%, calc((100svh - 76px) * 16 / 9));
+  aspect-ratio: 16 / 9;
+  margin: 0 auto auto;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.preview-frame.is-grid-visible::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(16, 16, 16, 0.16) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(16, 16, 16, 0.16) 1px, transparent 1px);
+  background-size: var(--col) var(--row);
+}
+
+.preview-line {
+  position: absolute;
+  left: var(--col);
+  right: calc(var(--col) * 1.35);
+  top: calc(var(--row) * 1.08);
+  z-index: 3;
+  height: 1.5px;
+  background: var(--ink);
+}
+
+.preview-logo {
+  position: absolute;
+  left: var(--col);
+  bottom: calc(var(--row) * 0.74);
+  z-index: 4;
+  width: calc(var(--col) * 0.34);
+  min-width: 26px;
+  max-width: 42px;
+}
+
+.preview-page {
+  position: absolute;
+  inset: 0;
+}
+
+.preview-copy {
+  position: absolute;
+  left: calc(var(--col) * 0.94);
+  top: calc(var(--row) * 6.48);
+  width: calc(var(--col) * 5.85);
+}
+
+.preview-copy h2,
+.preview-copy p {
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.preview-copy h2 {
+  margin-bottom: calc(var(--row) * 0.28);
+  font-size: clamp(16px, 1.46vw, 28px);
+}
+
+.preview-copy p {
+  font-size: clamp(14px, 1.28vw, 24px);
+}
+
+.preview-cover {
+  position: absolute;
+  left: calc(var(--col) * var(--cover-col, 7.35));
+  top: calc(var(--row) * var(--cover-row, 2.1));
+  width: calc(var(--col) * var(--cover-width, 3));
+  max-height: calc(var(--row) * var(--cover-height, 8.9));
+  aspect-ratio: var(--media-ratio, 0.678);
+  margin: 0;
+  overflow: hidden;
+  border-radius: clamp(8px, 0.82vw, 16px);
+}
+
+.preview-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--cover-position, center center);
+}
+
+@media (max-width: 980px) {
+  .editor-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-panel {
+    height: auto;
+  }
+}
