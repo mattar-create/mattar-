@@ -3,6 +3,44 @@ const DRAFT_KEY = "mattar-project-editor-draft";
 const PREVIEW_KEY = "mattar-projects-preview";
 const API_BASE = location.protocol === "file:" ? "http://127.0.0.1:4174" : "";
 const canWriteRepositoryFiles = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname);
+const PROJECT_MEDIA_ASSETS = [
+  "assets/project-media/concha-1.png",
+  "assets/project-media/concha-2.png",
+  "assets/project-media/concha-cover.png",
+  "assets/project-media/concreto-1.png",
+  "assets/project-media/concreto-2.png",
+  "assets/project-media/concreto-3.png",
+  "assets/project-media/concreto-capa.png",
+  "assets/project-media/dadiva-1.png",
+  "assets/project-media/dadiva-2.png",
+  "assets/project-media/dadiva-capa.png",
+  "assets/project-media/fome-01.png",
+  "assets/project-media/fome-02.png",
+  "assets/project-media/fome-03.png",
+  "assets/project-media/fome-04.png",
+  "assets/project-media/fome-capa.png",
+  "assets/project-media/gelu-02.png",
+  "assets/project-media/gelu-03.png",
+  "assets/project-media/gelu-04.png",
+  "assets/project-media/gelu-05.png",
+  "assets/project-media/geluminas-cover.png",
+  "assets/project-media/soviet-1.png",
+  "assets/project-media/soviet-capa.png",
+  "assets/project-media/soviet-link.png",
+];
+const MEDIA_PATH_ALIASES = {
+  "assets/project-media/dadiva-01.png": "assets/project-media/dadiva-1.png",
+  "assets/project-media/dadiva-02.png": "assets/project-media/dadiva-2.png",
+  "assets/project-media/dadiva-03.png": "assets/project-media/dadiva-2.png",
+  "assets/project-media/dadiva-04.png": "assets/project-media/dadiva-2.png",
+  "assets/project-media/dadiva-05.png": "assets/project-media/dadiva-2.png",
+  "assets/project-media/concha-01.png": "assets/project-media/concha-1.png",
+  "assets/project-media/concha-02.png": "assets/project-media/concha-2.png",
+  "assets/project-media/concreto-01.png": "assets/project-media/concreto-1.png",
+  "assets/project-media/concreto-02.png": "assets/project-media/concreto-2.png",
+  "assets/project-media/concreto-03.png": "assets/project-media/concreto-3.png",
+  "assets/project-media/soviet-01.png": "assets/project-media/soviet-1.png",
+};
 
 const state = {
   projects: [],
@@ -16,6 +54,7 @@ const elements = {
   list: document.querySelector("#project-list"),
   form: document.querySelector("#project-form"),
   galleryEditor: document.querySelector("#gallery-editor"),
+  mediaAssets: document.querySelector("#media-assets"),
   preview: document.querySelector("#preview-page"),
   previewFrame: document.querySelector("#preview-frame"),
   status: document.querySelector("#editor-status"),
@@ -27,13 +66,10 @@ const templateProject = {
   year: "2022",
   description:
     "A gastroperformance Dádiva, apresentada no pavilhão da Bienal durante o evento Geração Senac, propôs uma experiência sensorial inspirada na teoria da reciprocidade de Marcel Mauss. Os participantes percorriam um túnel de labaredas após receberem um fósforo comestível de chocolate e, no ato final, eram convidados a refletir sobre uma vontade interna, depositando simbolicamente sua chama em um pote de ouro. A ação terminava com a escolha entre um biscoito de água ou de fogo, representando permanência ou início.",
-  cover: "assets/covers/dadiva-cover.png",
+  cover: "assets/project-media/dadiva-capa.png",
   gallery: [
-    { type: "image", src: "assets/project-media/dadiva-01.png" },
-    { type: "image", src: "assets/project-media/dadiva-02.png" },
-    { type: "image", src: "assets/project-media/dadiva-03.png" },
-    { type: "image", src: "assets/project-media/dadiva-04.png" },
-    { type: "image", src: "assets/project-media/dadiva-05.png" },
+    { type: "image", src: "assets/project-media/dadiva-1.png" },
+    { type: "image", src: "assets/project-media/dadiva-2.png" },
   ],
   layout: {
     coverCol: 7.35,
@@ -68,6 +104,21 @@ function slugify(value) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     || "projeto";
+}
+
+function normalizeMediaPath(value = "") {
+  const path = String(value).trim().replace(/\\/g, "/");
+
+  if (!path) {
+    return "";
+  }
+
+  if (/^(https?:|data:|blob:)/i.test(path)) {
+    return path;
+  }
+
+  const normalized = path.startsWith("assets/") ? path : `assets/project-media/${path.replace(/^\/+/, "")}`;
+  return MEDIA_PATH_ALIASES[normalized] || normalized;
 }
 
 function setStatus(message, isError = false) {
@@ -106,15 +157,17 @@ function inferMediaType(src = "") {
 
 function normalizeMediaItem(item) {
   if (typeof item === "string") {
+    const src = normalizeMediaPath(item);
     return {
-      type: inferMediaType(item),
-      src: item,
+      type: inferMediaType(src),
+      src,
     };
   }
 
+  const src = normalizeMediaPath(item.src || "");
   return {
-    type: item.type || inferMediaType(item.src || ""),
-    src: item.src || "",
+    type: item.type || inferMediaType(src),
+    src,
     title: item.title || "",
   };
 }
@@ -130,8 +183,17 @@ function normalizeProject(project) {
   };
 
   merged.id = merged.id || slugify(merged.title || "projeto");
+  merged.cover = normalizeMediaPath(merged.cover || "");
   merged.gallery = (merged.gallery?.length ? merged.gallery : merged.slides || []).map(normalizeMediaItem);
   return merged;
+}
+
+function renderMediaAssetOptions() {
+  if (!elements.mediaAssets) {
+    return;
+  }
+
+  elements.mediaAssets.innerHTML = PROJECT_MEDIA_ASSETS.map((path) => `<option value="${path}"></option>`).join("");
 }
 
 async function loadProjects() {
@@ -275,7 +337,7 @@ function updateProjectFromForm() {
   project.year = field("year").value;
   project.description = field("description").value;
   project.id = slugify(project.title || project.id);
-  project.cover = field("coverPath").value.trim();
+  project.cover = normalizeMediaPath(field("coverPath").value);
   delete project.previewCover;
   project.layout.textCol = Number(field("textCol").value);
   project.layout.textRow = Number(field("textRow").value);
@@ -390,7 +452,7 @@ function handleGalleryFiles(files) {
 }
 
 function addGalleryPath() {
-  const value = field("galleryPath").value.trim();
+  const value = normalizeMediaPath(field("galleryPath").value);
 
   if (!value) {
     return;
@@ -520,7 +582,7 @@ elements.form.addEventListener("input", (event) => {
     const index = Number(event.target.dataset.gallerySrc);
     const item = currentProject().gallery[index];
     if (item) {
-      item.src = event.target.value.trim();
+      item.src = normalizeMediaPath(event.target.value);
       item.type = inferMediaType(item.src);
       delete item.previewSrc;
       renderPreview();
@@ -566,6 +628,7 @@ document.addEventListener("click", (event) => {
 });
 
 async function init() {
+  renderMediaAssetOptions();
   await loadProjects();
   renderAll();
   publishPreviewData();

@@ -423,6 +423,34 @@ const shouldUseLocalPreview = () => {
   const previewMode = urlParams.get("preview");
   return previewMode === "local" || (previewMode !== "json" && Boolean(localStorage.getItem(PREVIEW_KEY)));
 };
+const MEDIA_PATH_ALIASES = {
+  "assets/project-media/dadiva-01.png": "assets/project-media/dadiva-1.png",
+  "assets/project-media/dadiva-02.png": "assets/project-media/dadiva-2.png",
+  "assets/project-media/dadiva-03.png": "assets/project-media/dadiva-2.png",
+  "assets/project-media/dadiva-04.png": "assets/project-media/dadiva-2.png",
+  "assets/project-media/dadiva-05.png": "assets/project-media/dadiva-2.png",
+  "assets/project-media/concha-01.png": "assets/project-media/concha-1.png",
+  "assets/project-media/concha-02.png": "assets/project-media/concha-2.png",
+  "assets/project-media/concreto-01.png": "assets/project-media/concreto-1.png",
+  "assets/project-media/concreto-02.png": "assets/project-media/concreto-2.png",
+  "assets/project-media/concreto-03.png": "assets/project-media/concreto-3.png",
+  "assets/project-media/soviet-01.png": "assets/project-media/soviet-1.png",
+};
+
+function normalizeMediaPath(value = "") {
+  const path = String(value).trim().replace(/\\/g, "/");
+
+  if (!path) {
+    return "";
+  }
+
+  if (/^(https?:|data:|blob:)/i.test(path)) {
+    return path;
+  }
+
+  const normalized = path.startsWith("assets/") ? path : `assets/project-media/${path.replace(/^\/+/, "")}`;
+  return MEDIA_PATH_ALIASES[normalized] || normalized;
+}
 
 function normalizeProject(project, index = 0, total = 1) {
   const id = project.id || slugify(project.title || `projeto-${index + 1}`);
@@ -433,7 +461,7 @@ function normalizeProject(project, index = 0, total = 1) {
     order: project.order || `${String(index + 1).padStart(2, "0")}/${String(total).padStart(2, "0")}`,
     year: project.year || "",
     title: project.title || "Projeto sem titulo",
-    cover: project.cover || "assets/covers/dadiva-cover.png",
+    cover: normalizeMediaPath(project.cover || "assets/project-media/dadiva-capa.png"),
     coverAlt: project.coverAlt || project.title || "Imagem de capa",
     slides: galleryMedia.length ? galleryMedia.map(normalizeMediaItem) : [normalizeMediaItem(project.cover || "assets/covers/dadiva-cover.png")],
     description: project.description || project.text || "",
@@ -453,15 +481,17 @@ function normalizeProject(project, index = 0, total = 1) {
 
 function normalizeMediaItem(item) {
   if (typeof item === "string") {
+    const src = normalizeMediaPath(item);
     return {
-      type: inferMediaType(item),
-      src: item,
+      type: inferMediaType(src),
+      src,
     };
   }
 
+  const src = normalizeMediaPath(item.src || "");
   return {
-    type: item.type || inferMediaType(item.src || ""),
-    src: item.src || "",
+    type: item.type || inferMediaType(src),
+    src,
     title: item.title || "",
   };
 }

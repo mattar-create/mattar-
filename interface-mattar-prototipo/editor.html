@@ -108,7 +108,7 @@
 
           <label>
             Caminho/URL da capa
-            <input name="coverPath" autocomplete="off" placeholder="assets/covers/dadiva-cover.png" />
+            <input name="coverPath" autocomplete="off" list="media-assets" placeholder="assets/project-media/dadiva-capa.png" />
           </label>
 
           <label>
@@ -124,10 +124,12 @@
           <div class="external-video-row">
             <label>
               Caminho/URL para adicionar na galeria
-              <input name="galleryPath" type="text" placeholder="assets/project-media/dadiva-01.png ou https://youtube.com/..." />
+              <input name="galleryPath" type="text" list="media-assets" placeholder="assets/project-media/dadiva-1.png ou https://youtube.com/..." />
             </label>
             <button type="button" data-action="add-gallery-path">Adicionar mídia</button>
           </div>
+
+          <datalist id="media-assets"></datalist>
 
           <div class="gallery-editor" id="gallery-editor"></div>
         </form>
