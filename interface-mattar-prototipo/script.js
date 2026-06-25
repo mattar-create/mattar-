@@ -785,6 +785,8 @@ function updateScrollState() {
   root.style.setProperty("--line-color", colorMix(COLORS.paper, COLORS.ink, collapse));
   root.style.setProperty("--accent-color", colorMix(COLORS.paper, COLORS.red, collapse));
   root.style.setProperty("--text-intro-color", colorMix(COLORS.paper, COLORS.paper, 0));
+  root.style.setProperty("--scroll-progress", pageProgress.toFixed(4));
+  root.style.setProperty("--scroll-unit", unit.toFixed(4));
   setSectionVisibility(unit);
 
   ticking = false;
@@ -802,6 +804,16 @@ function setSectionVisibility(unit) {
     const opacity = opacityById[section.id] || 0;
     section.style.setProperty("--section-opacity", opacity.toFixed(3));
     section.classList.toggle("is-current", opacity > 0.001);
+  });
+
+  const currentSection = sections.reduce((active, section) => {
+    const opacity = Number(section.style.getPropertyValue("--section-opacity")) || 0;
+    return opacity > active.opacity ? { id: section.id, opacity } : active;
+  }, { id: "comissionamento", opacity: 0 }).id;
+
+  document.body.dataset.section = currentSection;
+  document.querySelectorAll(".section-rail a").forEach((link) => {
+    link.classList.toggle("is-active", link.dataset.targetSection === currentSection);
   });
 }
 
