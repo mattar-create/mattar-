@@ -290,8 +290,7 @@ function render() {
       state.commissioning.title,
       "h1",
       "page-title",
-    )}${renderTopicControls("commissioning")}<div class="commissioning-copy">${renderCommissioningParagraphs()}</div></div></section></div>
-    <div class="page-shell"><section class="pdf-page cover-page"><div class="page-artboard">${renderHeader()}<img class="pdf-logo" src="assets/brand/mattar-mark-ref.png" alt="" aria-hidden="true" /><div class="cover-copy"><h1 class="cover-title">${editable(
+    )}${renderTopicControls("commissioning")}<div class="commissioning-copy">${renderCommissioningParagraphs()}</div><div class="cover-copy"><h1 class="cover-title">${editable(
       "cover.titlePrefix",
       state.cover.titlePrefix,
     )}<br />${editable("cover.titleHighlight", state.cover.titleHighlight, "span", "cover-title__red")} ${editable(

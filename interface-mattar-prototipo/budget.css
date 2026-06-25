@@ -194,18 +194,19 @@ button, input, textarea { font: inherit; }
 .commissioning-copy {
   position: absolute;
   left: 91px;
-  top: 360px;
+  top: 346px;
   width: 780px;
   display: grid;
-  gap: 24px;
+  gap: 22px;
 }
 .commissioning-copy p {
   margin: 0;
   white-space: pre-wrap;
   max-width: 780px;
-  font-size: 22px;
-  line-height: 1.2;
+  font-size: 20px;
+  line-height: 1.18;
   letter-spacing: -0.022em;
+  font-style: italic;
   border-radius: 8px;
   transition: background-color 120ms ease, box-shadow 120ms ease;
 }
@@ -215,6 +216,23 @@ button, input, textarea { font: inherit; }
 }
 .commissioning-page .page-controls {
   top: 202px;
+}
+.commissioning-page .cover-copy {
+  top: 980px;
+  width: 745px;
+}
+.commissioning-page .cover-title {
+  margin: 0 0 36px;
+  font-size: 34px;
+  line-height: 1.05;
+}
+.commissioning-page .detail-list {
+  max-width: 620px;
+  font-size: 17px;
+  line-height: 1.18;
+}
+.commissioning-page .detail-actions {
+  margin-top: 10px;
 }
 .closing-grid {
   position: absolute;
