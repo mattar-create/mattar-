@@ -111,6 +111,29 @@ button, input, textarea { font: inherit; }
   width: 56px;
   height: auto;
 }
+.page-header {
+  position: absolute;
+  left: 91px;
+  right: 91px;
+  top: 82px;
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  color: rgba(5, 5, 5, 0.72);
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+.page-header__label,
+.page-header__date {
+  margin: 0;
+}
+.page-header__date {
+  text-align: right;
+}
 [contenteditable="true"] {
   outline: 0;
   border-radius: 2px;
@@ -153,17 +176,107 @@ button, input, textarea { font: inherit; }
 .page-title {
   position: absolute;
   left: 91px;
-  top: 115px;
+  top: 150px;
   margin: 0;
   font-size: 35px;
   line-height: 1.06;
   font-weight: 400;
   letter-spacing: -0.025em;
 }
+.commissioning-copy {
+  position: absolute;
+  left: 91px;
+  top: 248px;
+  width: 888px;
+  display: grid;
+  gap: 34px;
+}
+.commissioning-copy p {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 25px;
+  line-height: 1.24;
+  letter-spacing: -0.02em;
+  border-radius: 8px;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+.commissioning-copy p.is-selected {
+  background: rgba(206, 33, 26, 0.035);
+  box-shadow: 0 0 0 10px rgba(206, 33, 26, 0.035);
+}
+.closing-grid {
+  position: absolute;
+  left: 91px;
+  top: 248px;
+  width: 898px;
+  display: grid;
+  grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+  gap: 64px;
+  align-items: start;
+}
+.banking-block,
+.acceptance-block {
+  display: grid;
+  gap: 22px;
+}
+.banking-block h2,
+.acceptance-block h2 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.08;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+.banking-list {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.22;
+}
+.banking-row {
+  display: block;
+}
+.banking-row strong {
+  font-weight: 400;
+  text-transform: uppercase;
+}
+.acceptance-copy {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 21px;
+  line-height: 1.28;
+  letter-spacing: -0.018em;
+}
+.signature-stack {
+  display: grid;
+  gap: 16px;
+  margin-top: 10px;
+}
+.signature-row {
+  display: grid;
+  gap: 8px;
+}
+.signature-row__label {
+  margin: 0;
+  color: rgba(5, 5, 5, 0.6);
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.signature-row__value {
+  min-height: 34px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(5, 5, 5, 0.42);
+  font-size: 20px;
+  line-height: 1.14;
+  letter-spacing: -0.018em;
+}
 .composition-list {
   position: absolute;
   left: 91px;
-  top: 250px;
+  top: 286px;
   width: 990px;
   display: grid;
   gap: 55px;
@@ -171,7 +284,7 @@ button, input, textarea { font: inherit; }
 .stage-list {
   position: absolute;
   left: 91px;
-  top: 250px;
+  top: 286px;
   width: 860px;
   display: grid;
   gap: 40px;
