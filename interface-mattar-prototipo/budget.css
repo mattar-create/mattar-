@@ -1,4 +1,4 @@
-@font-face {
+﻿@font-face {
   font-family: "Univers LT";
   src: url("assets/fonts/UniversLTStd.otf") format("opentype");
   font-weight: 400;
@@ -183,26 +183,38 @@ button, input, textarea { font: inherit; }
   font-weight: 400;
   letter-spacing: -0.025em;
 }
+.commissioning-page .page-title {
+  top: 214px;
+  max-width: 640px;
+  font-size: 52px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
 .commissioning-copy {
   position: absolute;
   left: 91px;
-  top: 248px;
-  width: 888px;
+  top: 360px;
+  width: 780px;
   display: grid;
-  gap: 34px;
+  gap: 24px;
 }
 .commissioning-copy p {
   margin: 0;
   white-space: pre-wrap;
-  font-size: 25px;
-  line-height: 1.24;
-  letter-spacing: -0.02em;
+  max-width: 780px;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -0.022em;
   border-radius: 8px;
   transition: background-color 120ms ease, box-shadow 120ms ease;
 }
 .commissioning-copy p.is-selected {
   background: rgba(206, 33, 26, 0.035);
   box-shadow: 0 0 0 10px rgba(206, 33, 26, 0.035);
+}
+.commissioning-page .page-controls {
+  top: 202px;
 }
 .closing-grid {
   position: absolute;
@@ -453,3 +465,5 @@ button, input, textarea { font: inherit; }
     box-shadow: none !important;
   }
 }
+
+

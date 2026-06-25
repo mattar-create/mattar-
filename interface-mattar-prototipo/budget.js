@@ -285,6 +285,12 @@ function renderTopicControls(sectionName) {
 function render() {
   setPdfTitle();
   documentRoot.innerHTML = `
+    <div class="page-shell"><section class="pdf-page commissioning-page"><div class="page-artboard">${renderHeader()}<img class="pdf-logo" src="assets/brand/mattar-mark-ref.png" alt="" aria-hidden="true" />${editable(
+      "commissioning.title",
+      state.commissioning.title,
+      "h1",
+      "page-title",
+    )}${renderTopicControls("commissioning")}<div class="commissioning-copy">${renderCommissioningParagraphs()}</div></div></section></div>
     <div class="page-shell"><section class="pdf-page cover-page"><div class="page-artboard">${renderHeader()}<img class="pdf-logo" src="assets/brand/mattar-mark-ref.png" alt="" aria-hidden="true" /><div class="cover-copy"><h1 class="cover-title">${editable(
       "cover.titlePrefix",
       state.cover.titlePrefix,
@@ -292,12 +298,6 @@ function render() {
       "cover.titleSuffix",
       state.cover.titleSuffix,
     )}</h1><div class="detail-list">${renderDetails()}</div><div class="detail-actions"><button class="inline-action" type="button" data-action="add-detail">+ campo</button><button class="inline-action" type="button" data-action="remove-detail">- campo</button></div></div></div></section></div>
-    <div class="page-shell"><section class="pdf-page commissioning-page"><div class="page-artboard">${renderHeader()}<img class="pdf-logo" src="assets/brand/mattar-mark-ref.png" alt="" aria-hidden="true" />${editable(
-      "commissioning.title",
-      state.commissioning.title,
-      "h1",
-      "page-title",
-    )}${renderTopicControls("commissioning")}<div class="commissioning-copy">${renderCommissioningParagraphs()}</div></div></section></div>
     <div class="page-shell"><section class="pdf-page composition-page"><div class="page-artboard">${renderHeader()}<img class="pdf-logo" src="assets/brand/mattar-mark-ref.png" alt="" aria-hidden="true" />${editable(
       "composition.title",
       state.composition.title,
@@ -485,5 +485,6 @@ async function init() {
 init().catch((error) => {
   documentRoot.innerHTML = `<section class="pdf-page"><p>${escapeHtml(error.message)}</p></section>`;
 });
+
 
 
