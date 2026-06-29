@@ -1,33 +1,33 @@
-﻿const STORAGE_KEY = "mattar-budget-document";
+const STORAGE_KEY = "mattar-budget-document";
 const DATA_PATH = "assets/data/budget-document.json";
 const API_BASE = location.protocol === "file:" ? "http://127.0.0.1:4174" : "";
 const canWriteBudgetFile = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname);
 const autosaveDelayMs = 900;
 const DEFAULT_BUDGET_DATA = {
   meta: {
-    documentTitle: "Estimativa OrÃ§amentÃ¡ria - Gastroperformance",
-    headerLabel: "Estimativa OrÃ§amentÃ¡ria",
+    documentTitle: "Estimativa Orçamentária - Gastroperformance",
+    headerLabel: "Estimativa Orçamentária",
     headerDate: "22/09",
-    client: "BoticÃ¡rio",
+    client: "Boticário",
     projectType: "Gastroperformance",
     guests: "80 paxs",
   },
   cover: {
-    titlePrefix: "Estimativa OrÃ§amentÃ¡ria para",
+    titlePrefix: "Estimativa Orçamentária para",
     titleHighlight: "Gastroperformance",
     titleSuffix: "para 80 paxs",
     details: [
-      { label: "CLIENTE", value: "BoticÃ¡rio" },
+      { label: "CLIENTE", value: "Boticário" },
       { label: "DATA", value: "16 ou 22/09" },
       { label: "QUANTIDADE DE PAX", value: "80 total" },
-      { label: "DIÃRIAS", value: "1 para ensaio e apresentaÃ§Ã£o" },
-      { label: "DURAÃ‡ÃƒO", value: "atÃ© 2 horas aproximadamente." },
-      { label: "HORÃRIO", value: "A definir" },
+      { label: "DIÁRIAS", value: "1 para ensaio e apresentação" },
+      { label: "DURAÇÃO", value: "até 2 horas aproximadamente." },
+      { label: "HORÁRIO", value: "A definir" },
       { label: "LOCAL", value: "Gymnasium" },
       {
-        label: "SERVIÃ‡O PRESTADO",
+        label: "SERVIÇO PRESTADO",
         value:
-          "Evento exclusivo para convidados atravÃ©s de espetÃ¡culo e jantar empratado em 5 tempos: couvert, entrada, primeiro prato, segundo prato e sobremesa.",
+          "Evento exclusivo para convidados através de espetáculo e jantar empratado em 5 tempos: couvert, entrada, primeiro prato, segundo prato e sobremesa.",
       },
     ],
   },
@@ -40,27 +40,27 @@ const DEFAULT_BUDGET_DATA = {
     ],
   },
   composition: {
-    title: "ComposiÃ§Ã£o do OrÃ§amento",
+    title: "Composição do Orçamento",
     items: [
       {
         heading: "Conceito criativo do projeto:",
         body:
-          "Ampla pesquisa, desenvolvimento criativo e artÃ­stico, argumentaÃ§Ã£o e defesa para a proposta criativa para o projeto da gastroperformance.",
+          "Ampla pesquisa, desenvolvimento criativo e artístico, argumentação e defesa para a proposta criativa para o projeto da gastroperformance.",
       },
       {
         heading: "A&B:",
         body:
-          "Desenvolvimento do cardÃ¡pio, receitas e testes de comidas; serviÃ§o de buffet com bebidas (sem bebidas alcoÃ³licas), garÃ§ons e equipe de cozinha.",
+          "Desenvolvimento do cardápio, receitas e testes de comidas; serviço de buffet com bebidas (sem bebidas alcoólicas), garçons e equipe de cozinha.",
       },
       {
         heading: "Audiovisual:",
         body:
-          "ExecuÃ§Ã£o do projeto audiovisual, fotÃ³grafo/vÃ­deo para registro do evento; execuÃ§Ã£o artÃ­stica dentro do conceito criado para o projeto; execuÃ§Ã£o das peÃ§as estruturais, trilha sonora, locuÃ§Ãµes, mÃºsicos e atores.",
+          "Execução do projeto audiovisual, fotógrafo/vídeo para registro do evento; execução artística dentro do conceito criado para o projeto; execução das peças estruturais, trilha sonora, locuções, músicos e atores.",
       },
       {
-        heading: "OperaÃ§Ã£o e ProduÃ§Ã£o:",
+        heading: "Operação e Produção:",
         body:
-          "Desenvolvimento de receitas/cardÃ¡pio, direÃ§Ã£o artÃ­stica, aluguel de equipamentos de cozinha, aluguel de pratos, talheres, taÃ§as e utensÃ­lios, moldes, silk, esculturas, mesas e cadeiras, equipes, cardÃ¡pio fÃ­sico, convites, gestÃ£o comercial, atendimento, produÃ§Ã£o executiva e reserva tÃ©cnica.",
+          "Desenvolvimento de receitas/cardápio, direção artística, aluguel de equipamentos de cozinha, aluguel de pratos, talheres, taças e utensílios, moldes, silk, esculturas, mesas e cadeiras, equipes, cardápio físico, convites, gestão comercial, atendimento, produção executiva e reserva técnica.",
       },
     ],
   },
@@ -70,25 +70,25 @@ const DEFAULT_BUDGET_DATA = {
       {
         heading: "Etapa 1: Conceito Criativo",
         body:
-          "ContrataÃ§Ã£o para o desenvolvimento do conceito criativo: R$ 80k (descontado do valor total do projeto)\nPrazo estimado: 15 dias para apresentaÃ§Ã£o e 15 dias para refinos/ajustes para a aprovaÃ§Ã£o final.",
+          "Contratação para o desenvolvimento do conceito criativo: R$ 80k (descontado do valor total do projeto)\nPrazo estimado: 15 dias para apresentação e 15 dias para refinos/ajustes para a aprovação final.",
       },
       {
-        heading: "Etapa 2: AprovaÃ§Ã£o do Projeto",
+        heading: "Etapa 2: Aprovação do Projeto",
         body:
-          "FormalizaÃ§Ã£o para o aceite e contrataÃ§Ã£o, definiÃ§Ã£o de forma de pagamento e assinatura de contrato para inÃ­cio das etapas seguintes.\nPrazo estimado: 15 dias.",
+          "Formalização para o aceite e contratação, definição de forma de pagamento e assinatura de contrato para início das etapas seguintes.\nPrazo estimado: 15 dias.",
       },
       {
         heading: "Etapa 3: Desenvolvimento",
         body:
-          "InÃ­cio do desenvolvimento dos projetos de audiovisual, de gastronomia e toda a produÃ§Ã£o do evento.\nPrazo estimado: 45/60 dias.",
+          "Início do desenvolvimento dos projetos de audiovisual, de gastronomia e toda a produção do evento.\nPrazo estimado: 45/60 dias.",
       },
       {
-        heading: "Etapa 4: RealizaÃ§Ã£o da Gastroperformance",
+        heading: "Etapa 4: Realização da Gastroperformance",
         body: "Data: 16 ou 22/09.",
       },
     ],
     payment:
-      "Forma de pagamento: CriaÃ§Ã£o Ã  vista e projeto atÃ© 30 dias antes do evento.\nEstimativa de orÃ§amento vÃ¡lida por 10 dias.",
+      "Forma de pagamento: Criação à vista e projeto até 30 dias antes do evento.\nEstimativa de orçamento válida por 10 dias.",
   },
   contact: {
     name: "Sergio Saad",
@@ -97,13 +97,13 @@ const DEFAULT_BUDGET_DATA = {
     phone: "cel. 11 99966-2704",
   },
   banking: {
-    title: "Dados BancÃ¡rios",
+    title: "Dados Bancários",
     details: [
       { label: "BANCO", value: "Banco Exemplo S.A." },
       { label: "AGÃŠNCIA", value: "0001" },
       { label: "CONTA CORRENTE", value: "12345-6" },
       { label: "PIX", value: "financeiro@mattar.com" },
-      { label: "FAVORECIDO", value: "Mattar Projetos ArtÃ­sticos Ltda." },
+      { label: "FAVORECIDO", value: "Mattar Projetos Artísticos Ltda." },
       { label: "CNPJ", value: "12.345.678/0001-90" }
     ]
   },
@@ -229,7 +229,7 @@ function setPdfTitle() {
     state?.cover.details.find((item) => item.label.toLowerCase().includes("cliente"))?.value ||
     state?.meta.client ||
     "Cliente";
-  document.title = `${state?.meta.documentTitle || "Estimativa OrÃ§amentÃ¡ria"} - ${client}`;
+  document.title = `${state?.meta.documentTitle || "Estimativa Orçamentária"} - ${client}`;
 }
 
 function editable(path, value, tag = "span", className = "") {
@@ -306,9 +306,9 @@ function renderTopics(sectionName) {
 function renderTopicControls(sectionName) {
   const label =
     sectionName === "composition"
-      ? "composiÃ§Ã£o"
+      ? "composição"
       : sectionName === "commissioning"
-        ? "parÃ¡grafo"
+        ? "parágrafo"
         : "etapa";
   return `<div class="page-controls" data-section="${sectionName}"><span>Editar ${label}</span><button class="inline-action" type="button" data-action="add-topic" data-section="${sectionName}">+ adicionar</button><button class="inline-action" type="button" data-action="remove-topic" data-section="${sectionName}">- remover selecionado</button></div>`;
 }
@@ -557,14 +557,14 @@ function addTopic(section, index = selectedTopic.section === section ? selectedT
   const insertAt = Math.max(0, Number(index)) + 1;
 
   if (section === "commissioning") {
-    state.commissioning.paragraphs.splice(insertAt, 0, "Novo parÃ¡grafo.");
+    state.commissioning.paragraphs.splice(insertAt, 0, "Novo parágrafo.");
     selectedTopic = { section, index: insertAt };
     render();
     scheduleAutosave();
     return;
   }
 
-  state[section].items.splice(insertAt, 0, { heading: "Novo tÃ³pico", body: "Descreva este item." });
+  state[section].items.splice(insertAt, 0, { heading: "Novo tópico", body: "Descreva este item." });
   selectedTopic = { section, index: insertAt };
   render();
   scheduleAutosave();
@@ -576,7 +576,7 @@ function removeTopic(section, index = selectedTopic.section === section ? select
 
   if (section === "commissioning") {
     if (state.commissioning.paragraphs.length <= 1) {
-      setStatus("Mantenha ao menos um parÃ¡grafo.");
+      setStatus("Mantenha ao menos um parágrafo.");
       return;
     }
     state.commissioning.paragraphs.splice(removeAt, 1);
@@ -590,7 +590,7 @@ function removeTopic(section, index = selectedTopic.section === section ? select
   }
 
   if (state[section].items.length <= 1) {
-    setStatus("Mantenha ao menos um tÃ³pico.");
+    setStatus("Mantenha ao menos um tópico.");
     return;
   }
 
@@ -605,7 +605,7 @@ function removeTopic(section, index = selectedTopic.section === section ? select
 
 function addDetail() {
   syncFromDom();
-  state.cover.details.push({ label: "NOVO CAMPO", value: "InformaÃ§Ã£o" });
+  state.cover.details.push({ label: "NOVO CAMPO", value: "Informação" });
   render();
   scheduleAutosave();
 }
