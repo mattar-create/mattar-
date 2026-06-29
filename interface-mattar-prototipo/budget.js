@@ -1,8 +1,14 @@
 const STORAGE_KEY = "mattar-budget-document";
 const DATA_PATH = "assets/data/budget-document.json";
 const API_BASE = location.protocol === "file:" ? "http://127.0.0.1:4174" : "";
-const canWriteBudgetFile = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname);
+const canWriteLocalFiles = ["localhost", "127.0.0.1"].includes(location.hostname);
+const GITHUB_OWNER = "mattar-create";
+const GITHUB_REPO = "mattar-";
+const GITHUB_BRANCH = "main";
+const GITHUB_ROOT = "interface-mattar-prototipo";
+const GITHUB_TOKEN_KEY = "mattar-budget-github-token";
 const autosaveDelayMs = 900;
+const githubAutosaveDelayMs = 4500;
 const DEFAULT_BUDGET_DATA = {
   meta: {
     documentTitle: "Estimativa Orçamentária - Gastroperformance",
@@ -125,6 +131,8 @@ const documentRoot = document.querySelector(".budget-document");
 const statusEl = document.querySelector(".budget-status");
 const libraryListEl = document.querySelector("#budget-document-list");
 const documentNameInput = document.querySelector("#budget-document-name");
+const githubTokenInput = document.querySelector("#github-token");
+const budgetToolsEl = document.querySelector(".budget-tools");
 let state = null;
 let selectedTopic = { section: "composition", index: 0 };
 let autosaveTimer = null;
@@ -148,6 +156,27 @@ function normalizeDocumentPath(value = DATA_PATH) {
 
 const documentDataPath = normalizeDocumentPath(new URLSearchParams(location.search).get("file"));
 const storageKey = `${STORAGE_KEY}:${documentDataPath}`;
+
+function getGitHubToken() {
+  return localStorage.getItem(GITHUB_TOKEN_KEY) || "";
+}
+
+function hasGitHubToken() {
+  return Boolean(getGitHubToken());
+}
+
+function canWriteRepositoryFiles() {
+  return canWriteLocalFiles || hasGitHubToken();
+}
+
+function updateGitHubControls() {
+  const connected = hasGitHubToken();
+  budgetToolsEl?.classList.toggle("github-connected", connected);
+  if (githubTokenInput) {
+    githubTokenInput.value = "";
+    githubTokenInput.placeholder = connected ? "GitHub conectado" : "token do GitHub";
+  }
+}
 
 function slugify(value) {
   return String(value || "")
@@ -384,6 +413,105 @@ async function apiPost(path, body) {
   return response.json();
 }
 
+function githubContentPath(path = documentDataPath) {
+  return `${GITHUB_ROOT}/${normalizeDocumentPath(path)}`;
+}
+
+function toBase64Utf8(value) {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary);
+}
+
+function githubApiPath(path) {
+  return encodeURIComponent(path).replace(/%2F/g, "/");
+}
+
+async function githubRequest(path, options = {}) {
+  const token = getGitHubToken();
+  if (!token) throw new Error("Conecte o GitHub para salvar online.");
+
+  const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}${path}`, {
+    ...options,
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+      ...(options.headers || {}),
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || `GitHub respondeu ${response.status}`);
+  }
+
+  return response.json();
+}
+
+async function githubGetContent(path) {
+  return githubRequest(`/contents/${githubApiPath(path)}?ref=${encodeURIComponent(GITHUB_BRANCH)}`);
+}
+
+async function githubPutContent(path, document, message, sha = null) {
+  const body = {
+    branch: GITHUB_BRANCH,
+    message,
+    content: toBase64Utf8(`${JSON.stringify(document, null, 2)}\n`),
+  };
+
+  if (sha) body.sha = sha;
+
+  return githubRequest(`/contents/${githubApiPath(path)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+async function saveBudgetDocumentToGitHub(options = {}) {
+  const path = githubContentPath(documentDataPath);
+  const current = await githubGetContent(path);
+  await githubPutContent(path, state, `Atualiza ${documentDataPath.replace("assets/data/", "")}`, current.sha);
+  localStorage.removeItem(storageKey);
+  setStatus(options.silent ? "Salvo automaticamente no GitHub." : "Arquivo salvo no GitHub.");
+}
+
+async function createBudgetDocumentOnGitHub(name) {
+  const safeName = slugify(name);
+  const newPath = `assets/data/${safeName}.json`;
+  const githubPath = githubContentPath(newPath);
+  await githubPutContent(githubPath, state, `Cria modelo ${safeName}.json`);
+  return { path: newPath };
+}
+
+async function loadGitHubDocumentLibrary() {
+  const files = await githubGetContent(`${GITHUB_ROOT}/assets/data`);
+  const jsonFiles = Array.isArray(files) ? files.filter((file) => file.type === "file" && file.name.endsWith(".json")) : [];
+
+  const documents = await Promise.all(
+    jsonFiles.map(async (file) => {
+      const path = `assets/data/${file.name}`;
+      try {
+        const response = await fetch(`${file.download_url}?v=${Date.now()}`, { cache: "no-store" });
+        const document = await response.json();
+        return {
+          path,
+          client: document?.meta?.client || document?.cover?.details?.find((item) => item.label?.toLowerCase().includes("cliente"))?.value || "Documento",
+          projectType: document?.meta?.projectType || document?.cover?.titleHighlight || "Orçamento",
+        };
+      } catch {
+        return { path, client: file.name.replace(".json", ""), projectType: "" };
+      }
+    }),
+  );
+
+  return documents.sort((a, b) => documentLabel(a).localeCompare(documentLabel(b), "pt-BR"));
+}
+
 function documentLabel(documentInfo) {
   const client = documentInfo.client || "Sem cliente";
   const type = documentInfo.projectType || "Orcamento";
@@ -416,10 +544,16 @@ async function loadDocumentLibrary() {
   }
 
   try {
-    const response = await fetch(`${API_BASE}/api/budget-documents?v=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok) throw new Error("Nao foi possivel carregar a biblioteca.");
-    const data = await response.json();
-    documentLibrary = data.documents || [];
+    if (canWriteLocalFiles) {
+      const response = await fetch(`${API_BASE}/api/budget-documents?v=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("Não foi possível carregar a biblioteca local.");
+      const data = await response.json();
+      documentLibrary = data.documents || [];
+    } else if (hasGitHubToken()) {
+      documentLibrary = await loadGitHubDocumentLibrary();
+    } else {
+      throw new Error("GitHub desconectado.");
+    }
   } catch (error) {
     documentLibrary = [
       {
@@ -445,7 +579,7 @@ async function openDocument(path) {
     return;
   }
 
-  if (canWriteBudgetFile) {
+  if (canWriteRepositoryFiles()) {
     await saveBudgetDocument({ silent: true }).catch(() => {});
   }
 
@@ -463,8 +597,8 @@ function nextDocumentName(prefix = "") {
 }
 
 async function createDocumentFromCurrent(prefix = "") {
-  if (!canWriteBudgetFile) {
-    setStatus("Para criar arquivos, abra pelo servidor local.");
+  if (!canWriteRepositoryFiles()) {
+    setStatus("Conecte o GitHub para criar arquivos online.");
     return;
   }
 
@@ -472,13 +606,12 @@ async function createDocumentFromCurrent(prefix = "") {
   const name = nextDocumentName(prefix);
   setStatus("Criando arquivo...");
 
-  const result = await apiPost("/api/create-budget-document", {
-    name,
-    document: state,
-  });
+  const result = canWriteLocalFiles
+    ? await apiPost("/api/create-budget-document", { name, document: state })
+    : await createBudgetDocumentOnGitHub(name);
 
   localStorage.removeItem(`${STORAGE_KEY}:${result.path}`);
-  setStatus("Arquivo criado.");
+  setStatus(canWriteLocalFiles ? "Arquivo criado." : "Arquivo criado no GitHub.");
   navigateToDocument(result.path);
 }
 
@@ -491,8 +624,8 @@ function saveBrowserDraft(message = "Documento salvo neste navegador.") {
 async function saveBudgetDocument(options = {}) {
   syncFromDom();
 
-  if (!canWriteBudgetFile) {
-    saveBrowserDraft("Online: salvo neste navegador.");
+  if (!canWriteRepositoryFiles()) {
+    saveBrowserDraft("Online: salvo neste navegador. Conecte o GitHub para gravar no repositório.");
     return;
   }
 
@@ -503,16 +636,20 @@ async function saveBudgetDocument(options = {}) {
 
   isSaving = true;
   if (!options.silent) {
-    setStatus("Salvando arquivo...");
+    setStatus(canWriteLocalFiles ? "Salvando arquivo..." : "Salvando no GitHub...");
   }
 
   try {
-    await apiPost("/api/save-budget-document", {
-      path: documentDataPath,
-      document: state,
-    });
-    localStorage.removeItem(storageKey);
-    setStatus(options.silent ? "Salvo automaticamente no arquivo." : "Arquivo salvo.");
+    if (canWriteLocalFiles) {
+      await apiPost("/api/save-budget-document", {
+        path: documentDataPath,
+        document: state,
+      });
+      localStorage.removeItem(storageKey);
+      setStatus(options.silent ? "Salvo automaticamente no arquivo." : "Arquivo salvo.");
+    } else {
+      await saveBudgetDocumentToGitHub(options);
+    }
   } catch (error) {
     localStorage.setItem(storageKey, JSON.stringify(state));
     setStatus(`Salvo no navegador. ${error.message}`);
@@ -530,7 +667,7 @@ function scheduleAutosave() {
   window.clearTimeout(autosaveTimer);
   autosaveTimer = window.setTimeout(() => {
     saveBudgetDocument({ silent: true }).catch(() => {});
-  }, autosaveDelayMs);
+  }, hasGitHubToken() && !canWriteLocalFiles ? githubAutosaveDelayMs : autosaveDelayMs);
 }
 
 function generateShareLink() {
@@ -655,6 +792,26 @@ document.addEventListener("input", (event) => {
 
 document.addEventListener("focusin", selectTopicFromEvent);
 
+async function connectGitHub() {
+  const token = githubTokenInput?.value.trim();
+  if (!token) {
+    setStatus("Cole um token do GitHub para conectar.");
+    return;
+  }
+
+  localStorage.setItem(GITHUB_TOKEN_KEY, token);
+  updateGitHubControls();
+  setStatus("GitHub conectado.");
+  await loadDocumentLibrary();
+}
+
+function disconnectGitHub() {
+  localStorage.removeItem(GITHUB_TOKEN_KEY);
+  updateGitHubControls();
+  setStatus("GitHub desconectado.");
+  loadDocumentLibrary();
+}
+
 document.addEventListener("click", (event) => {
   selectTopicFromEvent(event);
   const documentButton = event.target.closest("[data-document-path]");
@@ -671,6 +828,8 @@ document.addEventListener("click", (event) => {
   if (action === "print") exportPdf();
   if (action === "reset") resetModel();
   if (action === "refresh-library") loadDocumentLibrary();
+  if (action === "connect-github") connectGitHub().catch((error) => setStatus(error.message));
+  if (action === "disconnect-github") disconnectGitHub();
   if (action === "create-document") createDocumentFromCurrent().catch((error) => setStatus(error.message));
   if (action === "duplicate-document") createDocumentFromCurrent("copia").catch((error) => setStatus(error.message));
   if (action === "add-topic") addTopic(button.dataset.section, button.dataset.index);
@@ -685,13 +844,14 @@ async function init() {
   const defaultData = await loadDefaultData();
   const hashData = dataFromHash();
   const savedData = localStorage.getItem(storageKey);
-  state = hashData || (canWriteBudgetFile ? clone(defaultData) : savedData ? JSON.parse(savedData) : clone(defaultData));
+  updateGitHubControls();
+  state = hashData || (canWriteLocalFiles ? clone(defaultData) : savedData ? JSON.parse(savedData) : clone(defaultData));
   render();
   if (documentNameInput) {
     documentNameInput.value = nextDocumentName();
   }
   loadDocumentLibrary();
-  setStatus(canWriteBudgetFile ? "Documento pronto. Alteracoes salvam no arquivo." : "Documento pronto. Alteracoes salvam no navegador.");
+  setStatus(canWriteLocalFiles ? "Documento pronto. Alterações salvam no arquivo." : hasGitHubToken() ? "Documento pronto. Alterações salvam no GitHub." : "Documento pronto. Conecte o GitHub para salvar online.");
 }
 
 init().catch((error) => {
