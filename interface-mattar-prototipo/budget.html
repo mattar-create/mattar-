@@ -40,7 +40,8 @@
       <section class="budget-github" aria-label="Salvar no GitHub">
         <div class="budget-github__head">
           <strong>GitHub</strong>
-          <button type="button" data-action="disconnect-github">Sair</button>
+          <span id="github-state">Desconectado</span>
+          <button type="button" data-action="disconnect-github">Trocar</button>
         </div>
         <div class="budget-github__connect">
           <input id="github-token" type="password" placeholder="token do GitHub" autocomplete="off" />

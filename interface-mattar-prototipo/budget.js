@@ -132,6 +132,7 @@ const statusEl = document.querySelector(".budget-status");
 const libraryListEl = document.querySelector("#budget-document-list");
 const documentNameInput = document.querySelector("#budget-document-name");
 const githubTokenInput = document.querySelector("#github-token");
+const githubStateEl = document.querySelector("#github-state");
 const budgetToolsEl = document.querySelector(".budget-tools");
 let state = null;
 let selectedTopic = { section: "composition", index: 0 };
@@ -172,9 +173,12 @@ function canWriteRepositoryFiles() {
 function updateGitHubControls() {
   const connected = hasGitHubToken();
   budgetToolsEl?.classList.toggle("github-connected", connected);
+  if (githubStateEl) {
+    githubStateEl.textContent = connected ? "Conectado" : "Desconectado";
+  }
   if (githubTokenInput) {
     githubTokenInput.value = "";
-    githubTokenInput.placeholder = connected ? "GitHub conectado" : "token do GitHub";
+    githubTokenInput.placeholder = "token do GitHub";
   }
 }
 
@@ -792,23 +796,30 @@ document.addEventListener("input", (event) => {
 
 document.addEventListener("focusin", selectTopicFromEvent);
 
+githubTokenInput?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    connectGitHub().catch((error) => setStatus(error.message));
+  }
+});
+
 async function connectGitHub() {
   const token = githubTokenInput?.value.trim();
   if (!token) {
-    setStatus("Cole um token do GitHub para conectar.");
+    setStatus(hasGitHubToken() ? "GitHub já está conectado neste navegador." : "Cole um token do GitHub uma vez para conectar.");
     return;
   }
 
   localStorage.setItem(GITHUB_TOKEN_KEY, token);
   updateGitHubControls();
-  setStatus("GitHub conectado.");
+  setStatus("GitHub conectado neste navegador.");
   await loadDocumentLibrary();
 }
 
 function disconnectGitHub() {
   localStorage.removeItem(GITHUB_TOKEN_KEY);
   updateGitHubControls();
-  setStatus("GitHub desconectado.");
+  setStatus("Token removido deste navegador.");
   loadDocumentLibrary();
 }
 
@@ -851,7 +862,7 @@ async function init() {
     documentNameInput.value = nextDocumentName();
   }
   loadDocumentLibrary();
-  setStatus(canWriteLocalFiles ? "Documento pronto. Alterações salvam no arquivo." : hasGitHubToken() ? "Documento pronto. Alterações salvam no GitHub." : "Documento pronto. Conecte o GitHub para salvar online.");
+  setStatus(canWriteLocalFiles ? "Documento pronto. Alterações salvam no arquivo." : hasGitHubToken() ? "Documento pronto. Alterações salvam no GitHub." : "Documento pronto. Conecte o GitHub uma vez para salvar online.");
 }
 
 init().catch((error) => {
