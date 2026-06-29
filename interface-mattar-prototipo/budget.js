@@ -2,13 +2,10 @@ const STORAGE_KEY = "mattar-budget-document";
 const DATA_PATH = "assets/data/budget-document.json";
 const API_BASE = location.protocol === "file:" ? "http://127.0.0.1:4174" : "";
 const canWriteLocalFiles = ["localhost", "127.0.0.1"].includes(location.hostname);
-const GITHUB_OWNER = "mattar-create";
-const GITHUB_REPO = "mattar-";
-const GITHUB_BRANCH = "main";
-const GITHUB_ROOT = "interface-mattar-prototipo";
-const GITHUB_TOKEN_KEY = "mattar-budget-github-token";
+const remoteLibraryEndpoint = window.BUDGET_LIBRARY_API || (location.protocol.startsWith("http") ? `${location.origin}/api/budget-documents` : "");
+const canWriteRemoteLibrary = Boolean(remoteLibraryEndpoint) && !canWriteLocalFiles;
 const autosaveDelayMs = 900;
-const githubAutosaveDelayMs = 4500;
+const remoteAutosaveDelayMs = 1800;
 const DEFAULT_BUDGET_DATA = {
   meta: {
     documentTitle: "Estimativa Orçamentária - Gastroperformance",
@@ -131,8 +128,6 @@ const documentRoot = document.querySelector(".budget-document");
 const statusEl = document.querySelector(".budget-status");
 const libraryListEl = document.querySelector("#budget-document-list");
 const documentNameInput = document.querySelector("#budget-document-name");
-const githubTokenInput = document.querySelector("#github-token");
-const githubStateEl = document.querySelector("#github-state");
 const budgetToolsEl = document.querySelector(".budget-tools");
 let state = null;
 let selectedTopic = { section: "composition", index: 0 };
@@ -158,28 +153,12 @@ function normalizeDocumentPath(value = DATA_PATH) {
 const documentDataPath = normalizeDocumentPath(new URLSearchParams(location.search).get("file"));
 const storageKey = `${STORAGE_KEY}:${documentDataPath}`;
 
-function getGitHubToken() {
-  return localStorage.getItem(GITHUB_TOKEN_KEY) || "";
-}
-
-function hasGitHubToken() {
-  return Boolean(getGitHubToken());
-}
-
 function canWriteRepositoryFiles() {
-  return canWriteLocalFiles || hasGitHubToken();
+  return canWriteLocalFiles || canWriteRemoteLibrary;
 }
 
-function updateGitHubControls() {
-  const connected = hasGitHubToken();
-  budgetToolsEl?.classList.toggle("github-connected", connected);
-  if (githubStateEl) {
-    githubStateEl.textContent = connected ? "Conectado" : "Desconectado";
-  }
-  if (githubTokenInput) {
-    githubTokenInput.value = "";
-    githubTokenInput.placeholder = "token do GitHub";
-  }
+function updateLibraryMode() {
+  budgetToolsEl?.classList.toggle("remote-library", canWriteRemoteLibrary);
 }
 
 function slugify(value) {
@@ -417,103 +396,58 @@ async function apiPost(path, body) {
   return response.json();
 }
 
-function githubContentPath(path = documentDataPath) {
-  return `${GITHUB_ROOT}/${normalizeDocumentPath(path)}`;
+function remoteLibraryUrl(path = "") {
+  return `${remoteLibraryEndpoint}${path}`;
 }
 
-function toBase64Utf8(value) {
-  const bytes = new TextEncoder().encode(value);
-  let binary = "";
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-  return btoa(binary);
-}
+async function remoteLibraryRequest(path = "", options = {}) {
+  if (!remoteLibraryEndpoint) {
+    throw new Error("Biblioteca online não configurada.");
+  }
 
-function githubApiPath(path) {
-  return encodeURIComponent(path).replace(/%2F/g, "/");
-}
-
-async function githubRequest(path, options = {}) {
-  const token = getGitHubToken();
-  if (!token) throw new Error("Conecte o GitHub para salvar online.");
-
-  const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}${path}`, {
+  const response = await fetch(remoteLibraryUrl(path), {
     ...options,
     headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${token}`,
-      "X-GitHub-Api-Version": "2022-11-28",
+      "Content-Type": "application/json",
       ...(options.headers || {}),
     },
   });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `GitHub respondeu ${response.status}`);
+    throw new Error(error.message || `Erro ${response.status}`);
   }
 
   return response.json();
 }
 
-async function githubGetContent(path) {
-  return githubRequest(`/contents/${githubApiPath(path)}?ref=${encodeURIComponent(GITHUB_BRANCH)}`);
+async function saveBudgetDocumentToRemote(options = {}) {
+  await remoteLibraryRequest("", {
+    method: "POST",
+    body: JSON.stringify({
+      action: "save",
+      path: documentDataPath,
+      document: state,
+    }),
+  });
+  localStorage.removeItem(storageKey);
+  setStatus(options.silent ? "Salvo automaticamente na biblioteca." : "Arquivo salvo na biblioteca.");
 }
 
-async function githubPutContent(path, document, message, sha = null) {
-  const body = {
-    branch: GITHUB_BRANCH,
-    message,
-    content: toBase64Utf8(`${JSON.stringify(document, null, 2)}\n`),
-  };
-
-  if (sha) body.sha = sha;
-
-  return githubRequest(`/contents/${githubApiPath(path)}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+async function createBudgetDocumentOnRemote(name) {
+  return remoteLibraryRequest("", {
+    method: "POST",
+    body: JSON.stringify({
+      action: "create",
+      name,
+      document: state,
+    }),
   });
 }
 
-async function saveBudgetDocumentToGitHub(options = {}) {
-  const path = githubContentPath(documentDataPath);
-  const current = await githubGetContent(path);
-  await githubPutContent(path, state, `Atualiza ${documentDataPath.replace("assets/data/", "")}`, current.sha);
-  localStorage.removeItem(storageKey);
-  setStatus(options.silent ? "Salvo automaticamente no GitHub." : "Arquivo salvo no GitHub.");
-}
-
-async function createBudgetDocumentOnGitHub(name) {
-  const safeName = slugify(name);
-  const newPath = `assets/data/${safeName}.json`;
-  const githubPath = githubContentPath(newPath);
-  await githubPutContent(githubPath, state, `Cria modelo ${safeName}.json`);
-  return { path: newPath };
-}
-
-async function loadGitHubDocumentLibrary() {
-  const files = await githubGetContent(`${GITHUB_ROOT}/assets/data`);
-  const jsonFiles = Array.isArray(files) ? files.filter((file) => file.type === "file" && file.name.endsWith(".json")) : [];
-
-  const documents = await Promise.all(
-    jsonFiles.map(async (file) => {
-      const path = `assets/data/${file.name}`;
-      try {
-        const response = await fetch(`${file.download_url}?v=${Date.now()}`, { cache: "no-store" });
-        const document = await response.json();
-        return {
-          path,
-          client: document?.meta?.client || document?.cover?.details?.find((item) => item.label?.toLowerCase().includes("cliente"))?.value || "Documento",
-          projectType: document?.meta?.projectType || document?.cover?.titleHighlight || "Orçamento",
-        };
-      } catch {
-        return { path, client: file.name.replace(".json", ""), projectType: "" };
-      }
-    }),
-  );
-
-  return documents.sort((a, b) => documentLabel(a).localeCompare(documentLabel(b), "pt-BR"));
+async function loadRemoteDocumentLibrary() {
+  const data = await remoteLibraryRequest(`?v=${Date.now()}`, { cache: "no-store" });
+  return data.documents || [];
 }
 
 function documentLabel(documentInfo) {
@@ -553,10 +487,10 @@ async function loadDocumentLibrary() {
       if (!response.ok) throw new Error("Não foi possível carregar a biblioteca local.");
       const data = await response.json();
       documentLibrary = data.documents || [];
-    } else if (hasGitHubToken()) {
-      documentLibrary = await loadGitHubDocumentLibrary();
+    } else if (canWriteRemoteLibrary) {
+      documentLibrary = await loadRemoteDocumentLibrary();
     } else {
-      throw new Error("GitHub desconectado.");
+      throw new Error("Biblioteca online não configurada.");
     }
   } catch (error) {
     documentLibrary = [
@@ -612,10 +546,10 @@ async function createDocumentFromCurrent(prefix = "") {
 
   const result = canWriteLocalFiles
     ? await apiPost("/api/create-budget-document", { name, document: state })
-    : await createBudgetDocumentOnGitHub(name);
+    : await createBudgetDocumentOnRemote(name);
 
   localStorage.removeItem(`${STORAGE_KEY}:${result.path}`);
-  setStatus(canWriteLocalFiles ? "Arquivo criado." : "Arquivo criado no GitHub.");
+  setStatus(canWriteLocalFiles ? "Arquivo criado." : "Arquivo criado na biblioteca.");
   navigateToDocument(result.path);
 }
 
@@ -629,7 +563,7 @@ async function saveBudgetDocument(options = {}) {
   syncFromDom();
 
   if (!canWriteRepositoryFiles()) {
-    saveBrowserDraft("Online: salvo neste navegador. Conecte o GitHub para gravar no repositório.");
+    saveBrowserDraft("Online: salvo neste navegador. Biblioteca online indisponível.");
     return;
   }
 
@@ -640,7 +574,7 @@ async function saveBudgetDocument(options = {}) {
 
   isSaving = true;
   if (!options.silent) {
-    setStatus(canWriteLocalFiles ? "Salvando arquivo..." : "Salvando no GitHub...");
+    setStatus(canWriteLocalFiles ? "Salvando arquivo..." : "Salvando na biblioteca...");
   }
 
   try {
@@ -652,7 +586,7 @@ async function saveBudgetDocument(options = {}) {
       localStorage.removeItem(storageKey);
       setStatus(options.silent ? "Salvo automaticamente no arquivo." : "Arquivo salvo.");
     } else {
-      await saveBudgetDocumentToGitHub(options);
+      await saveBudgetDocumentToRemote(options);
     }
   } catch (error) {
     localStorage.setItem(storageKey, JSON.stringify(state));
@@ -671,7 +605,7 @@ function scheduleAutosave() {
   window.clearTimeout(autosaveTimer);
   autosaveTimer = window.setTimeout(() => {
     saveBudgetDocument({ silent: true }).catch(() => {});
-  }, hasGitHubToken() && !canWriteLocalFiles ? githubAutosaveDelayMs : autosaveDelayMs);
+  }, canWriteRemoteLibrary ? remoteAutosaveDelayMs : autosaveDelayMs);
 }
 
 function generateShareLink() {
@@ -796,33 +730,6 @@ document.addEventListener("input", (event) => {
 
 document.addEventListener("focusin", selectTopicFromEvent);
 
-githubTokenInput?.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
-    event.preventDefault();
-    connectGitHub().catch((error) => setStatus(error.message));
-  }
-});
-
-async function connectGitHub() {
-  const token = githubTokenInput?.value.trim();
-  if (!token) {
-    setStatus(hasGitHubToken() ? "GitHub já está conectado neste navegador." : "Cole um token do GitHub uma vez para conectar.");
-    return;
-  }
-
-  localStorage.setItem(GITHUB_TOKEN_KEY, token);
-  updateGitHubControls();
-  setStatus("GitHub conectado neste navegador.");
-  await loadDocumentLibrary();
-}
-
-function disconnectGitHub() {
-  localStorage.removeItem(GITHUB_TOKEN_KEY);
-  updateGitHubControls();
-  setStatus("Token removido deste navegador.");
-  loadDocumentLibrary();
-}
-
 document.addEventListener("click", (event) => {
   selectTopicFromEvent(event);
   const documentButton = event.target.closest("[data-document-path]");
@@ -839,8 +746,6 @@ document.addEventListener("click", (event) => {
   if (action === "print") exportPdf();
   if (action === "reset") resetModel();
   if (action === "refresh-library") loadDocumentLibrary();
-  if (action === "connect-github") connectGitHub().catch((error) => setStatus(error.message));
-  if (action === "disconnect-github") disconnectGitHub();
   if (action === "create-document") createDocumentFromCurrent().catch((error) => setStatus(error.message));
   if (action === "duplicate-document") createDocumentFromCurrent("copia").catch((error) => setStatus(error.message));
   if (action === "add-topic") addTopic(button.dataset.section, button.dataset.index);
@@ -855,14 +760,14 @@ async function init() {
   const defaultData = await loadDefaultData();
   const hashData = dataFromHash();
   const savedData = localStorage.getItem(storageKey);
-  updateGitHubControls();
+  updateLibraryMode();
   state = hashData || (canWriteLocalFiles ? clone(defaultData) : savedData ? JSON.parse(savedData) : clone(defaultData));
   render();
   if (documentNameInput) {
     documentNameInput.value = nextDocumentName();
   }
   loadDocumentLibrary();
-  setStatus(canWriteLocalFiles ? "Documento pronto. Alterações salvam no arquivo." : hasGitHubToken() ? "Documento pronto. Alterações salvam no GitHub." : "Documento pronto. Conecte o GitHub uma vez para salvar online.");
+  setStatus(canWriteLocalFiles ? "Documento pronto. Alterações salvam no arquivo." : canWriteRemoteLibrary ? "Documento pronto. Alterações salvam na biblioteca." : "Documento pronto. Biblioteca online indisponível.");
 }
 
 init().catch((error) => {

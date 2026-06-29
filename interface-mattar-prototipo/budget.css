@@ -237,81 +237,6 @@ button, input, textarea { font: inherit; }
 .budget-hint {
   display: none;
 }
-.budget-github {
-  display: grid;
-  gap: 10px;
-  padding-top: 2px;
-  border-top: 1px solid rgba(0, 0, 0, 0.055);
-}
-.budget-github__head,
-.budget-github__connect {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-  align-items: center;
-}
-.budget-github__head {
-  grid-template-columns: 1fr auto auto;
-}
-.budget-github__head strong,
-.budget-github__head span {
-  color: rgba(0, 0, 0, 0.66);
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1;
-  text-transform: uppercase;
-}
-.budget-github__head span {
-  color: rgba(0, 0, 0, 0.46);
-  font-size: 10px;
-}
-.budget-github__head button,
-.budget-github__connect button {
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  color: rgba(0, 0, 0, 0.62);
-  font-size: 11px;
-  line-height: 1;
-  text-transform: uppercase;
-}
-.budget-github__head button:hover,
-.budget-github__head button:focus-visible,
-.budget-github__connect button:hover,
-.budget-github__connect button:focus-visible {
-  background: transparent;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.budget-github__connect input {
-  width: 100%;
-  min-width: 0;
-  min-height: 30px;
-  padding: 6px 9px;
-  border: 0;
-  border-radius: 0;
-  background: rgba(255, 255, 255, 0.58);
-  color: var(--ink);
-  font-size: 12px;
-}
-.budget-github__connect input:focus {
-  box-shadow: inset 0 -2px 0 var(--red);
-  outline: none;
-}
-.budget-tools.github-connected .budget-github__connect {
-  display: none;
-}
-.budget-tools:not(.github-connected) .budget-github__head button {
-  display: none;
-}
-.budget-tools.github-connected .budget-github__head span {
-  color: var(--red);
-}
-.budget-tools.github-connected .budget-github__connect input::placeholder {
-  color: rgba(0, 0, 0, 0.72);
-}
-
 .budget-document {
   --page-scale: 0.68;
   display: grid;
@@ -667,14 +592,14 @@ button, input, textarea { font: inherit; }
     border-left: 0;
     border-right: 0;
   }
-  .budget-actions, .budget-library, .budget-github, .budget-hint { grid-column: 1 / -1; }
+  .budget-actions, .budget-library, .budget-hint { grid-column: 1 / -1; }
   .budget-document { padding: 20px; }
   .page-shell { width: min(100%, calc((100svh - 230px) * 1080 / 1463)); }
 }
 
 @media (max-width: 640px) {
   .budget-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 12px; }
-  .budget-tools__brand, .budget-actions, .budget-library, .budget-github, .budget-status, .budget-hint { grid-column: 1 / -1; }
+  .budget-tools__brand, .budget-actions, .budget-library, .budget-status, .budget-hint { grid-column: 1 / -1; }
   .budget-tools button { width: 100%; min-width: 0; }
 }
 
