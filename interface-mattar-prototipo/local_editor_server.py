@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import base64
 import json
@@ -9,6 +9,7 @@ from urllib.parse import unquote, urlparse
 
 ROOT = Path(__file__).resolve().parent
 DATA_PATH = ROOT / "assets" / "data" / "projects.json"
+BUDGET_DATA_PATH = ROOT / "assets" / "data" / "budget-document.json"
 
 
 def safe_path(relative_path: str) -> Path:
@@ -41,6 +42,18 @@ class LocalEditorHandler(SimpleHTTPRequestHandler):
         self.send_response(204)
         self.end_headers()
 
+    def do_GET(self) -> None:
+        try:
+            parsed = urlparse(self.path)
+
+            if parsed.path == "/api/budget-documents":
+                self.write_json({"documents": self.list_budget_documents()})
+                return
+
+            super().do_GET()
+        except Exception as error:
+            self.write_json({"message": str(error)}, status=400)
+
     def do_POST(self) -> None:
         try:
             parsed = urlparse(self.path)
@@ -56,7 +69,17 @@ class LocalEditorHandler(SimpleHTTPRequestHandler):
                 self.write_json({"ok": True})
                 return
 
-            self.write_json({"message": "Endpoint não encontrado."}, status=404)
+            if parsed.path == "/api/save-budget-document":
+                self.save_budget_document(payload)
+                self.write_json({"ok": True})
+                return
+
+
+            if parsed.path == "/api/create-budget-document":
+                document_path = self.create_budget_document(payload)
+                self.write_json({"ok": True, "path": document_path})
+                return
+            self.write_json({"message": "Endpoint nÃ£o encontrado."}, status=404)
         except Exception as error:
             self.write_json({"message": str(error)}, status=400)
 
@@ -91,6 +114,92 @@ class LocalEditorHandler(SimpleHTTPRequestHandler):
 
         DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
         DATA_PATH.write_text(json.dumps({"projects": projects}, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def save_budget_document(self, payload: dict) -> None:
+        document = payload.get("document")
+        relative_path = payload.get("path") or "assets/data/budget-document.json"
+
+        if not isinstance(document, dict):
+            raise ValueError("Payload precisa conter document.")
+
+        target = safe_path(relative_path)
+        data_root = (ROOT / "assets" / "data").resolve()
+
+        if data_root not in target.parents and target != BUDGET_DATA_PATH:
+            raise ValueError("Documentos de orcamento devem ficar em assets/data.")
+
+        if target.suffix.lower() != ".json":
+            raise ValueError("Documento de orcamento precisa ser JSON.")
+
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(document, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def list_budget_documents(self) -> list[dict]:
+        data_root = (ROOT / "assets" / "data").resolve()
+        documents = []
+
+        for target in sorted(data_root.glob("*.json")):
+            if target.name == "projects.json":
+                continue
+
+            try:
+                data = json.loads(target.read_text(encoding="utf-8-sig"))
+            except Exception:
+                continue
+
+            if not isinstance(data, dict) or "cover" not in data:
+                continue
+
+            details = data.get("cover", {}).get("details", [])
+            client = next(
+                (
+                    item.get("value")
+                    for item in details
+                    if isinstance(item, dict) and "cliente" in item.get("label", "").lower()
+                ),
+                data.get("meta", {}).get("client", ""),
+            )
+            project_type = data.get("meta", {}).get("projectType") or data.get("cover", {}).get("titleHighlight", "")
+
+            documents.append(
+                {
+                    "path": target.relative_to(ROOT).as_posix(),
+                    "name": target.stem,
+                    "title": data.get("meta", {}).get("documentTitle", "Estimativa Orçamentária"),
+                    "client": client,
+                    "projectType": project_type,
+                    "updated": target.stat().st_mtime,
+                }
+            )
+
+        return documents
+
+    def create_budget_document(self, payload: dict) -> str:
+        document = payload.get("document")
+        requested_name = payload.get("name") or "novo-orcamento"
+
+        if not isinstance(document, dict):
+            raise ValueError("Payload precisa conter document.")
+
+        safe_name = "".join(ch.lower() if ch.isalnum() else "-" for ch in requested_name)
+        safe_name = "-".join(part for part in safe_name.split("-") if part) or "novo-orcamento"
+        data_root = (ROOT / "assets" / "data").resolve()
+        target = (data_root / f"{safe_name}.json").resolve()
+
+        if target.exists():
+            suffix = 2
+            while True:
+                candidate = target.with_name(f"{safe_name}-{suffix}.json")
+                if not candidate.exists():
+                    target = candidate
+                    break
+                suffix += 1
+
+        if data_root not in target.parents:
+            raise ValueError("Documento fora de assets/data.")
+
+        target.write_text(json.dumps(document, ensure_ascii=False, indent=2), encoding="utf-8")
+        return target.relative_to(ROOT).as_posix()
 
 
 def main() -> None:

@@ -1,5 +1,8 @@
 ﻿const STORAGE_KEY = "mattar-budget-document";
 const DATA_PATH = "assets/data/budget-document.json";
+const API_BASE = location.protocol === "file:" ? "http://127.0.0.1:4174" : "";
+const canWriteBudgetFile = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname);
+const autosaveDelayMs = 900;
 const DEFAULT_BUDGET_DATA = {
   meta: {
     documentTitle: "Estimativa OrÃ§amentÃ¡ria - Gastroperformance",
@@ -120,11 +123,40 @@ const DEFAULT_BUDGET_DATA = {
 
 const documentRoot = document.querySelector(".budget-document");
 const statusEl = document.querySelector(".budget-status");
+const libraryListEl = document.querySelector("#budget-document-list");
+const documentNameInput = document.querySelector("#budget-document-name");
 let state = null;
 let selectedTopic = { section: "composition", index: 0 };
+let autosaveTimer = null;
+let isSaving = false;
+let saveQueued = false;
+let documentLibrary = [];
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function normalizeDocumentPath(value = DATA_PATH) {
+  const path = String(value || DATA_PATH).trim().replace(/\\/g, "/").replace(/^\/+/, "");
+
+  if (!path.startsWith("assets/data/") || !path.endsWith(".json")) {
+    return DATA_PATH;
+  }
+
+  return path;
+}
+
+const documentDataPath = normalizeDocumentPath(new URLSearchParams(location.search).get("file"));
+const storageKey = `${STORAGE_KEY}:${documentDataPath}`;
+
+function slugify(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    || "novo-orcamento";
 }
 
 function setStatus(message) {
@@ -166,8 +198,7 @@ function dataFromHash() {
 
 async function loadDefaultData() {
   try {
-    if (location.protocol === "file:") return clone(DEFAULT_BUDGET_DATA);
-    const response = await fetch(DATA_PATH, { cache: "no-store" });
+    const response = await fetch(`${API_BASE}/${documentDataPath}?v=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) throw new Error("Nao foi possivel carregar o modelo.");
     return response.json();
   } catch (error) {
@@ -338,10 +369,168 @@ function updatePageScale() {
   documentRoot.style.setProperty("--page-scale", String(Math.min(1, Math.max(0.2, width / 1080))));
 }
 
-function saveLocal() {
+async function apiPost(path, body) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || `Erro ${response.status}`);
+  }
+
+  return response.json();
+}
+
+function documentLabel(documentInfo) {
+  const client = documentInfo.client || "Sem cliente";
+  const type = documentInfo.projectType || "Orcamento";
+  return `${client} - ${type}`;
+}
+
+function renderDocumentLibrary() {
+  if (!libraryListEl) {
+    return;
+  }
+
+  if (!documentLibrary.length) {
+    libraryListEl.innerHTML = `<p class="budget-library__empty">Nenhum arquivo encontrado.</p>`;
+    return;
+  }
+
+  libraryListEl.innerHTML = documentLibrary
+    .map((documentInfo) => {
+      const isActive = documentInfo.path === documentDataPath;
+      return `<button type="button" class="budget-document-button${isActive ? " is-active" : ""}" data-document-path="${escapeHtml(
+        documentInfo.path,
+      )}"><strong>${escapeHtml(documentLabel(documentInfo))}</strong><span>${escapeHtml(documentInfo.path.replace("assets/data/", ""))}</span></button>`;
+    })
+    .join("");
+}
+
+async function loadDocumentLibrary() {
+  if (!libraryListEl) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/api/budget-documents?v=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error("Nao foi possivel carregar a biblioteca.");
+    const data = await response.json();
+    documentLibrary = data.documents || [];
+  } catch (error) {
+    documentLibrary = [
+      {
+        path: documentDataPath,
+        client: state?.meta?.client || "Documento atual",
+        projectType: state?.meta?.projectType || "",
+      },
+    ];
+  }
+
+  renderDocumentLibrary();
+}
+
+function navigateToDocument(path) {
+  const url = new URL(location.href);
+  url.hash = "";
+  url.searchParams.set("file", path);
+  location.href = url.toString();
+}
+
+async function openDocument(path) {
+  if (path === documentDataPath) {
+    return;
+  }
+
+  if (canWriteBudgetFile) {
+    await saveBudgetDocument({ silent: true }).catch(() => {});
+  }
+
+  navigateToDocument(path);
+}
+
+function nextDocumentName(prefix = "") {
+  const client =
+    state?.cover?.details?.find((item) => item.label.toLowerCase().includes("cliente"))?.value ||
+    state?.meta?.client ||
+    "cliente";
+  const project = state?.cover?.titleHighlight || state?.meta?.projectType || "orcamento";
+  const base = slugify(documentNameInput?.value || `${client}-${project}`);
+  return prefix ? `${base}-${prefix}` : base;
+}
+
+async function createDocumentFromCurrent(prefix = "") {
+  if (!canWriteBudgetFile) {
+    setStatus("Para criar arquivos, abra pelo servidor local.");
+    return;
+  }
+
   syncFromDom();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  setStatus("Documento salvo neste navegador.");
+  const name = nextDocumentName(prefix);
+  setStatus("Criando arquivo...");
+
+  const result = await apiPost("/api/create-budget-document", {
+    name,
+    document: state,
+  });
+
+  localStorage.removeItem(`${STORAGE_KEY}:${result.path}`);
+  setStatus("Arquivo criado.");
+  navigateToDocument(result.path);
+}
+
+function saveBrowserDraft(message = "Documento salvo neste navegador.") {
+  syncFromDom();
+  localStorage.setItem(storageKey, JSON.stringify(state));
+  setStatus(message);
+}
+
+async function saveBudgetDocument(options = {}) {
+  syncFromDom();
+
+  if (!canWriteBudgetFile) {
+    saveBrowserDraft("Online: salvo neste navegador.");
+    return;
+  }
+
+  if (isSaving) {
+    saveQueued = true;
+    return;
+  }
+
+  isSaving = true;
+  if (!options.silent) {
+    setStatus("Salvando arquivo...");
+  }
+
+  try {
+    await apiPost("/api/save-budget-document", {
+      path: documentDataPath,
+      document: state,
+    });
+    localStorage.removeItem(storageKey);
+    setStatus(options.silent ? "Salvo automaticamente no arquivo." : "Arquivo salvo.");
+  } catch (error) {
+    localStorage.setItem(storageKey, JSON.stringify(state));
+    setStatus(`Salvo no navegador. ${error.message}`);
+    throw error;
+  } finally {
+    isSaving = false;
+    if (saveQueued) {
+      saveQueued = false;
+      scheduleAutosave();
+    }
+  }
+}
+
+function scheduleAutosave() {
+  window.clearTimeout(autosaveTimer);
+  autosaveTimer = window.setTimeout(() => {
+    saveBudgetDocument({ silent: true }).catch(() => {});
+  }, autosaveDelayMs);
 }
 
 function generateShareLink() {
@@ -354,11 +543,12 @@ function generateShareLink() {
 }
 
 async function resetModel() {
-  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(storageKey);
   history.replaceState(null, "", location.pathname);
   state = clone(await loadDefaultData());
   selectedTopic = { section: "composition", index: 0 };
   render();
+  scheduleAutosave();
   setStatus("Modelo restaurado.");
 }
 
@@ -370,12 +560,14 @@ function addTopic(section, index = selectedTopic.section === section ? selectedT
     state.commissioning.paragraphs.splice(insertAt, 0, "Novo parÃ¡grafo.");
     selectedTopic = { section, index: insertAt };
     render();
+    scheduleAutosave();
     return;
   }
 
   state[section].items.splice(insertAt, 0, { heading: "Novo tÃ³pico", body: "Descreva este item." });
   selectedTopic = { section, index: insertAt };
   render();
+  scheduleAutosave();
 }
 
 function removeTopic(section, index = selectedTopic.section === section ? selectedTopic.index : 0) {
@@ -393,6 +585,7 @@ function removeTopic(section, index = selectedTopic.section === section ? select
       index: Math.max(0, Math.min(removeAt, state.commissioning.paragraphs.length - 1)),
     };
     render();
+    scheduleAutosave();
     return;
   }
 
@@ -407,12 +600,14 @@ function removeTopic(section, index = selectedTopic.section === section ? select
     index: Math.max(0, Math.min(removeAt, state[section].items.length - 1)),
   };
   render();
+  scheduleAutosave();
 }
 
 function addDetail() {
   syncFromDom();
   state.cover.details.push({ label: "NOVO CAMPO", value: "InformaÃ§Ã£o" });
   render();
+  scheduleAutosave();
 }
 
 function removeDetail() {
@@ -423,6 +618,7 @@ function removeDetail() {
   }
   state.cover.details.pop();
   render();
+  scheduleAutosave();
 }
 
 function exportPdf() {
@@ -451,20 +647,32 @@ function selectTopicFromEvent(event) {
 }
 
 document.addEventListener("input", (event) => {
-  if (event.target.matches("[contenteditable]")) syncFromDom();
+  if (event.target.matches("[contenteditable]")) {
+    syncFromDom();
+    scheduleAutosave();
+  }
 });
 
 document.addEventListener("focusin", selectTopicFromEvent);
 
 document.addEventListener("click", (event) => {
   selectTopicFromEvent(event);
+  const documentButton = event.target.closest("[data-document-path]");
+  if (documentButton) {
+    openDocument(documentButton.dataset.documentPath).catch((error) => setStatus(error.message));
+    return;
+  }
+
   const button = event.target.closest("[data-action]");
   if (!button) return;
   const action = button.dataset.action;
-  if (action === "save") saveLocal();
+  if (action === "save") saveBudgetDocument().catch(() => {});
   if (action === "share") generateShareLink();
   if (action === "print") exportPdf();
   if (action === "reset") resetModel();
+  if (action === "refresh-library") loadDocumentLibrary();
+  if (action === "create-document") createDocumentFromCurrent().catch((error) => setStatus(error.message));
+  if (action === "duplicate-document") createDocumentFromCurrent("copia").catch((error) => setStatus(error.message));
   if (action === "add-topic") addTopic(button.dataset.section, button.dataset.index);
   if (action === "remove-topic") removeTopic(button.dataset.section, button.dataset.index);
   if (action === "add-detail") addDetail();
@@ -476,9 +684,14 @@ window.addEventListener("resize", updatePageScale);
 async function init() {
   const defaultData = await loadDefaultData();
   const hashData = dataFromHash();
-  const savedData = localStorage.getItem(STORAGE_KEY);
-  state = hashData || (savedData ? JSON.parse(savedData) : clone(defaultData));
+  const savedData = localStorage.getItem(storageKey);
+  state = hashData || (canWriteBudgetFile ? clone(defaultData) : savedData ? JSON.parse(savedData) : clone(defaultData));
   render();
+  if (documentNameInput) {
+    documentNameInput.value = nextDocumentName();
+  }
+  loadDocumentLibrary();
+  setStatus(canWriteBudgetFile ? "Documento pronto. Alteracoes salvam no arquivo." : "Documento pronto. Alteracoes salvam no navegador.");
 }
 
 init().catch((error) => {

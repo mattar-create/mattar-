@@ -12,16 +12,32 @@
       <div class="budget-tools__brand">
         <img src="assets/brand/Logo-Vector.svg" alt="Mattar" />
         <div>
-          <strong>Documento editável</strong>
-          <span>Estimativa / PDF</span>
+          <strong>Documentos</strong>
+          <span>Orçamentos</span>
         </div>
       </div>
-      <button type="button" data-action="save">Salvar</button>
-      <button type="button" data-action="share">Gerar link</button>
-      <button type="button" data-action="print">Exportar PDF</button>
-      <button type="button" data-action="reset">Restaurar modelo</button>
+      <div class="budget-actions" aria-label="Ações do documento">
+        <button class="budget-action budget-action--primary" type="button" data-action="save">Salvar</button>
+        <button class="budget-action" type="button" data-action="print">PDF</button>
+        <button class="budget-action" type="button" data-action="share">Compartilhar</button>
+        <button class="budget-action" type="button" data-action="reset">Restaurar</button>
+      </div>
+      <section class="budget-library" aria-label="Biblioteca de modelos">
+        <div class="budget-library__head">
+          <strong>Modelos</strong>
+          <button type="button" data-action="refresh-library" aria-label="Atualizar lista">Atualizar</button>
+        </div>
+        <div class="budget-library__list" id="budget-document-list"></div>
+        <label class="budget-library__field">
+          <span>Novo arquivo</span>
+          <input id="budget-document-name" type="text" placeholder="cliente-projeto" autocomplete="off" />
+        </label>
+        <div class="budget-library__actions">
+          <button type="button" data-action="create-document">Criar do atual</button>
+          <button type="button" data-action="duplicate-document">Duplicar</button>
+        </div>
+      </section>
       <p class="budget-status" role="status"></p>
-      <p class="budget-hint">Clique diretamente em qualquer texto para editar. Use + e - para mudar tópicos.</p>
     </aside>
     <main class="budget-document" aria-label="Documento de estimativa orçamentária"></main>
     <script src="budget.js"></script>
