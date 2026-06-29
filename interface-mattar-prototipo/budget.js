@@ -1,11 +1,9 @@
 const STORAGE_KEY = "mattar-budget-document";
 const DATA_PATH = "assets/data/budget-document.json";
 const API_BASE = location.protocol === "file:" ? "http://127.0.0.1:4174" : "";
+const LIBRARY_PATH = "assets/data/budget-models.json";
 const canWriteLocalFiles = ["localhost", "127.0.0.1"].includes(location.hostname);
-const remoteLibraryEndpoint = window.BUDGET_LIBRARY_API || (location.protocol.startsWith("http") ? `${location.origin}/api/budget-documents` : "");
-const canWriteRemoteLibrary = Boolean(remoteLibraryEndpoint) && !canWriteLocalFiles;
 const autosaveDelayMs = 900;
-const remoteAutosaveDelayMs = 1800;
 const DEFAULT_BUDGET_DATA = {
   meta: {
     documentTitle: "Estimativa Orçamentária - Gastroperformance",
@@ -127,7 +125,6 @@ const DEFAULT_BUDGET_DATA = {
 const documentRoot = document.querySelector(".budget-document");
 const statusEl = document.querySelector(".budget-status");
 const libraryListEl = document.querySelector("#budget-document-list");
-const documentNameInput = document.querySelector("#budget-document-name");
 const budgetToolsEl = document.querySelector(".budget-tools");
 let state = null;
 let selectedTopic = { section: "composition", index: 0 };
@@ -152,14 +149,6 @@ function normalizeDocumentPath(value = DATA_PATH) {
 
 const documentDataPath = normalizeDocumentPath(new URLSearchParams(location.search).get("file"));
 const storageKey = `${STORAGE_KEY}:${documentDataPath}`;
-
-function canWriteRepositoryFiles() {
-  return canWriteLocalFiles || canWriteRemoteLibrary;
-}
-
-function updateLibraryMode() {
-  budgetToolsEl?.classList.toggle("remote-library", canWriteRemoteLibrary);
-}
 
 function slugify(value) {
   return String(value || "")
@@ -396,60 +385,6 @@ async function apiPost(path, body) {
   return response.json();
 }
 
-function remoteLibraryUrl(path = "") {
-  return `${remoteLibraryEndpoint}${path}`;
-}
-
-async function remoteLibraryRequest(path = "", options = {}) {
-  if (!remoteLibraryEndpoint) {
-    throw new Error("Biblioteca online não configurada.");
-  }
-
-  const response = await fetch(remoteLibraryUrl(path), {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `Erro ${response.status}`);
-  }
-
-  return response.json();
-}
-
-async function saveBudgetDocumentToRemote(options = {}) {
-  await remoteLibraryRequest("", {
-    method: "POST",
-    body: JSON.stringify({
-      action: "save",
-      path: documentDataPath,
-      document: state,
-    }),
-  });
-  localStorage.removeItem(storageKey);
-  setStatus(options.silent ? "Salvo automaticamente na biblioteca." : "Arquivo salvo na biblioteca.");
-}
-
-async function createBudgetDocumentOnRemote(name) {
-  return remoteLibraryRequest("", {
-    method: "POST",
-    body: JSON.stringify({
-      action: "create",
-      name,
-      document: state,
-    }),
-  });
-}
-
-async function loadRemoteDocumentLibrary() {
-  const data = await remoteLibraryRequest(`?v=${Date.now()}`, { cache: "no-store" });
-  return data.documents || [];
-}
-
 function documentLabel(documentInfo) {
   const client = documentInfo.client || "Sem cliente";
   const type = documentInfo.projectType || "Orcamento";
@@ -487,10 +422,11 @@ async function loadDocumentLibrary() {
       if (!response.ok) throw new Error("Não foi possível carregar a biblioteca local.");
       const data = await response.json();
       documentLibrary = data.documents || [];
-    } else if (canWriteRemoteLibrary) {
-      documentLibrary = await loadRemoteDocumentLibrary();
     } else {
-      throw new Error("Biblioteca online não configurada.");
+      const response = await fetch(`${API_BASE}/${LIBRARY_PATH}?v=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("Não foi possível carregar o índice de modelos.");
+      const data = await response.json();
+      documentLibrary = data.documents || [];
     }
   } catch (error) {
     documentLibrary = [
@@ -517,40 +453,9 @@ async function openDocument(path) {
     return;
   }
 
-  if (canWriteRepositoryFiles()) {
-    await saveBudgetDocument({ silent: true }).catch(() => {});
-  }
+  await saveBudgetDocument({ silent: true }).catch(() => {});
 
   navigateToDocument(path);
-}
-
-function nextDocumentName(prefix = "") {
-  const client =
-    state?.cover?.details?.find((item) => item.label.toLowerCase().includes("cliente"))?.value ||
-    state?.meta?.client ||
-    "cliente";
-  const project = state?.cover?.titleHighlight || state?.meta?.projectType || "orcamento";
-  const base = slugify(documentNameInput?.value || `${client}-${project}`);
-  return prefix ? `${base}-${prefix}` : base;
-}
-
-async function createDocumentFromCurrent(prefix = "") {
-  if (!canWriteRepositoryFiles()) {
-    setStatus("Conecte o GitHub para criar arquivos online.");
-    return;
-  }
-
-  syncFromDom();
-  const name = nextDocumentName(prefix);
-  setStatus("Criando arquivo...");
-
-  const result = canWriteLocalFiles
-    ? await apiPost("/api/create-budget-document", { name, document: state })
-    : await createBudgetDocumentOnRemote(name);
-
-  localStorage.removeItem(`${STORAGE_KEY}:${result.path}`);
-  setStatus(canWriteLocalFiles ? "Arquivo criado." : "Arquivo criado na biblioteca.");
-  navigateToDocument(result.path);
 }
 
 function saveBrowserDraft(message = "Documento salvo neste navegador.") {
@@ -562,8 +467,8 @@ function saveBrowserDraft(message = "Documento salvo neste navegador.") {
 async function saveBudgetDocument(options = {}) {
   syncFromDom();
 
-  if (!canWriteRepositoryFiles()) {
-    saveBrowserDraft("Online: salvo neste navegador. Biblioteca online indisponível.");
+  if (!canWriteLocalFiles) {
+    saveBrowserDraft(options.silent ? "Salvo automaticamente neste navegador." : "Documento salvo neste navegador.");
     return;
   }
 
@@ -574,20 +479,16 @@ async function saveBudgetDocument(options = {}) {
 
   isSaving = true;
   if (!options.silent) {
-    setStatus(canWriteLocalFiles ? "Salvando arquivo..." : "Salvando na biblioteca...");
+    setStatus("Salvando arquivo...");
   }
 
   try {
-    if (canWriteLocalFiles) {
-      await apiPost("/api/save-budget-document", {
-        path: documentDataPath,
-        document: state,
-      });
-      localStorage.removeItem(storageKey);
-      setStatus(options.silent ? "Salvo automaticamente no arquivo." : "Arquivo salvo.");
-    } else {
-      await saveBudgetDocumentToRemote(options);
-    }
+    await apiPost("/api/save-budget-document", {
+      path: documentDataPath,
+      document: state,
+    });
+    localStorage.removeItem(storageKey);
+    setStatus(options.silent ? "Salvo automaticamente no arquivo." : "Arquivo salvo.");
   } catch (error) {
     localStorage.setItem(storageKey, JSON.stringify(state));
     setStatus(`Salvo no navegador. ${error.message}`);
@@ -605,7 +506,7 @@ function scheduleAutosave() {
   window.clearTimeout(autosaveTimer);
   autosaveTimer = window.setTimeout(() => {
     saveBudgetDocument({ silent: true }).catch(() => {});
-  }, canWriteRemoteLibrary ? remoteAutosaveDelayMs : autosaveDelayMs);
+  }, autosaveDelayMs);
 }
 
 function generateShareLink() {
@@ -746,8 +647,7 @@ document.addEventListener("click", (event) => {
   if (action === "print") exportPdf();
   if (action === "reset") resetModel();
   if (action === "refresh-library") loadDocumentLibrary();
-  if (action === "create-document") createDocumentFromCurrent().catch((error) => setStatus(error.message));
-  if (action === "duplicate-document") createDocumentFromCurrent("copia").catch((error) => setStatus(error.message));
+  if (action === "save-model") saveBudgetDocument().catch(() => {});
   if (action === "add-topic") addTopic(button.dataset.section, button.dataset.index);
   if (action === "remove-topic") removeTopic(button.dataset.section, button.dataset.index);
   if (action === "add-detail") addDetail();
@@ -760,19 +660,13 @@ async function init() {
   const defaultData = await loadDefaultData();
   const hashData = dataFromHash();
   const savedData = localStorage.getItem(storageKey);
-  updateLibraryMode();
-  state = hashData || (canWriteLocalFiles ? clone(defaultData) : savedData ? JSON.parse(savedData) : clone(defaultData));
+  state = hashData || (savedData ? JSON.parse(savedData) : clone(defaultData));
   render();
-  if (documentNameInput) {
-    documentNameInput.value = nextDocumentName();
-  }
   loadDocumentLibrary();
-  setStatus(canWriteLocalFiles ? "Documento pronto. Alterações salvam no arquivo." : canWriteRemoteLibrary ? "Documento pronto. Alterações salvam na biblioteca." : "Documento pronto. Biblioteca online indisponível.");
+  setStatus(canWriteLocalFiles ? "Documento pronto. Alterações salvam no arquivo." : "Documento pronto. Alterações salvam neste navegador.");
 }
 
 init().catch((error) => {
   documentRoot.innerHTML = `<section class="pdf-page"><p>${escapeHtml(error.message)}</p></section>`;
 });
-
-
 

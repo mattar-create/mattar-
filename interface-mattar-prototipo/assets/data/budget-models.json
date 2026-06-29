@@ -1,0 +1,14 @@
+{
+  "documents": [
+    {
+      "path": "assets/data/budget-document.json",
+      "client": "Boticário",
+      "projectType": "Gastroperformance"
+    },
+    {
+      "path": "assets/data/boticario-gastroperformance.json",
+      "client": "Boticário",
+      "projectType": "Gastroperformance"
+    }
+  ]
+}
