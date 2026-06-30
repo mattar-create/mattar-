@@ -48,6 +48,29 @@ function apiPath(path) {
   return encodeURIComponent(path).replace(/%2F/g, "/");
 }
 
+async function githubContentExists(path) {
+  try {
+    await githubGetContent(path);
+    return true;
+  } catch (error) {
+    if (error.statusCode === 404) return false;
+    throw error;
+  }
+}
+
+async function uniqueDocumentPath(name) {
+  const baseSlug = slugify(name);
+  let path = `assets/data/${baseSlug}.json`;
+  let suffix = 2;
+
+  while (await githubContentExists(contentPath(path))) {
+    path = `assets/data/${baseSlug}-${suffix}.json`;
+    suffix += 1;
+  }
+
+  return path;
+}
+
 async function githubRequest(path, options = {}) {
   const config = repoConfig();
   if (!config.token) {
@@ -165,7 +188,7 @@ module.exports = async function handler(request, response) {
     }
 
     if (action === "create") {
-      const path = `assets/data/${slugify(body.name)}.json`;
+      const path = await uniqueDocumentPath(body.name);
       await githubPutContent(contentPath(path), document, `Cria modelo ${path.replace("assets/data/", "")}`);
       sendJson(response, 200, { path });
       return;

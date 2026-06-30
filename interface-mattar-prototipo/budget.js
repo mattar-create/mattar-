@@ -1,8 +1,11 @@
 const STORAGE_KEY = "mattar-budget-document";
+const LIBRARY_STORAGE_KEY = "mattar-budget-model-library";
 const DATA_PATH = "assets/data/budget-document.json";
 const API_BASE = location.protocol === "file:" ? "http://127.0.0.1:4174" : "";
 const LIBRARY_PATH = "assets/data/budget-models.json";
+const REMOTE_BUDGET_API = "/api/budget-documents";
 const canWriteLocalFiles = ["localhost", "127.0.0.1"].includes(location.hostname);
+const canUseRemoteApi = location.protocol.startsWith("http") && !canWriteLocalFiles;
 const autosaveDelayMs = 900;
 const DEFAULT_BUDGET_DATA = {
   meta: {
@@ -101,7 +104,7 @@ const DEFAULT_BUDGET_DATA = {
     title: "Dados Bancários",
     details: [
       { label: "BANCO", value: "Banco Exemplo S.A." },
-      { label: "AGÃŠNCIA", value: "0001" },
+      { label: "AGÊNCIA", value: "0001" },
       { label: "CONTA CORRENTE", value: "12345-6" },
       { label: "PIX", value: "financeiro@mattar.com" },
       { label: "FAVORECIDO", value: "Mattar Projetos Artísticos Ltda." },
@@ -147,8 +150,12 @@ function normalizeDocumentPath(value = DATA_PATH) {
   return path;
 }
 
-const documentDataPath = normalizeDocumentPath(new URLSearchParams(location.search).get("file"));
-const storageKey = `${STORAGE_KEY}:${documentDataPath}`;
+let documentDataPath = normalizeDocumentPath(new URLSearchParams(location.search).get("file"));
+let storageKey = documentStorageKey(documentDataPath);
+
+function documentStorageKey(path) {
+  return `${STORAGE_KEY}:${normalizeDocumentPath(path)}`;
+}
 
 function slugify(value) {
   return String(value || "")
@@ -158,6 +165,84 @@ function slugify(value) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     || "novo-orcamento";
+}
+
+function storedLibraryFallback() {
+  return { documents: [], records: {} };
+}
+
+function loadStoredLibrary() {
+  try {
+    const data = JSON.parse(localStorage.getItem(LIBRARY_STORAGE_KEY) || "null");
+    if (!data || !Array.isArray(data.documents) || !data.records || typeof data.records !== "object") {
+      return storedLibraryFallback();
+    }
+
+    return {
+      documents: data.documents.map((item) => ({ ...item, path: normalizeDocumentPath(item.path) })),
+      records: Object.fromEntries(
+        Object.entries(data.records).map(([path, document]) => [normalizeDocumentPath(path), document]),
+      ),
+    };
+  } catch {
+    return storedLibraryFallback();
+  }
+}
+
+function saveStoredLibrary(library) {
+  localStorage.setItem(
+    LIBRARY_STORAGE_KEY,
+    JSON.stringify({
+      documents: library.documents,
+      records: library.records,
+    }),
+  );
+}
+
+function modelInfoFromDocument(document, path = documentDataPath) {
+  const details = document?.cover?.details || [];
+  const client =
+    details.find((item) => String(item.label || "").toLowerCase().includes("cliente"))?.value ||
+    document?.meta?.client ||
+    "Novo cliente";
+  const projectType = document?.meta?.projectType || document?.cover?.titleHighlight || "Orçamento";
+
+  return {
+    path: normalizeDocumentPath(path),
+    client,
+    projectType,
+    title: document?.meta?.documentTitle || `${client} - ${projectType}`,
+    updated: Date.now(),
+    source: "browser",
+  };
+}
+
+function uniqueModelPath(baseSlug) {
+  const library = loadStoredLibrary();
+  const usedPaths = new Set([
+    ...documentLibrary.map((item) => normalizeDocumentPath(item.path)),
+    ...library.documents.map((item) => normalizeDocumentPath(item.path)),
+    ...Object.keys(library.records).map(normalizeDocumentPath),
+  ]);
+  let path = normalizeDocumentPath(`assets/data/${baseSlug}.json`);
+  let suffix = 2;
+
+  while (usedPaths.has(path)) {
+    path = normalizeDocumentPath(`assets/data/${baseSlug}-${suffix}.json`);
+    suffix += 1;
+  }
+
+  return path;
+}
+
+function setCurrentDocumentPath(path) {
+  documentDataPath = normalizeDocumentPath(path);
+  storageKey = documentStorageKey(documentDataPath);
+
+  const url = new URL(location.href);
+  url.hash = "";
+  url.searchParams.set("file", documentDataPath);
+  history.replaceState(null, "", url.toString());
 }
 
 function setStatus(message) {
@@ -198,6 +283,11 @@ function dataFromHash() {
 }
 
 async function loadDefaultData() {
+  const storedDocument = loadStoredLibrary().records[documentDataPath];
+  if (storedDocument) {
+    return clone(storedDocument);
+  }
+
   try {
     const response = await fetch(`${API_BASE}/${documentDataPath}?v=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) throw new Error("Nao foi possivel carregar o modelo.");
@@ -404,9 +494,10 @@ function renderDocumentLibrary() {
   libraryListEl.innerHTML = documentLibrary
     .map((documentInfo) => {
       const isActive = documentInfo.path === documentDataPath;
+      const sourceLabel = documentInfo.source === "browser" ? " · salvo neste navegador" : "";
       return `<button type="button" class="budget-document-button${isActive ? " is-active" : ""}" data-document-path="${escapeHtml(
         documentInfo.path,
-      )}"><strong>${escapeHtml(documentLabel(documentInfo))}</strong><span>${escapeHtml(documentInfo.path.replace("assets/data/", ""))}</span></button>`;
+      )}"><strong>${escapeHtml(documentLabel(documentInfo))}</strong><span>${escapeHtml(documentInfo.path.replace("assets/data/", ""))}${sourceLabel}</span></button>`;
     })
     .join("");
 }
@@ -416,10 +507,20 @@ async function loadDocumentLibrary() {
     return;
   }
 
+  const storedLibrary = loadStoredLibrary();
+
   try {
     if (canWriteLocalFiles) {
       const response = await fetch(`${API_BASE}/api/budget-documents?v=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) throw new Error("Não foi possível carregar a biblioteca local.");
+      const data = await response.json();
+      documentLibrary = data.documents || [];
+    } else if (canUseRemoteApi) {
+      let response = await fetch(`${REMOTE_BUDGET_API}?v=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) {
+        response = await fetch(`${API_BASE}/${LIBRARY_PATH}?v=${Date.now()}`, { cache: "no-store" });
+      }
+      if (!response.ok) throw new Error("Não foi possível carregar o índice de modelos.");
       const data = await response.json();
       documentLibrary = data.documents || [];
     } else {
@@ -428,14 +529,22 @@ async function loadDocumentLibrary() {
       const data = await response.json();
       documentLibrary = data.documents || [];
     }
+
+    const byPath = new Map(documentLibrary.map((item) => [normalizeDocumentPath(item.path), item]));
+    storedLibrary.documents.forEach((item) => {
+      byPath.set(normalizeDocumentPath(item.path), item);
+    });
+    documentLibrary = Array.from(byPath.values());
   } catch (error) {
-    documentLibrary = [
-      {
-        path: documentDataPath,
-        client: state?.meta?.client || "Documento atual",
-        projectType: state?.meta?.projectType || "",
-      },
-    ];
+    documentLibrary = storedLibrary.documents.length
+      ? storedLibrary.documents
+      : [
+          {
+            path: documentDataPath,
+            client: state?.meta?.client || "Documento atual",
+            projectType: state?.meta?.projectType || "",
+          },
+        ];
   }
 
   renderDocumentLibrary();
@@ -502,6 +611,76 @@ async function saveBudgetDocument(options = {}) {
   }
 }
 
+async function saveModel() {
+  syncFromDom();
+
+  if (canWriteLocalFiles) {
+    if (documentDataPath === DATA_PATH) {
+      const name = slugify(`${state.meta.client || ""}-${state.meta.projectType || state.cover.titleHighlight || ""}`);
+      const response = await apiPost("/api/create-budget-document", { name, document: state });
+      if (response?.path) {
+        setCurrentDocumentPath(response.path);
+      }
+    } else {
+      await apiPost("/api/save-budget-document", {
+        path: documentDataPath,
+        document: state,
+      });
+    }
+
+    localStorage.removeItem(storageKey);
+    await loadDocumentLibrary();
+    setStatus("Modelo salvo na biblioteca.");
+    return;
+  }
+
+  if (canUseRemoteApi) {
+    try {
+      const creating = documentDataPath === DATA_PATH;
+      const name = slugify(`${state.meta.client || ""}-${state.meta.projectType || state.cover.titleHighlight || ""}`);
+      const response = await apiPost(REMOTE_BUDGET_API, {
+        action: creating ? "create" : "save",
+        path: documentDataPath,
+        name,
+        document: state,
+      });
+
+      if (response?.path) {
+        setCurrentDocumentPath(response.path);
+      }
+
+      localStorage.removeItem(storageKey);
+      await loadDocumentLibrary();
+      setStatus("Modelo salvo no GitHub.");
+      return;
+    } catch (error) {
+      setStatus(`Backend indisponível. Salvando neste navegador.`);
+    }
+  }
+
+  const library = loadStoredLibrary();
+  const hasStoredRecord = Boolean(library.records[documentDataPath]);
+  const shouldCreateModel = documentDataPath === DATA_PATH && !hasStoredRecord;
+  const targetPath = shouldCreateModel
+    ? uniqueModelPath(slugify(`${state.meta.client || ""}-${state.meta.projectType || state.cover.titleHighlight || ""}`))
+    : documentDataPath;
+  const modelInfo = modelInfoFromDocument(state, targetPath);
+  const existingIndex = library.documents.findIndex((item) => normalizeDocumentPath(item.path) === targetPath);
+
+  library.records[targetPath] = clone(state);
+  if (existingIndex >= 0) {
+    library.documents[existingIndex] = { ...library.documents[existingIndex], ...modelInfo };
+  } else {
+    library.documents.unshift(modelInfo);
+  }
+
+  saveStoredLibrary(library);
+  setCurrentDocumentPath(targetPath);
+  localStorage.setItem(storageKey, JSON.stringify(state));
+  await loadDocumentLibrary();
+  setStatus("Modelo salvo na biblioteca deste navegador.");
+}
+
 function scheduleAutosave() {
   window.clearTimeout(autosaveTimer);
   autosaveTimer = window.setTimeout(() => {
@@ -520,7 +699,7 @@ function generateShareLink() {
 
 async function resetModel() {
   localStorage.removeItem(storageKey);
-  history.replaceState(null, "", location.pathname);
+  setCurrentDocumentPath(DATA_PATH);
   state = clone(await loadDefaultData());
   selectedTopic = { section: "composition", index: 0 };
   render();
@@ -647,7 +826,7 @@ document.addEventListener("click", (event) => {
   if (action === "print") exportPdf();
   if (action === "reset") resetModel();
   if (action === "refresh-library") loadDocumentLibrary();
-  if (action === "save-model") saveBudgetDocument().catch(() => {});
+  if (action === "save-model") saveModel().catch((error) => setStatus(error.message));
   if (action === "add-topic") addTopic(button.dataset.section, button.dataset.index);
   if (action === "remove-topic") removeTopic(button.dataset.section, button.dataset.index);
   if (action === "add-detail") addDetail();
@@ -669,4 +848,3 @@ async function init() {
 init().catch((error) => {
   documentRoot.innerHTML = `<section class="pdf-page"><p>${escapeHtml(error.message)}</p></section>`;
 });
-
