@@ -1,0 +1,34 @@
+# OS/editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+
+# Local runtime/cache files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local server/test outputs
+tmp/
+temp/
+*.tmp
+*.log
+screenshots/
+playwright-report/
+test-results/
+
+# Future toolchains
+node_modules/
+dist/
+build/
+.vite/
+.next/
+
+# Local env files
+.env
+.env.*
+!.env.example

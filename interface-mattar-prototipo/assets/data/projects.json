@@ -1,32 +1,68 @@
 {
   "projects": [
     {
+      "id": "concha",
+      "title": "Concha y Toro",
+      "year": "2021",
+      "description": "Criada para celebrar o vinho Don Melchor 2021, a experiência gastronômica foi inspirada na paisagem da Cordilheira dos Andes. A mesa se constrói como território sensorial, aproximando alimento, imagem e presença.",
+      "cover": "assets/covers/concha-cover.png",
+      "gallery": [
+        { "type": "image", "src": "assets/project-media/concha-1.png" },
+        { "type": "image", "src": "assets/project-media/concha-2.png" }
+      ],
+      "layout": { "coverCol": 7.2, "coverRow": 2.1, "coverWidth": 3.2, "coverHeight": 8.8, "coverPosition": "center center", "textCol": 0.95, "textRow": 6.35, "textWidth": 5.6, "textScale": 0.92 }
+    },
+    {
       "id": "dadiva",
       "title": "DÁDIVA",
       "year": "2022",
-      "description": "A gastroperformance Dádiva, apresentada no pavilhão da Bienal durante o evento Geração Senac, propôs uma experiência sensorial inspirada na teoria da reciprocidade de Marcel Mauss. Os participantes percorriam um túnel de labaredas após receberem um fósforo comestível de chocolate e, no ato final, eram convidados a refletir sobre uma vontade interna, depositando simbolicamente sua chama em um pote de ouro. A ação terminava com a escolha entre um biscoito de água ou de fogo, representando permanência ou início.",
+      "description": "A gastroperformance Dádiva, apresentada no pavilhão da Bienal durante o evento Geração Senac, propôs uma experiência sensorial inspirada na teoria da reciprocidade de Marcel Mauss. Os participantes percorriam um túnel de labaredas após receberem um fósforo comestível de chocolate e, no ato final, eram convidados a refletir sobre uma vontade interna.",
       "cover": "assets/project-media/dadiva-capa.png",
       "gallery": [
-        {
-          "type": "image",
-          "src": "assets/project-media/dadiva-1.png"
-        },
-        {
-          "type": "image",
-          "src": "assets/project-media/dadiva-2.png"
-        }
+        { "type": "image", "src": "assets/project-media/dadiva-1.png" },
+        { "type": "image", "src": "assets/project-media/dadiva-2.png" }
       ],
-      "layout": {
-        "coverCol": 7.35,
-        "coverRow": 2.1,
-        "coverWidth": 3,
-        "coverHeight": 8.9,
-        "coverPosition": "center center",
-        "textCol": 0.94,
-        "textRow": 6.48,
-        "textWidth": 5.85,
-        "textScale": 1
-      }
+      "layout": { "coverCol": 7.35, "coverRow": 2.1, "coverWidth": 3, "coverHeight": 8.9, "coverPosition": "center center", "textCol": 0.94, "textRow": 6.48, "textWidth": 5.85, "textScale": 1 }
+    },
+    {
+      "id": "geluminia",
+      "title": "Gelúminas",
+      "year": "2017",
+      "description": "Poesia luminofágica construída por luz, gelatina e cor. A obra transforma matéria alimentar em dispositivo sensorial, entre escultura, arquitetura efêmera e participação.",
+      "cover": "assets/covers/geluminia-cover.png",
+      "gallery": [
+        { "type": "image", "src": "assets/project-media/gelu-02.png" },
+        { "type": "image", "src": "assets/project-media/gelu-03.png" },
+        { "type": "image", "src": "assets/project-media/gelu-04.png" },
+        { "type": "image", "src": "assets/project-media/gelu-05.png" }
+      ],
+      "layout": { "coverCol": 7.35, "coverRow": 2.1, "coverWidth": 3, "coverHeight": 8.9, "coverPosition": "center center", "textCol": 0.94, "textRow": 6.48, "textWidth": 5.85, "textScale": 0.92 }
+    },
+    {
+      "id": "soviet",
+      "title": "Soviet Roulette",
+      "year": "2012",
+      "description": "A contaminação invisível dos alimentos na região de Chernobil é reencenada por meio de maçãs pretas oferecidas ao público, instaurando uma tensão entre escolha, risco e percepção.",
+      "cover": "assets/covers/soviet-cover.png",
+      "gallery": [
+        { "type": "image", "src": "assets/project-media/soviet-1.png" },
+        { "type": "image", "src": "assets/project-media/soviet-link.png" }
+      ],
+      "layout": { "coverCol": 7.25, "coverRow": 2.2, "coverWidth": 3.1, "coverHeight": 8.5, "coverPosition": "center center", "textCol": 0.94, "textRow": 6.5, "textWidth": 5.7, "textScale": 0.9 }
+    },
+    {
+      "id": "fome-come",
+      "title": "Fome Come",
+      "year": "2012",
+      "description": "Coquetel performático apresentado na 30ª Bienal de São Paulo, relacionando alimento e desigualdade socioeconômica global por meio de uma instalação suspensa e participativa.",
+      "cover": "assets/covers/fome-come-cover.png",
+      "gallery": [
+        { "type": "image", "src": "assets/project-media/fome-01.png" },
+        { "type": "image", "src": "assets/project-media/fome-02.png" },
+        { "type": "image", "src": "assets/project-media/fome-03.png" },
+        { "type": "image", "src": "assets/project-media/fome-04.png" }
+      ],
+      "layout": { "coverCol": 7.35, "coverRow": 2.1, "coverWidth": 3, "coverHeight": 8.9, "coverPosition": "center center", "textCol": 0.94, "textRow": 6.48, "textWidth": 5.85, "textScale": 0.9 }
     }
   ]
 }

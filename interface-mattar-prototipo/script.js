@@ -20,7 +20,7 @@ const PROJECTS = [
     intro: "assets/pages/concha-info.png",
     slides: ["assets/pages/CONCHA Y TORO.png"],
     description:
-      "Criada para celebrar o vinho Don Melchor 2021, a experiência gastronômica foi inspirada na paisagem da Cordilheira dos Andes. A mesa se constrói como território sensorial, aproximando alimento, imagem e presença.",
+      "Criada para celebrar o vinho Don Melchor 2021, a experiÃƒÂªncia gastronÃƒÂ´mica foi inspirada na paisagem da Cordilheira dos Andes. A mesa se constrÃƒÂ³i como territÃƒÂ³rio sensorial, aproximando alimento, imagem e presenÃƒÂ§a.",
   },
   {
     id: "concreto",
@@ -34,19 +34,19 @@ const PROJECTS = [
       "assets/pages/concreto-images-3.png",
     ],
     description:
-      "Instalação criada para o estande brasileiro na Anuga Food Fair, inspirada na arte concreta brasileira. A obra organiza pequenos módulos comestíveis como campo gráfico, espacial e performático.",
+      "InstalaÃƒÂ§ÃƒÂ£o criada para o estande brasileiro na Anuga Food Fair, inspirada na arte concreta brasileira. A obra organiza pequenos mÃƒÂ³dulos comestÃƒÂ­veis como campo grÃƒÂ¡fico, espacial e performÃƒÂ¡tico.",
   },
   {
     id: "dadiva",
     order: "03/07",
     year: "2022",
-    title: "Dádiva",
+    title: "DÃƒÂ¡diva",
     intro: "assets/pages/dadiva-info.png",
     slides: [
       "assets/pages/dadiva-images-1.png",
     ],
     description:
-      "Apresentada no pavilhão da Bienal durante o evento Geração Senac, propôs uma experiência sensorial inspirada na teoria da reciprocidade de Marcel Mauss.",
+      "Apresentada no pavilhÃƒÂ£o da Bienal durante o evento GeraÃƒÂ§ÃƒÂ£o Senac, propÃƒÂ´s uma experiÃƒÂªncia sensorial inspirada na teoria da reciprocidade de Marcel Mauss.",
   },
   {
     id: "fome-come",
@@ -58,13 +58,13 @@ const PROJECTS = [
       "assets/pages/fome-come-images-1.png",
     ],
     description:
-      "Coquetel performático apresentado na 30ª Bienal de São Paulo, relacionando alimento e desigualdade socioeconômica global por meio de uma instalação suspensa e participativa.",
+      "Coquetel performÃƒÂ¡tico apresentado na 30Ã‚Âª Bienal de SÃƒÂ£o Paulo, relacionando alimento e desigualdade socioeconÃƒÂ´mica global por meio de uma instalaÃƒÂ§ÃƒÂ£o suspensa e participativa.",
   },
   {
     id: "geluminia",
     order: "05/07",
     year: "2017",
-    title: "Gelúminas",
+    title: "GelÃƒÂºminas",
     intro: "assets/pages/geluminia-info.png",
     slides: [
       "assets/pages/geluminia-images-1.png",
@@ -73,7 +73,7 @@ const PROJECTS = [
       "assets/pages/geluminia-images-4.png",
     ],
     description:
-      "Poesia luminofágica construída por luz, gelatina e cor. A obra transforma matéria alimentar em dispositivo sensorial, entre escultura, arquitetura efêmera e participação.",
+      "Poesia luminofÃƒÂ¡gica construÃƒÂ­da por luz, gelatina e cor. A obra transforma matÃƒÂ©ria alimentar em dispositivo sensorial, entre escultura, arquitetura efÃƒÂªmera e participaÃƒÂ§ÃƒÂ£o.",
   },
   {
     id: "mulher-vida-liberdade",
@@ -83,7 +83,7 @@ const PROJECTS = [
     intro: "assets/pages/mulher-vida-liberdade-info.png",
     slides: ["assets/pages/mulher-vida-liberdade-images-1.png"],
     description:
-      "Gastroperformance apresentada no Taste Brasil 2025, inspirada nos protestos no Irã. Canto, imagem, palavra e alimento atravessam a experiência como gesto de memória e presença.",
+      "Gastroperformance apresentada no Taste Brasil 2025, inspirada nos protestos no IrÃƒÂ£. Canto, imagem, palavra e alimento atravessam a experiÃƒÂªncia como gesto de memÃƒÂ³ria e presenÃƒÂ§a.",
   },
   {
     id: "soviet",
@@ -96,7 +96,7 @@ const PROJECTS = [
       "assets/pages/soviet-images-2.png",
     ],
     description:
-      "A contaminação invisível dos alimentos na região de Chernobil é reencenada por maçãs pretas oferecidas ao público, instaurando uma tensão entre escolha, risco e percepção.",
+      "A contaminaÃƒÂ§ÃƒÂ£o invisÃƒÂ­vel dos alimentos na regiÃƒÂ£o de Chernobil ÃƒÂ© reencenada por maÃƒÂ§ÃƒÂ£s pretas oferecidas ao pÃƒÂºblico, instaurando uma tensÃƒÂ£o entre escolha, risco e percepÃƒÂ§ÃƒÂ£o.",
   },
 ];
 
@@ -208,10 +208,11 @@ const clamp = (value, min = 0, max = 1) => Math.min(Math.max(value, min), max);
 const lerp = (from, to, amount) => from + (to - from) * amount;
 const smoothstep = (value) => value * value * (3 - 2 * value);
 const SECTION_UNITS = {
-  comissionamento: 0,
-  pesquisa: 1.72,
-  producao: 2.78,
-  registros: 3.25,
+  abertura: 0,
+  introducao: 1,
+  projetos: 2,
+  narrativa: 3,
+  proposta: 4,
 };
 
 function colorMix(from, to, amount) {
@@ -417,12 +418,21 @@ const galleryState = {
 };
 const mediaState = new Map();
 let appInitialized = false;
+let forcedInitialUnit = null;
 const PREVIEW_KEY = "mattar-projects-preview";
 const isLocalPreviewHost = ["", "localhost", "127.0.0.1"].includes(window.location.hostname);
 const shouldUseLocalPreview = () => {
   const previewMode = urlParams.get("preview");
   return previewMode === "local" || (previewMode !== "json" && Boolean(localStorage.getItem(PREVIEW_KEY)));
 };
+const INTRO_SEQUENCE_IMAGES = [
+  "assets/editorial/intro-sequence/vector-0.png",
+  "assets/editorial/intro-sequence/vector-1.png",
+  "assets/editorial/intro-sequence/vector-2.png",
+  "assets/editorial/intro-sequence/vector-3.png",
+];
+let introSequenceIndex = 0;
+
 const MEDIA_PATH_ALIASES = {
   "assets/project-media/dadiva-01.png": "assets/project-media/dadiva-1.png",
   "assets/project-media/dadiva-02.png": "assets/project-media/dadiva-2.png",
@@ -606,6 +616,7 @@ async function refreshProjectsFromDataSource() {
   await loadProjects();
   renderGallery();
   buildDeckMarkup();
+  initIntroSequence();
   preloadDeckImages();
 }
 
@@ -770,7 +781,7 @@ function updateScrollState() {
   const doc = document.documentElement;
   const maxScroll = Math.max(doc.scrollHeight - window.innerHeight, 1);
   const scrollY = window.scrollY;
-  const unit = scrollY / window.innerHeight;
+  const unit = forcedInitialUnit ?? scrollY / window.innerHeight;
   const pageProgress = clamp(scrollY / maxScroll);
   const collapse = smoothstep(clamp(unit / 1.62));
   const shape = interpolateShape(unit);
@@ -793,27 +804,19 @@ function updateScrollState() {
 }
 
 function setSectionVisibility(unit) {
-  const opacityById = {
-    comissionamento: opacityWindow(unit, 0, 0, 0.52, 0.82),
-    pesquisa: opacityWindow(unit, 1.2, 1.48, 2.32, 2.52),
-    producao: opacityWindow(unit, 2.48, 2.7, 2.96, 3.12),
-    registros: opacityWindow(unit, 3.04, 3.22, 99, 99),
-  };
+  const sectionIds = ["abertura", "introducao", "projetos", "narrativa", "proposta"];
+  const activeIndex = Math.max(0, Math.min(sectionIds.length - 1, Math.round(unit)));
+  const activeId = sectionIds[activeIndex];
 
   sections.forEach((section) => {
-    const opacity = opacityById[section.id] || 0;
+    const opacity = section.id === activeId ? 1 : 0;
     section.style.setProperty("--section-opacity", opacity.toFixed(3));
-    section.classList.toggle("is-current", opacity > 0.001);
+    section.classList.toggle("is-current", section.id === activeId);
   });
 
-  const currentSection = sections.reduce((active, section) => {
-    const opacity = Number(section.style.getPropertyValue("--section-opacity")) || 0;
-    return opacity > active.opacity ? { id: section.id, opacity } : active;
-  }, { id: "comissionamento", opacity: 0 }).id;
-
-  document.body.dataset.section = currentSection;
+  document.body.dataset.section = activeId;
   document.querySelectorAll(".section-rail a").forEach((link) => {
-    link.classList.toggle("is-active", link.dataset.targetSection === currentSection);
+    link.classList.toggle("is-active", link.dataset.targetSection === activeId);
   });
 }
 
@@ -1013,6 +1016,10 @@ function requestUpdate() {
   }
 }
 
+function clearForcedInitialUnit() {
+  forcedInitialUnit = null;
+}
+
 function dismissEntryScreen() {
   if (entryDismissed || !entryScreen) {
     return;
@@ -1163,23 +1170,111 @@ function handleDirectionalKeys(event) {
   }
 }
 
+function setIntroSequenceImage(index) {
+  const boundedIndex = (index + INTRO_SEQUENCE_IMAGES.length) % INTRO_SEQUENCE_IMAGES.length;
+  const image = document.querySelector(".intro-sequence__frame img");
+  const markImage = document.querySelector(".intro-mark img");
+
+  introSequenceIndex = boundedIndex;
+  document.body.dataset.introFrame = String(boundedIndex);
+
+  if (image) {
+    image.src = INTRO_SEQUENCE_IMAGES[boundedIndex];
+  }
+
+  if (markImage) {
+    markImage.src = INTRO_SEQUENCE_IMAGES[boundedIndex];
+  }
+}
+
+function openIntroSequence() {
+  dismissEntryScreen();
+  document.body.classList.add("intro-sequence-open");
+  setIntroSequenceImage(introSequenceIndex);
+}
+
+function closeIntroSequence() {
+  document.body.classList.remove("intro-sequence-open");
+}
+
+function initIntroSequence() {
+  const mark = document.querySelector(".intro-mark");
+
+  if (!mark) {
+    return;
+  }
+
+  mark.addEventListener("mouseenter", () => document.body.classList.add("intro-mark-hovered"));
+  mark.addEventListener("mouseleave", () => document.body.classList.remove("intro-mark-hovered"));
+  mark.addEventListener("click", (event) => {
+    event.preventDefault();
+    openIntroSequence();
+  });
+
+  document.addEventListener("click", (event) => {
+    const action = event.target.closest("[data-intro-action]")?.dataset.introAction;
+
+    if (!action) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (action === "next") {
+      setIntroSequenceImage(introSequenceIndex + 1);
+    } else if (action === "prev") {
+      setIntroSequenceImage(introSequenceIndex - 1);
+    } else if (action === "close") {
+      closeIntroSequence();
+    }
+  });
+}
 function applyInitialSection() {
-  const unitParam = urlParams.get("unit");
-  const sectionId = urlParams.get("section") || window.location.hash.replace("#", "");
+  const currentParams = new URLSearchParams(window.location.search);
+  const unitParam = currentParams.get("unit");
+  const sectionId = currentParams.get("section") || window.location.hash.replace("#", "");
   const target = sectionId ? document.getElementById(sectionId) : null;
+  let initialUnit = 0;
+  let shouldScrollToInitialUnit = false;
 
   if (unitParam !== null) {
     const unit = Number(unitParam);
     if (Number.isFinite(unit)) {
-      window.scrollTo({ top: unit * window.innerHeight, behavior: "auto" });
+      initialUnit = unit;
+      forcedInitialUnit = unit;
     }
   } else if (target) {
-    const unit = SECTION_UNITS[target.id] || 0;
-    window.scrollTo({ top: unit * window.innerHeight, behavior: "auto" });
+    initialUnit = SECTION_UNITS[target.id] || 0;
+    forcedInitialUnit = initialUnit;
+  } else {
+    shouldScrollToInitialUnit = true;
+    forcedInitialUnit = null;
   }
+
+  setSectionVisibility(initialUnit);
+  root.style.setProperty("--scroll-unit", initialUnit.toFixed(4));
+  document.body.dataset.initialUnit = initialUnit.toFixed(4);
+
+  if (!shouldScrollToInitialUnit) {
+    return;
+  }
+
+  window.scrollTo({ top: initialUnit * window.innerHeight, behavior: "auto" });
+  window.setTimeout(() => {
+    window.scrollTo({ top: initialUnit * window.innerHeight, behavior: "auto" });
+    setSectionVisibility(initialUnit);
+    root.style.setProperty("--scroll-unit", initialUnit.toFixed(4));
+  }, 80);
+  window.setTimeout(() => {
+    window.scrollTo({ top: initialUnit * window.innerHeight, behavior: "auto" });
+    setSectionVisibility(initialUnit);
+    root.style.setProperty("--scroll-unit", initialUnit.toFixed(4));
+  }, 220);
 }
 
 window.addEventListener("scroll", requestUpdate, { passive: true });
+window.addEventListener("wheel", clearForcedInitialUnit, { passive: true });
+window.addEventListener("touchmove", clearForcedInitialUnit, { passive: true });
 window.addEventListener("pointerdown", dismissEntryScreen, { passive: true, once: true });
 window.addEventListener("click", dismissEntryScreen, { passive: true, once: true });
 window.addEventListener("wheel", dismissEntryScreen, { passive: true, once: true });
@@ -1187,6 +1282,10 @@ window.addEventListener("touchmove", dismissEntryScreen, { passive: true, once: 
 window.addEventListener(
   "keydown",
   (event) => {
+    if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", " ", "Spacebar", "Home", "End"].includes(event.key)) {
+      clearForcedInitialUnit();
+    }
+
     if (["ArrowDown", "PageDown", " ", "Spacebar"].includes(event.key)) {
       dismissEntryScreen();
     }
@@ -1235,6 +1334,26 @@ document.addEventListener("click", (event) => {
   scrollToSection(link.dataset.targetSection);
 }, true);
 document.addEventListener("keydown", (event) => {
+  if (document.body.classList.contains("intro-sequence-open")) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeIntroSequence();
+      return;
+    }
+
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      setIntroSequenceImage(introSequenceIndex + 1);
+      return;
+    }
+
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      setIntroSequenceImage(introSequenceIndex - 1);
+      return;
+    }
+  }
+
   if (event.key === "Escape" && deckOverlay?.classList.contains("is-open")) {
     closeDeck();
     return;
@@ -1301,6 +1420,7 @@ async function initializeApp() {
   await loadProjects();
   renderGallery();
   buildDeckMarkup();
+  initIntroSequence();
   preloadDeckImages();
 
   if (urlParams.get("skipEntry") === "1") {
@@ -1316,7 +1436,6 @@ async function initializeApp() {
   }
 
   applyInitialSection();
-  updateScrollState();
 }
 
 window.addEventListener("load", initializeApp);

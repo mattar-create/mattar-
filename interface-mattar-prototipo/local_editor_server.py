@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import json
+from datetime import datetime
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlparse
@@ -10,6 +11,7 @@ from urllib.parse import unquote, urlparse
 ROOT = Path(__file__).resolve().parent
 DATA_PATH = ROOT / "assets" / "data" / "projects.json"
 BUDGET_DATA_PATH = ROOT / "assets" / "data" / "budget-document.json"
+BUDGET_PROPOSAL_ROOT = ROOT / "assets" / "data" / "propostas"
 
 
 def safe_path(relative_path: str) -> Path:
@@ -79,6 +81,11 @@ class LocalEditorHandler(SimpleHTTPRequestHandler):
                 document_path = self.create_budget_document(payload)
                 self.write_json({"ok": True, "path": document_path})
                 return
+
+            if parsed.path == "/api/delete-budget-document":
+                document_path = self.delete_budget_document(payload)
+                self.write_json({"ok": True, "path": document_path})
+                return
             self.write_json({"message": "Endpoint nÃ£o encontrado."}, status=404)
         except Exception as error:
             self.write_json({"message": str(error)}, status=400)
@@ -125,7 +132,10 @@ class LocalEditorHandler(SimpleHTTPRequestHandler):
         target = safe_path(relative_path)
         data_root = (ROOT / "assets" / "data").resolve()
 
-        if data_root not in target.parents and target != BUDGET_DATA_PATH:
+        if target == BUDGET_DATA_PATH:
+            raise ValueError("Template nao pode ser editado. Crie uma proposta.")
+
+        if data_root not in target.parents:
             raise ValueError("Documentos de orcamento devem ficar em assets/data.")
 
         if target.suffix.lower() != ".json":
@@ -138,8 +148,11 @@ class LocalEditorHandler(SimpleHTTPRequestHandler):
         data_root = (ROOT / "assets" / "data").resolve()
         documents = []
 
-        for target in sorted(data_root.glob("*.json")):
-            if target.name == "projects.json":
+        proposal_targets = list(BUDGET_PROPOSAL_ROOT.rglob("*.json")) if BUDGET_PROPOSAL_ROOT.exists() else []
+        legacy_targets = [target for target in data_root.glob("*.json")]
+
+        for target in sorted({*proposal_targets, *legacy_targets}):
+            if target == BUDGET_DATA_PATH or target.name in {"projects.json", "budget-models.json", BUDGET_DATA_PATH.name}:
                 continue
 
             try:
@@ -165,7 +178,7 @@ class LocalEditorHandler(SimpleHTTPRequestHandler):
                 {
                     "path": target.relative_to(ROOT).as_posix(),
                     "name": target.stem,
-                    "title": data.get("meta", {}).get("documentTitle", "Estimativa Orçamentária"),
+                    "title": data.get("commissioning", {}).get("title") or data.get("meta", {}).get("documentTitle", "Estimativa Or?ament?ria"),
                     "client": client,
                     "projectType": project_type,
                     "updated": target.stat().st_mtime,
@@ -173,6 +186,26 @@ class LocalEditorHandler(SimpleHTTPRequestHandler):
             )
 
         return documents
+
+    def delete_budget_document(self, payload: dict) -> str:
+        relative_path = payload.get("path") or ""
+        target = safe_path(relative_path)
+        data_root = (ROOT / "assets" / "data").resolve()
+
+        if target == BUDGET_DATA_PATH:
+            raise ValueError("Template nao pode ser apagado.")
+
+        if data_root not in target.parents:
+            raise ValueError("Documento fora de assets/data.")
+
+        if target.suffix.lower() != ".json":
+            raise ValueError("Documento de orcamento precisa ser JSON.")
+
+        if not target.exists():
+            raise ValueError("Documento nao encontrado.")
+
+        target.unlink()
+        return target.relative_to(ROOT).as_posix()
 
     def create_budget_document(self, payload: dict) -> str:
         document = payload.get("document")
@@ -184,7 +217,9 @@ class LocalEditorHandler(SimpleHTTPRequestHandler):
         safe_name = "".join(ch.lower() if ch.isalnum() else "-" for ch in requested_name)
         safe_name = "-".join(part for part in safe_name.split("-") if part) or "novo-orcamento"
         data_root = (ROOT / "assets" / "data").resolve()
-        target = (data_root / f"{safe_name}.json").resolve()
+        proposal_root = (BUDGET_PROPOSAL_ROOT / str(datetime.now().year)).resolve()
+        proposal_root.mkdir(parents=True, exist_ok=True)
+        target = (proposal_root / f"{safe_name}.json").resolve()
 
         if target.exists():
             suffix = 2
@@ -195,8 +230,8 @@ class LocalEditorHandler(SimpleHTTPRequestHandler):
                     break
                 suffix += 1
 
-        if data_root not in target.parents:
-            raise ValueError("Documento fora de assets/data.")
+        if data_root not in target.parents or target == BUDGET_DATA_PATH:
+            raise ValueError("Documento fora de assets/data/propostas.")
 
         target.write_text(json.dumps(document, ensure_ascii=False, indent=2), encoding="utf-8")
         return target.relative_to(ROOT).as_posix()

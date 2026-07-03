@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Estimativa Orçamentária - Gastroperformance</title>
+    <link rel="icon" href="assets/brand/Logo-Vector.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="budget.css" />
+  </head>
+  <body>
+    <aside class="budget-tools" aria-label="Ferramentas do documento">
+      <div class="budget-tools__brand">
+        <img src="assets/brand/Logo-Vector.svg" alt="Mattar" />
+        <div>
+          <strong>Documentos</strong>
+          <span>Orçamentos</span>
+        </div>
+      </div>
+      <div class="budget-actions" aria-label="Ações do documento">
+        <button class="budget-action budget-action--primary" type="button" data-action="save">Salvar</button>
+        <button class="budget-action" type="button" data-action="print">PDF</button>
+        <button class="budget-action" type="button" data-action="share">Compartilhar</button>
+        <button class="budget-action" type="button" data-action="reset">Restaurar</button>
+      </div>
+      <section class="budget-library" aria-label="Biblioteca de modelos">
+        <div class="budget-library__head">
+          <strong>Modelos</strong>
+          <button type="button" data-action="refresh-library" aria-label="Atualizar lista">Atualizar</button>
+        </div>
+        <div class="budget-library__list" id="budget-document-list"></div>
+        <div class="budget-library__actions">
+          <button type="button" data-action="save-model">Salvar modelo</button>
+        </div>
+      </section>
+      <p class="budget-status" role="status"></p>
+    </aside>
+    <main class="budget-document" aria-label="Documento de estimativa orçamentária"></main>
+    <script src="budget.js"></script>
+  </body>
+</html>

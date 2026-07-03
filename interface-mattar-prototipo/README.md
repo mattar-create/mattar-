@@ -1,59 +1,90 @@
-# Interface Mattar | Protótipo de Leitura
+# Interface Mattar Prototype
 
-Este protótipo transforma as páginas estáticas em uma leitura web contínua:
-o texto rola, enquanto o campo visual fica fixo e o vermelho se concentra em
-um elemento gráfico lateral.
+This is the active Lab Mattar web app.
 
-## Navegação direta
+It contains three connected tools:
 
-- `index.html#comissionamento`
-- `index.html#pesquisa`
-- `index.html#producao`
-- `index.html#registros`
+- `index.html`: public visual identity interface, editorial scenes, M intro motion, and project deck overlay.
+- `editor.html`: project creation/editing tool for developed projects.
+- `budget.html`: letterhead, budget, and proposal document tool.
 
-## Editor de projetos
+## Local Run
 
-O modo de edição fica separado da interface principal:
-
-- `editor.html`
-
-Ele edita os projetos de:
-
-- `assets/data/projects.json`
-
-Durante desenvolvimento local, abra o editor pelo servidor de edição:
+Run the local server from this folder:
 
 ```txt
 python local_editor_server.py
-http://127.0.0.1:4174/editor.html
 ```
 
-Esse servidor grava `assets/data/projects.json` e os arquivos adicionados em
-`assets/projects/<id-do-projeto>/`.
+Then open:
 
-O editor controla conteúdo, imagem de capa, galeria e posição da capa dentro do
-grid aprovado. Ele não libera diagramação livre, para manter texto alinhado e
-imagens preenchendo os espaços definidos.
+```txt
+http://127.0.0.1:4174/index.html
+http://127.0.0.1:4174/editor.html
+http://127.0.0.1:4174/budget.html
+```
 
-A galeria aceita:
+## Public Interface
 
-- imagens locais;
-- vídeos locais;
-- links externos de vídeo, como YouTube ou Vimeo.
+The public interface is driven by:
 
-## Direção atual
+```txt
+index.html
+styles.css
+script.js
+assets/data/projects.json
+assets/editorial/
+assets/project-media/
+```
 
-- Primeira tela integralmente vermelha.
-- Texto inicial com quebras de linha controladas no HTML.
-- Tipografia Univers Roman 55.
-- Linha superior fixa como régua de leitura.
-- Acento móvel acompanha o progresso do scroll.
-- Grid estrutural de 12 colunas por 12 linhas, invisível por padrão.
-- O vermelho não aparece como faixa de divisão entre páginas.
-- A galeria de projetos é carregada a partir de `assets/data/projects.json`.
-- Cada projeto usa o template validado da DÁDIVA: texto + capa no primeiro slide e galeria com uma imagem por vez no segundo slide.
+Direct scene links while the current scroll engine is active:
 
-## Inspeção de grid
+```txt
+index.html?skipEntry=1&unit=0
+index.html?skipEntry=1&unit=1
+index.html?skipEntry=1&unit=2
+index.html?skipEntry=1&unit=3
+index.html?skipEntry=1&unit=4
+```
 
-O grid não aparece na versão final. Para revisar alinhamentos, adicione
-temporariamente `data-grid="visible"` na tag `<body>` do `index.html`.
+## Project Editor
+
+The editor reads and writes:
+
+```txt
+assets/data/projects.json
+```
+
+Use it for project title, cover, gallery, deck content, and media references.
+
+## Budget Tool
+
+The budget tool reads and writes:
+
+```txt
+assets/data/budget-document.json
+assets/data/budget-models.json
+assets/data/boticario-gastroperformance.json
+assets/data/propostas/
+```
+
+It depends on `local_editor_server.py` for saving, creating, listing, and deleting budget/proposal documents.
+
+## Asset Rules
+
+- Use repository-relative asset paths only.
+- Do not reference files directly from Desktop, Downloads, or Documents/Codex.
+- Current editorial scene assets belong in `assets/editorial/`.
+- Project deck media belongs in `assets/project-media/`.
+- Runtime fonts belong in `assets/fonts/`.
+- Historical brand references can stay in `assets/Lab Mattar/`.
+- `backup_before_editorial_refactor/` is a recovery snapshot and should not be edited directly.
+
+## Validation Checklist
+
+- `script.js`, `editor.js`, and `budget.js` pass syntax checks.
+- JSON files in `assets/data/` parse correctly.
+- `index.html`, `editor.html`, and `budget.html` return HTTP 200 through the local server.
+- The M intro interaction opens and advances frames.
+- Project deck buttons open the deck overlay.
+- `budget.html` loads with no 404 resources and the API responds at `/api/budget-documents`.

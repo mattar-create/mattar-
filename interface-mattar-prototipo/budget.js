@@ -1,6 +1,8 @@
 const STORAGE_KEY = "mattar-budget-document";
 const LIBRARY_STORAGE_KEY = "mattar-budget-model-library";
-const DATA_PATH = "assets/data/budget-document.json";
+const TEMPLATE_PATH = "assets/data/budget-document.json";
+const DATA_PATH = TEMPLATE_PATH;
+const PROPOSAL_ROOT = "assets/data/propostas";
 const API_BASE = location.protocol === "file:" ? "http://127.0.0.1:4174" : "";
 const LIBRARY_PATH = "assets/data/budget-models.json";
 const REMOTE_BUDGET_API = "/api/budget-documents";
@@ -140,11 +142,11 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-function normalizeDocumentPath(value = DATA_PATH) {
-  const path = String(value || DATA_PATH).trim().replace(/\\/g, "/").replace(/^\/+/, "");
+function normalizeDocumentPath(value = TEMPLATE_PATH) {
+  const path = String(value || TEMPLATE_PATH).trim().replace(/\\/g, "/").replace(/^\/+/, "");
 
-  if (!path.startsWith("assets/data/") || !path.endsWith(".json")) {
-    return DATA_PATH;
+  if (!path.startsWith("assets/data/") || !path.endsWith(".json") || path.includes("..")) {
+    return TEMPLATE_PATH;
   }
 
   return path;
@@ -152,6 +154,10 @@ function normalizeDocumentPath(value = DATA_PATH) {
 
 let documentDataPath = normalizeDocumentPath(new URLSearchParams(location.search).get("file"));
 let storageKey = documentStorageKey(documentDataPath);
+
+function isTemplatePath(path = documentDataPath) {
+  return normalizeDocumentPath(path) === TEMPLATE_PATH;
+}
 
 function documentStorageKey(path) {
   return `${STORAGE_KEY}:${normalizeDocumentPath(path)}`;
@@ -199,22 +205,39 @@ function saveStoredLibrary(library) {
   );
 }
 
-function modelInfoFromDocument(document, path = documentDataPath) {
+function documentTitleFromData(document) {
+  return document?.commissioning?.title || document?.meta?.documentTitle || document?.cover?.titleHighlight || "Documento";
+}
+
+function documentClientFromData(document) {
   const details = document?.cover?.details || [];
-  const client =
+  return (
     details.find((item) => String(item.label || "").toLowerCase().includes("cliente"))?.value ||
     document?.meta?.client ||
-    "Novo cliente";
-  const projectType = document?.meta?.projectType || document?.cover?.titleHighlight || "Orçamento";
+    "Novo cliente"
+  );
+}
+
+function modelInfoFromDocument(document, path = documentDataPath) {
+  const client = documentClientFromData(document);
+  const projectType = document?.meta?.projectType || document?.cover?.titleHighlight || "Orcamento";
 
   return {
     path: normalizeDocumentPath(path),
     client,
     projectType,
-    title: document?.meta?.documentTitle || `${client} - ${projectType}`,
+    title: documentTitleFromData(document),
     updated: Date.now(),
     source: "browser",
   };
+}
+
+function proposalYear() {
+  return String(new Date().getFullYear());
+}
+
+function proposalPathFromSlug(baseSlug) {
+  return normalizeDocumentPath(`${PROPOSAL_ROOT}/${proposalYear()}/${baseSlug}.json`);
 }
 
 function uniqueModelPath(baseSlug) {
@@ -224,11 +247,11 @@ function uniqueModelPath(baseSlug) {
     ...library.documents.map((item) => normalizeDocumentPath(item.path)),
     ...Object.keys(library.records).map(normalizeDocumentPath),
   ]);
-  let path = normalizeDocumentPath(`assets/data/${baseSlug}.json`);
+  let path = proposalPathFromSlug(baseSlug);
   let suffix = 2;
 
   while (usedPaths.has(path)) {
-    path = normalizeDocumentPath(`assets/data/${baseSlug}-${suffix}.json`);
+    path = proposalPathFromSlug(`${baseSlug}-${suffix}`);
     suffix += 1;
   }
 
@@ -476,9 +499,12 @@ async function apiPost(path, body) {
 }
 
 function documentLabel(documentInfo) {
-  const client = documentInfo.client || "Sem cliente";
-  const type = documentInfo.projectType || "Orcamento";
-  return `${client} - ${type}`;
+  return documentInfo.title || documentInfo.name || "Documento";
+}
+
+function documentSubtitle(documentInfo, path) {
+  const context = [documentInfo.client, documentInfo.projectType].filter(Boolean).join(" - ");
+  return context || path.replace("assets/data/", "");
 }
 
 function renderDocumentLibrary() {
@@ -494,14 +520,21 @@ function renderDocumentLibrary() {
   libraryListEl.innerHTML = documentLibrary
     .map((documentInfo) => {
       const isActive = documentInfo.path === documentDataPath;
-      const sourceLabel = documentInfo.source === "browser" ? " · salvo neste navegador" : "";
-      return `<button type="button" class="budget-document-button${isActive ? " is-active" : ""}" data-document-path="${escapeHtml(
-        documentInfo.path,
-      )}"><strong>${escapeHtml(documentLabel(documentInfo))}</strong><span>${escapeHtml(documentInfo.path.replace("assets/data/", ""))}${sourceLabel}</span></button>`;
+      const sourceLabel = documentInfo.source === "browser" ? " - salvo neste navegador" : "";
+      const path = normalizeDocumentPath(documentInfo.path);
+      const canDelete = !isTemplatePath(path);
+      return `<div class="budget-document-row${isActive ? " is-active" : ""}"><button type="button" class="budget-document-button${
+        isActive ? " is-active" : ""
+      }" data-document-path="${escapeHtml(path)}"><strong>${escapeHtml(documentLabel(documentInfo))}</strong><span>${escapeHtml(
+        documentSubtitle(documentInfo, path),
+      )}${sourceLabel}</span></button>${
+        canDelete
+          ? `<button type="button" class="budget-document-delete" data-delete-document-path="${escapeHtml(path)}" aria-label="Apagar proposta" title="Apagar proposta">x</button>`
+          : ""
+      }</div>`;
     })
     .join("");
 }
-
 async function loadDocumentLibrary() {
   if (!libraryListEl) {
     return;
@@ -567,17 +600,111 @@ async function openDocument(path) {
   navigateToDocument(path);
 }
 
+async function deleteBudgetDocument(path) {
+  const targetPath = normalizeDocumentPath(path);
+
+  if (isTemplatePath(targetPath)) {
+    setStatus("O template nao pode ser apagado.");
+    return;
+  }
+
+  const documentInfo = documentLibrary.find((item) => normalizeDocumentPath(item.path) === targetPath);
+  const label = documentInfo ? documentLabel(documentInfo) : targetPath.replace("assets/data/", "");
+  const confirmed = window.confirm(`Apagar a proposta "${label}"? Essa acao nao desfaz.`);
+  if (!confirmed) return;
+
+  if (canWriteLocalFiles) {
+    await apiPost("/api/delete-budget-document", { path: targetPath });
+  } else if (canUseRemoteApi) {
+    await apiPost(REMOTE_BUDGET_API, { action: "delete", path: targetPath });
+  } else {
+    const library = loadStoredLibrary();
+    delete library.records[targetPath];
+    library.documents = library.documents.filter((item) => normalizeDocumentPath(item.path) !== targetPath);
+    saveStoredLibrary(library);
+    localStorage.removeItem(documentStorageKey(targetPath));
+  }
+
+  if (targetPath === documentDataPath) {
+    localStorage.removeItem(storageKey);
+    setCurrentDocumentPath(TEMPLATE_PATH);
+    state = clone(await loadDefaultData());
+    selectedTopic = { section: "composition", index: 0 };
+    render();
+  }
+
+  await loadDocumentLibrary();
+  setStatus("Proposta apagada.");
+}
+
 function saveBrowserDraft(message = "Documento salvo neste navegador.") {
   syncFromDom();
   localStorage.setItem(storageKey, JSON.stringify(state));
   setStatus(message);
 }
 
+function proposalNameFromState() {
+  return slugify(`${state.commissioning?.title || ""}-${state.meta.client || ""}`);
+}
+
+async function createCurrentProposal() {
+  const name = proposalNameFromState();
+
+  if (canWriteLocalFiles) {
+    const response = await apiPost("/api/create-budget-document", { name, document: state });
+    if (response?.path) setCurrentDocumentPath(response.path);
+    return response?.path || documentDataPath;
+  }
+
+  if (canUseRemoteApi) {
+    const response = await apiPost(REMOTE_BUDGET_API, {
+      action: "create",
+      name,
+      document: state,
+    });
+    if (response?.path) setCurrentDocumentPath(response.path);
+    return response?.path || documentDataPath;
+  }
+
+  const targetPath = uniqueModelPath(name);
+  setCurrentDocumentPath(targetPath);
+  return targetPath;
+}
+
+async function ensureEditableDocumentPath() {
+  if (!isTemplatePath()) {
+    return documentDataPath;
+  }
+
+  return createCurrentProposal();
+}
+
 async function saveBudgetDocument(options = {}) {
   syncFromDom();
 
   if (!canWriteLocalFiles) {
-    saveBrowserDraft(options.silent ? "Salvo automaticamente neste navegador." : "Documento salvo neste navegador.");
+    if (canUseRemoteApi) {
+      try {
+        await ensureEditableDocumentPath();
+        const current = await apiPost(REMOTE_BUDGET_API, {
+          action: "save",
+          path: documentDataPath,
+          document: state,
+        });
+        if (current?.path) setCurrentDocumentPath(current.path);
+        localStorage.removeItem(storageKey);
+        await loadDocumentLibrary();
+        setStatus(options.silent ? "Salvo automaticamente no GitHub." : "Proposta salva no GitHub.");
+        return;
+      } catch (error) {
+        setStatus("Backend indisponivel. Salvando neste navegador.");
+      }
+    }
+
+    if (isTemplatePath()) {
+      await ensureEditableDocumentPath();
+    }
+    saveBrowserDraft(options.silent ? "Salvo automaticamente neste navegador." : "Proposta salva neste navegador.");
     return;
   }
 
@@ -592,12 +719,13 @@ async function saveBudgetDocument(options = {}) {
   }
 
   try {
+    await ensureEditableDocumentPath();
     await apiPost("/api/save-budget-document", {
       path: documentDataPath,
       document: state,
     });
     localStorage.removeItem(storageKey);
-    setStatus(options.silent ? "Salvo automaticamente no arquivo." : "Arquivo salvo.");
+    setStatus(options.silent ? "Salvo automaticamente no arquivo." : "Proposta salva.");
   } catch (error) {
     localStorage.setItem(storageKey, JSON.stringify(state));
     setStatus(`Salvo no navegador. ${error.message}`);
@@ -613,35 +741,25 @@ async function saveBudgetDocument(options = {}) {
 
 async function saveModel() {
   syncFromDom();
+  await ensureEditableDocumentPath();
 
   if (canWriteLocalFiles) {
-    if (documentDataPath === DATA_PATH) {
-      const name = slugify(`${state.meta.client || ""}-${state.meta.projectType || state.cover.titleHighlight || ""}`);
-      const response = await apiPost("/api/create-budget-document", { name, document: state });
-      if (response?.path) {
-        setCurrentDocumentPath(response.path);
-      }
-    } else {
-      await apiPost("/api/save-budget-document", {
-        path: documentDataPath,
-        document: state,
-      });
-    }
+    await apiPost("/api/save-budget-document", {
+      path: documentDataPath,
+      document: state,
+    });
 
     localStorage.removeItem(storageKey);
     await loadDocumentLibrary();
-    setStatus("Modelo salvo na biblioteca.");
+    setStatus("Proposta salva na biblioteca.");
     return;
   }
 
   if (canUseRemoteApi) {
     try {
-      const creating = documentDataPath === DATA_PATH;
-      const name = slugify(`${state.meta.client || ""}-${state.meta.projectType || state.cover.titleHighlight || ""}`);
       const response = await apiPost(REMOTE_BUDGET_API, {
-        action: creating ? "create" : "save",
+        action: "save",
         path: documentDataPath,
-        name,
         document: state,
       });
 
@@ -651,7 +769,7 @@ async function saveModel() {
 
       localStorage.removeItem(storageKey);
       await loadDocumentLibrary();
-      setStatus("Modelo salvo no GitHub.");
+      setStatus("Proposta salva no GitHub.");
       return;
     } catch (error) {
       setStatus(`Backend indisponível. Salvando neste navegador.`);
@@ -660,9 +778,9 @@ async function saveModel() {
 
   const library = loadStoredLibrary();
   const hasStoredRecord = Boolean(library.records[documentDataPath]);
-  const shouldCreateModel = documentDataPath === DATA_PATH && !hasStoredRecord;
+  const shouldCreateModel = isTemplatePath() && !hasStoredRecord;
   const targetPath = shouldCreateModel
-    ? uniqueModelPath(slugify(`${state.meta.client || ""}-${state.meta.projectType || state.cover.titleHighlight || ""}`))
+    ? uniqueModelPath(proposalNameFromState())
     : documentDataPath;
   const modelInfo = modelInfoFromDocument(state, targetPath);
   const existingIndex = library.documents.findIndex((item) => normalizeDocumentPath(item.path) === targetPath);
@@ -678,7 +796,7 @@ async function saveModel() {
   setCurrentDocumentPath(targetPath);
   localStorage.setItem(storageKey, JSON.stringify(state));
   await loadDocumentLibrary();
-  setStatus("Modelo salvo na biblioteca deste navegador.");
+  setStatus("Proposta salva na biblioteca deste navegador.");
 }
 
 function scheduleAutosave() {
@@ -697,14 +815,13 @@ function generateShareLink() {
   setStatus("Link do documento copiado.");
 }
 
-async function resetModel() {
+async function newProposal() {
   localStorage.removeItem(storageKey);
-  setCurrentDocumentPath(DATA_PATH);
+  setCurrentDocumentPath(TEMPLATE_PATH);
   state = clone(await loadDefaultData());
   selectedTopic = { section: "composition", index: 0 };
   render();
-  scheduleAutosave();
-  setStatus("Modelo restaurado.");
+  setStatus("Nova proposta criada a partir do template.");
 }
 
 function addTopic(section, index = selectedTopic.section === section ? selectedTopic.index : 0) {
@@ -812,6 +929,12 @@ document.addEventListener("focusin", selectTopicFromEvent);
 
 document.addEventListener("click", (event) => {
   selectTopicFromEvent(event);
+  const deleteButton = event.target.closest("[data-delete-document-path]");
+  if (deleteButton) {
+    deleteBudgetDocument(deleteButton.dataset.deleteDocumentPath).catch((error) => setStatus(error.message));
+    return;
+  }
+
   const documentButton = event.target.closest("[data-document-path]");
   if (documentButton) {
     openDocument(documentButton.dataset.documentPath).catch((error) => setStatus(error.message));
@@ -824,7 +947,7 @@ document.addEventListener("click", (event) => {
   if (action === "save") saveBudgetDocument().catch(() => {});
   if (action === "share") generateShareLink();
   if (action === "print") exportPdf();
-  if (action === "reset") resetModel();
+  if (action === "reset" || action === "new-document") newProposal();
   if (action === "refresh-library") loadDocumentLibrary();
   if (action === "save-model") saveModel().catch((error) => setStatus(error.message));
   if (action === "add-topic") addTopic(button.dataset.section, button.dataset.index);
@@ -842,7 +965,7 @@ async function init() {
   state = hashData || (savedData ? JSON.parse(savedData) : clone(defaultData));
   render();
   loadDocumentLibrary();
-  setStatus(canWriteLocalFiles ? "Documento pronto. Alterações salvam no arquivo." : "Documento pronto. Alterações salvam neste navegador.");
+  setStatus(canWriteLocalFiles ? "Documento pronto. Alteracoes salvam em uma proposta propria." : "Documento pronto. Alteracoes salvam em uma proposta propria.");
 }
 
 init().catch((error) => {
