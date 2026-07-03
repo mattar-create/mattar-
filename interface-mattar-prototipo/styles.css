@@ -2040,7 +2040,6 @@ body::after,
   pointer-events: none;
 }
 
-body.intro-mark-hovered .read-section--introduction::after,
 body.intro-sequence-open .read-section--introduction::after {
   background: rgba(0, 0, 0, 0.68);
 }
@@ -2135,7 +2134,6 @@ body.intro-sequence-open .read-section--introduction::after {
   object-fit: cover;
 }
 
-body.intro-mark-hovered .intro-mark,
 body.intro-sequence-open .intro-mark {
   opacity: 1;
   transform: translateY(-3px);
@@ -2606,7 +2604,6 @@ body.intro-sequence-open .intro-sequence {
   transition: background 260ms ease;
 }
 
-body.intro-mark-hovered .read-section--introduction::after,
 body.intro-sequence-open .read-section--introduction::after {
   background: rgba(0, 0, 0, 0.72);
 }
@@ -2669,8 +2666,6 @@ body.intro-sequence-open .read-section--introduction::after {
   transform: none;
 }
 
-.intro-mark:hover,
-body.intro-mark-hovered .intro-mark,
 body.intro-sequence-open .intro-mark {
   opacity: 0.92;
   transform: none;
@@ -3257,11 +3252,6 @@ body.intro-sequence-open .intro-sequence {
   opacity: 0 !important;
 }
 
-.intro-mark:hover,
-body.intro-mark-hovered .intro-mark {
-  opacity: 0.92 !important;
-}
-
 body.intro-sequence-open .intro-mark {
   opacity: 0 !important;
   visibility: hidden;
@@ -3749,5 +3739,90 @@ body.intro-sequence-open .intro-mark {
   .entry-title h1,
   .opening-copy h1 {
     font-size: clamp(23px, 6.4vw, 34px) !important;
+  }
+}
+/* URBAN_FLORA_ALIGNMENT_PASS_V11 */
+.read-section--project-editorial::after {
+  background: linear-gradient(90deg, rgba(11, 13, 16, 0.74) 0%, rgba(11, 13, 16, 0.58) 31%, rgba(11, 13, 16, 0.18) 62%, rgba(11, 13, 16, 0.06) 100%);
+}
+
+.project-copy {
+  left: calc(var(--stage-x) + var(--stage-w) * 0.048) !important;
+  top: calc(var(--stage-y) + var(--stage-h) * 0.215) !important;
+  width: calc(var(--stage-w) * 0.36) !important;
+  color: var(--stage-paper);
+}
+
+.project-copy h2 {
+  margin-bottom: calc(var(--stage-h) * 0.034) !important;
+  font-family: "Univers LT", Arial, sans-serif !important;
+  font-size: clamp(25px, calc(var(--stage-w) * 0.024), 46px) !important;
+  font-style: normal !important;
+  font-weight: 300 !important;
+  line-height: 1.03 !important;
+  letter-spacing: 0 !important;
+}
+
+.project-copy h2 em,
+.project-copy h2 strong {
+  font-style: normal !important;
+  font-weight: 300 !important;
+}
+
+.project-copy h2 strong {
+  color: var(--stage-paper);
+}
+
+.project-copy p {
+  font-family: "Univers LT", Arial, sans-serif !important;
+  font-size: clamp(17px, calc(var(--stage-w) * 0.0116), 23px) !important;
+  font-style: normal !important;
+  font-weight: 300 !important;
+  line-height: 1.22 !important;
+  letter-spacing: 0 !important;
+}
+
+.project-copy p + p {
+  margin-top: calc(var(--stage-h) * 0.026) !important;
+}
+
+.project-copy p strong,
+.project-copy p b {
+  color: inherit;
+  font-weight: 300 !important;
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+  .project-copy {
+    left: 12vw !important;
+    top: 18svh !important;
+    width: 74vw !important;
+  }
+
+  .project-copy h2 {
+    margin-bottom: 3svh !important;
+    font-size: clamp(22px, 6vw, 31px) !important;
+    line-height: 1.08 !important;
+  }
+
+  .project-copy p {
+    font-size: clamp(14px, 3.65vw, 18px) !important;
+    line-height: 1.2 !important;
+  }
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+  .project-copy {
+    left: 9vw !important;
+    top: 18svh !important;
+    width: 43vw !important;
+  }
+
+  .project-copy h2 {
+    font-size: clamp(20px, 3.2vw, 29px) !important;
+  }
+
+  .project-copy p {
+    font-size: clamp(12px, 1.95vw, 16px) !important;
   }
 }

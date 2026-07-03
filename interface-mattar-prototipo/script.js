@@ -1203,9 +1203,6 @@ function initIntroSequence() {
   if (!mark) {
     return;
   }
-
-  mark.addEventListener("mouseenter", () => document.body.classList.add("intro-mark-hovered"));
-  mark.addEventListener("mouseleave", () => document.body.classList.remove("intro-mark-hovered"));
   mark.addEventListener("click", (event) => {
     event.preventDefault();
     openIntroSequence();
