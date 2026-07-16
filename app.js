@@ -113,8 +113,13 @@
     "red-title"(section) { return shell(section, `<h2 class="solo-title reveal">${esc(section.title)}</h2>`, "section-red section-title"); },
     closing(section) {
       const body = section.body || [];
-      const actions = body.slice(4).map((item) => `<span class="closing-action">${esc(item)}</span>`).join("");
-      return shell(section, `<article class="closing-copy reveal"><h2>${esc(section.title)}</h2><strong>${esc(body[0] || "Lab Mattar")}</strong><p class="closing-statement">${richText(body[1] || "")}</p><div class="closing-meta"><p>${esc(body[2] || "")}</p><p>${esc(body[3] || "")}</p></div><div class="closing-actions" aria-label="Ações finais">${actions}</div></article>`, "section-closing");
+      const addressParts = String(body[2] || "Instituto Mattar - Rua Minas Gerais - CEP 01244-010 - São Paulo").split(" - ");
+      const instituteName = addressParts.shift() || "Instituto Mattar";
+      const instituteAddress = addressParts.join(" - ");
+      const contactParts = String(body[3] || "Contato: Sergio Saad - Sergio@saadcd.com - 11 99966-2704").replace(/^Contato:\s*/i, "").split(" - ");
+      const contactName = contactParts[0] || "Sergio Saad", contactEmail = contactParts[1] || "Sergio@saadcd.com", contactPhone = contactParts[2] || "11 99966-2704";
+      const downloadLabel = body[4] || "Download arquivo", downloadTitle = body[5] || "Proposta orçamentária";
+      return shell(section, `<div class="closing-reference reveal"><div class="closing-institute"><strong>${esc(instituteName)}</strong><p>${esc(instituteAddress)}</p></div><div class="closing-information"><div class="closing-download"><span>${esc(downloadLabel)}</span><strong>${esc(downloadTitle)}</strong><i></i><p>Baixe Aqui.</p></div><address><span>Contato</span><strong>${esc(contactName)}</strong><a href="mailto:${esc(contactEmail)}">${esc(contactEmail)}</a><small>cel. ${esc(contactPhone)}</small></address></div><div class="closing-brand-lockup"><img src="assets/vectors/mattar.svg" alt="Mattar"><p>${richText(body[1] || "Gastroperformance: a comida como forma de expressão artística.")}</p></div></div>`, "section-closing section-closing-reference");
     }
   };
 

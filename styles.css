@@ -2907,3 +2907,213 @@ body:has(.section-portal-reference.is-active) .progress-line {
   .closing-actions { width: 100%; }
   .closing-action { flex: 1 1 100%; }
 }
+
+/* Closing page matched to reference 23.png. */
+.section-closing-reference,
+.section-closing-reference.story-section {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+}
+.section-closing-reference::before,
+.section-closing-reference .page-index { display: none; }
+.section-closing-reference .closing-reference {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.section-closing-reference .closing-institute {
+  position: absolute;
+  left: 62vw;
+  top: 14.5vh;
+  width: min(31vw, 620px);
+  color: var(--red);
+}
+.section-closing-reference .closing-institute strong {
+  display: block;
+  margin: 0 0 clamp(4px,.7vh,9px);
+  color: var(--red);
+  font-size: clamp(17px,1.35vw,27px);
+  font-weight: 300;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.section-closing-reference .closing-institute p {
+  color: var(--red);
+  font-size: clamp(10px,.78vw,15px);
+  line-height: 1.2;
+}
+.section-closing-reference .closing-information {
+  position: absolute;
+  left: 62vw;
+  top: 71.5vh;
+  width: min(24vw, 460px);
+  color: var(--ink);
+}
+.section-closing-reference .closing-download {
+  display: grid;
+  justify-items: start;
+}
+.section-closing-reference .closing-download span {
+  color: var(--ink);
+  font-size: clamp(8px,.58vw,11px);
+  line-height: 1;
+  text-transform: uppercase;
+}
+.section-closing-reference .closing-download strong {
+  margin: clamp(6px,.8vh,9px) 0;
+  color: var(--red);
+  font-size: clamp(12px,.92vw,18px);
+  font-weight: 300;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.section-closing-reference .closing-download i {
+  display: block;
+  width: min(100%, 240px);
+  height: 1px;
+  background: rgba(34,34,34,.34);
+}
+.section-closing-reference .closing-download p {
+  margin: clamp(8px,1.2vh,14px) 0 clamp(18px,3vh,32px);
+  color: var(--ink);
+  font-size: clamp(10px,.72vw,14px);
+  line-height: 1;
+}
+.section-closing-reference address {
+  display: grid;
+  justify-items: start;
+  color: var(--ink);
+  font-size: clamp(10px,.7vw,14px);
+  font-style: normal;
+  line-height: 1.02;
+}
+.section-closing-reference address span { margin-bottom: clamp(8px,1.1vh,12px); }
+.section-closing-reference address strong,
+.section-closing-reference address a {
+  color: var(--red);
+  font-weight: 300;
+  text-decoration: none;
+}
+.section-closing-reference address small {
+  color: var(--muted);
+  font-size: inherit;
+}
+.section-closing-reference .closing-brand-lockup {
+  position: absolute;
+  left: 2.2vw;
+  bottom: 6.5vh;
+  width: min(51vw, 980px);
+}
+.section-closing-reference .closing-brand-lockup img {
+  width: 100%;
+  height: auto;
+}
+.section-closing-reference .closing-brand-lockup p,
+.section-closing-reference .closing-brand-lockup p strong {
+  margin: clamp(7px,1vh,12px) 0 0;
+  color: var(--ink);
+  font-size: clamp(10px,1vw,19px);
+  font-weight: 400;
+  line-height: 1;
+  text-transform: uppercase;
+}
+body:has(.section-closing-reference.is-active) .site-chrome { color: var(--red); }
+body:has(.section-closing-reference.is-active) .chrome-brand {
+  left: 2.2vw;
+  top: 3.2vh;
+  width: min(280px,32vw);
+}
+body:has(.section-closing-reference.is-active) .chrome-mark {
+  right: 3vw;
+  top: 3.5vh;
+  width: clamp(14px,1.4vw,24px);
+  opacity: 1;
+  transform: none;
+}
+body:has(.section-closing-reference.is-active) .progress-line {
+  display: block;
+  left: auto;
+  right: 3.8vw;
+  top: 13vh;
+  bottom: 0;
+  width: clamp(3px,.36vw,6px);
+  background: var(--red);
+  pointer-events: none;
+  cursor: default;
+}
+body:has(.section-closing-reference.is-active) .progress-line::before {
+  left: 50%;
+  right: auto;
+  top: clamp(18px,3.8vh,42px);
+  bottom: auto;
+  width: clamp(42px,5.4vw,72px);
+  height: clamp(30px,5.8vh,54px);
+  border-radius: clamp(7px,1vw,14px);
+  background: var(--red);
+  transform: translateX(-50%);
+}
+body:has(.section-closing-reference.is-active) .progress-line::after { display: none; }
+body:has(.section-closing-reference.is-active) .vector-narrative { display: none; }
+@media (max-width:700px) {
+  .section-closing-reference .closing-institute {
+    left: 24px;
+    right: 54px;
+    top: 15vh;
+    width: auto;
+  }
+  .section-closing-reference .closing-institute strong { font-size: clamp(16px,5vw,20px); }
+  .section-closing-reference .closing-institute p { max-width: 28em; font-size: 11px; }
+  .section-closing-reference .closing-information {
+    left: 24px;
+    top: 38vh;
+    width: min(68vw,290px);
+  }
+  .section-closing-reference .closing-download strong { font-size: 14px; }
+  .section-closing-reference .closing-brand-lockup {
+    left: 24px;
+    bottom: 5.5vh;
+    width: calc(100vw - 72px);
+  }
+  .section-closing-reference .closing-brand-lockup p,
+  .section-closing-reference .closing-brand-lockup p strong { font-size: clamp(9px,2.7vw,12px); }
+  body:has(.section-closing-reference.is-active) .chrome-brand { left: 24px; top: 24px; }
+  body:has(.section-closing-reference.is-active) .chrome-mark { right: 20px; top: 24px; width: 18px; }
+  body:has(.section-closing-reference.is-active) .progress-line { display: none; }
+}
+@media (max-height:520px) and (orientation:landscape) {
+  .section-closing-reference .closing-institute { left: 56vw; top: 15vh; width: 36vw; }
+  .section-closing-reference .closing-information { left: 56vw; top: 43vh; width: 30vw; }
+  .section-closing-reference .closing-download p { margin-bottom: 10px; }
+  .section-closing-reference .closing-brand-lockup { left: 3vw; bottom: 8vh; width: 46vw; }
+  .section-closing-reference .closing-brand-lockup p,
+  .section-closing-reference .closing-brand-lockup p strong { font-size: 9px; }
+}
+
+/* The reference closing is a static composition; never leave it hidden by global reveals. */
+.section-closing-reference .closing-reference,
+.section-closing-reference.is-active .closing-reference,
+.section-closing-reference .closing-reference :is(p,strong,span,a,small,address,img,i) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+  filter: none !important;
+  animation: none !important;
+}
+.section-closing-reference.story-section { transition: none !important; }
+.section-closing-reference.story-section.is-active {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+@media (max-width:700px) {
+  .section-closing-reference .closing-brand-lockup {
+    left: 24px;
+    right: 48px;
+    width: auto !important;
+    max-width: none;
+  }
+}
