@@ -1,7 +1,7 @@
 window.MATTAR_CONTENT = {
   brand: { logo: "assets/brand/m-Vector.svg", red: "#ce211a", paper: "#f6f3ef" },
   tools: {
-    cursorTilt: "public/tools/cursor-tilt-mattar/index.html?v=20260716-consolidated-11",
+    cursorTilt: "public/tools/cursor-tilt-mattar/index.html?v=20260716-pages-paths-1",
     rubberText: "public/tools/rubber-m-vector-text-v3/index.html?v=20260716-consolidated-11",
     world: "public/tools/mattar-3d-world-flows/index.html",
     dynamicGallery: "public/tools/dynamic-image-webpage/index.html",

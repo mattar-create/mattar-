@@ -23,11 +23,22 @@ const reset = document.querySelector("#reset");
 const vectorSwatches = document.querySelectorAll(".vector-swatch");
 const bgSwatches = document.querySelectorAll(".bg-swatch");
 const params = new URLSearchParams(window.location.search);
+
+function resolveMImageSource(item) {
+  const src = decodeURIComponent(item);
+  if (!src.startsWith("/") || src.startsWith("//")) return src;
+
+  const projectBase = document.referrer
+    ? new URL(".", document.referrer)
+    : new URL("../../../", window.location.href);
+  return new URL(src.replace(/^\/+/, ""), projectBase).href;
+}
+
 const mImages = (params.get("images") || "")
   .split("|")
   .map((item) => item.trim())
   .filter(Boolean)
-  .map((item) => decodeURIComponent(item));
+  .map(resolveMImageSource);
 let activeImageIndex = 0;
 let imageTimer = 0;
 

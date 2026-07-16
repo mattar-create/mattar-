@@ -58,7 +58,10 @@
     return data.refImageGroups?.[key] || data.refImageGroups?.spaces || [];
   }
   function sharedMVisual(section, alt = section.title) {
-    const images = fixedMGroup(section).slice(0, 6).map((src) => encodeURIComponent(src.startsWith("/") ? src : `/${src}`)).join("|");
+    const images = fixedMGroup(section)
+      .slice(0, 6)
+      .map((src) => encodeURIComponent(new URL(src, document.baseURI).href))
+      .join("|");
     const join = data.tools.cursorTilt.includes("?") ? "&" : "?";
     const src = `${data.tools.cursorTilt}${join}embed=1&fixedm=1&images=${images}`;
     return `<div class="fixed-institute-m" aria-hidden="true"><iframe data-global-cursor-target src="${esc(src)}" title="M Mattar interativo fixo" loading="lazy"></iframe></div>`;
