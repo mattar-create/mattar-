@@ -7,6 +7,7 @@
   const chromeMark = document.querySelector(".chrome-mark");
   const progressLine = document.querySelector(".progress-line");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const conserveMedia = window.matchMedia("(max-width: 980px), (pointer: coarse)").matches;
   let activeIndex = 0;
   let wheelLocked = false;
   let projectAutoplayTimer = 0;
@@ -59,7 +60,7 @@
   }
   function sharedMVisual(section, alt = section.title) {
     const images = fixedMGroup(section)
-      .slice(0, 6)
+      .slice(0, conserveMedia ? 3 : 6)
       .map((src) => encodeURIComponent(new URL(src, document.baseURI).href))
       .join("|");
     const join = data.tools.cursorTilt.includes("?") ? "&" : "?";
@@ -304,6 +305,17 @@
     }, 2600);
   }
 
+
+  function setSectionMediaActive(section, active) {
+    if (!conserveMedia || !section) return;
+    section.querySelectorAll("[data-deferred-src]").forEach((element) => {
+      if (active && !element.hasAttribute("src")) {
+        element.setAttribute("src", element.dataset.deferredSrc);
+      } else if (!active && element.hasAttribute("src")) {
+        element.removeAttribute("src");
+      }
+    });
+  }
   function goTo(index) {
     const next = Math.min(Math.max(index, 0), sections.length - 1);
     if (next === activeIndex && document.querySelector(".story-section.is-active")) return;
@@ -311,10 +323,12 @@
     const nextSection = document.querySelector(`[data-index="${next}"]`);
     stopProjectAutoplay();
     stopCategoryAutoplay();
+    setSectionMediaActive(currentSection, false);
     currentSection?.classList.remove("is-active", "is-visible");
     currentSection?.setAttribute("aria-hidden", "true");
     nextSection?.classList.add("is-active", "is-visible");
     nextSection?.setAttribute("aria-hidden", "false");
+    setSectionMediaActive(nextSection, true);
     updateChrome(next, activeIndex);
     const nextData = sections[next];
     if (nextData?.type === "world" && nextSection?.querySelector("[data-world-stage]")) {
@@ -692,7 +706,9 @@
   }
 
   function render() {
-    presentation.innerHTML = sections.map((section) => (renderers[section.type] || renderers.institute)(section)).join("");
+    const markup = sections.map((section) => (renderers[section.type] || renderers.institute)(section)).join("");
+    presentation.innerHTML = conserveMedia ? markup.replace(/\ssrc=/g, " data-deferred-src=") : markup;
+
     bindProjectGalleries();
     bindCategoryMenus();
     bindWorld();
