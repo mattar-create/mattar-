@@ -1,0 +1,130 @@
+.vertical-image-carousel {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout paint;
+}
+
+.vertical-image-carousel__scene {
+  position: absolute;
+  top: 50%;
+  right: clamp(-120px, -4vw, -42px);
+  width: min(58vw, 920px);
+  height: min(88vh, 820px);
+  display: grid;
+  place-items: center;
+  perspective: 1250px;
+  perspective-origin: 52% 50%;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 15%, #000 85%, transparent 100%);
+  transform: translateY(-50%);
+}
+
+.vertical-image-carousel__ring {
+  --carousel-radius: clamp(250px, 39vh, 390px);
+  --carousel-card-width: clamp(230px, 24vw, 390px);
+  --carousel-card-ratio: 0.68;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--carousel-card-width);
+  height: calc(var(--carousel-card-width) / var(--carousel-card-ratio));
+  transform-style: preserve-3d;
+  animation: verticalImageCarouselRotate 42s linear infinite;
+}
+
+.vertical-image-carousel__card {
+  position: absolute;
+  grid-area: 1 / 1;
+  width: var(--carousel-card-width);
+  aspect-ratio: 7 / 10;
+  margin: 0;
+  overflow: hidden;
+  background: #902018;
+  border: 1px solid rgba(246, 243, 239, 0.22);
+  box-shadow: 0 22px 58px rgba(90, 16, 12, 0.34);
+  backface-visibility: hidden;
+  transform: rotateX(var(--carousel-angle, 0deg)) translateZ(var(--carousel-radius));
+}
+
+.vertical-image-carousel__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+}
+
+.vertical-image-carousel--variant-1 .vertical-image-carousel__scene {
+  right: clamp(-160px, -6vw, -70px);
+  width: min(62vw, 980px);
+}
+
+.vertical-image-carousel--variant-1 .vertical-image-carousel__ring {
+  --carousel-radius: clamp(270px, 41vh, 420px);
+  --carousel-card-width: clamp(220px, 23vw, 370px);
+  animation-duration: 46s;
+}
+
+.vertical-image-carousel--variant-2 .vertical-image-carousel__ring {
+  --carousel-radius: clamp(240px, 37vh, 370px);
+  --carousel-card-width: clamp(250px, 26vw, 420px);
+  animation-duration: 50s;
+}
+
+.vertical-image-carousel--variant-3 .vertical-image-carousel__scene {
+  right: clamp(-110px, -3vw, -34px);
+}
+
+.vertical-image-carousel--variant-3 .vertical-image-carousel__ring {
+  --carousel-radius: clamp(255px, 40vh, 400px);
+  --carousel-card-width: clamp(225px, 24vw, 385px);
+  animation-duration: 44s;
+  animation-direction: reverse;
+}
+
+@keyframes verticalImageCarouselRotate {
+  to {
+    transform: rotateX(-1turn);
+  }
+}
+
+@media (max-width: 900px) {
+  .vertical-image-carousel__scene {
+    top: 57%;
+    right: clamp(-155px, -26vw, -92px);
+    width: 100vw;
+    height: 74vh;
+    perspective: 980px;
+    opacity: 0.72;
+  }
+
+  .vertical-image-carousel__ring {
+    --carousel-radius: clamp(190px, 28vh, 260px);
+    --carousel-card-width: clamp(150px, 38vw, 220px);
+  }
+
+  .vertical-image-carousel__card {
+    box-shadow: 0 16px 38px rgba(90, 16, 12, 0.28);
+  }
+}
+
+@media (max-height: 700px) {
+  .vertical-image-carousel__scene {
+    height: 92vh;
+  }
+
+  .vertical-image-carousel__ring {
+    --carousel-radius: clamp(205px, 34vh, 300px);
+    --carousel-card-width: clamp(180px, 22vw, 300px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vertical-image-carousel__ring {
+    animation-duration: 180s;
+    animation-timing-function: linear;
+  }
+}

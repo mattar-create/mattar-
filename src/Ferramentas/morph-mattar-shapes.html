@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Morph Mattar Shapes</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #211b19;
+      --muted: #6f6560;
+      --line: #ddd5ce;
+      --paper: #f6f1e9;
+      --panel: #fffdf9;
+      --accent: #a3191e;
+      --accent-2: #ce211a;
+      --shadow: 0 18px 50px rgba(42, 30, 24, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(163, 25, 30, 0.08), transparent 36%),
+        linear-gradient(315deg, rgba(206, 33, 26, 0.09), transparent 42%),
+        var(--paper);
+    }
+
+    main {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(280px, 354px) minmax(0, 1fr);
+    }
+
+    aside {
+      border-right: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.78);
+      backdrop-filter: blur(18px);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .sub {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .control { display: grid; gap: 9px; }
+
+    label {
+      font-size: 12px;
+      font-weight: 760;
+      color: #4e4540;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    select, input[type="range"], button { width: 100%; }
+
+    select {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--ink);
+      padding: 11px 12px;
+      font: inherit;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+    }
+
+    input[type="range"] { accent-color: var(--accent); }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    button {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 11px 12px;
+      font: inherit;
+      font-weight: 760;
+      cursor: pointer;
+      color: #fff;
+      background: var(--accent);
+      transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+      box-shadow: 0 10px 24px rgba(163, 25, 30, 0.2);
+    }
+
+    button.secondary {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--line);
+      box-shadow: none;
+    }
+
+    button:hover { transform: translateY(-1px); background: #8d1217; }
+    button.secondary:hover { background: #f7f1ea; }
+
+    .readout {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stage-wrap {
+      min-width: 0;
+      padding: 28px;
+      display: grid;
+      place-items: center;
+    }
+
+    .stage {
+      width: min(100%, 1060px);
+      aspect-ratio: 1.18;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.032) 1px, transparent 1px),
+        linear-gradient(rgba(0, 0, 0, 0.032) 1px, transparent 1px),
+        #fffdfa;
+      background-size: 44px 44px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #output path {
+      shape-rendering: geometricPrecision;
+      paint-order: fill;
+    }
+
+    .hint {
+      position: absolute;
+      left: 16px;
+      bottom: 14px;
+      color: rgba(34, 28, 27, 0.52);
+      font-size: 12px;
+      pointer-events: none;
+    }
+
+    @media (max-width: 800px) {
+      main { grid-template-columns: 1fr; }
+      aside { border-right: 0; border-bottom: 1px solid var(--line); }
+      .stage-wrap { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <aside>
+      <section>
+        <h1>Morph Mattar Shapes</h1>
+        <p class="sub">Ferramenta local para animar os vetores da pasta Formas com morph continuo.</p>
+      </section>
+
+      <div class="control">
+        <label for="fromShape">De</label>
+        <select id="fromShape"></select>
+      </div>
+
+      <div class="control">
+        <label for="toShape">Para</label>
+        <select id="toShape"></select>
+      </div>
+
+      <div class="control">
+        <div class="readout">
+          <label for="progress">Morph</label>
+          <span id="progressLabel">0%</span>
+        </div>
+        <input id="progress" type="range" min="0" max="1000" value="0">
+      </div>
+
+      <div class="control">
+        <div class="readout">
+          <label for="duration">Dura&ccedil;&atilde;o</label>
+          <span id="durationLabel">1.8s</span>
+        </div>
+        <input id="duration" type="range" min="600" max="5200" step="100" value="1800">
+      </div>
+
+      <div class="row">
+        <button id="play">Play</button>
+        <button class="secondary" id="swap">Trocar</button>
+      </div>
+      <button id="loop">Loop 1-4</button>
+      <button class="secondary" id="random">Aleat&oacute;rio</button>
+    </aside>
+
+    <section class="stage-wrap">
+      <div class="stage">
+        <svg id="output" viewBox="0 0 1000 1000" aria-label="Visualiza&ccedil;&atilde;o do morph SVG"></svg>
+        <div class="hint">Arraste o controle Morph ou aperte Play</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const RAW_SVGS = [{"svg":"\u003c?xml version=\"1.0\" encoding=\"UTF-8\"?\u003e\n\u003csvg id=\"Camada_2\" data-name=\"Camada 2\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 820.88 654.03\"\u003e\n  \u003cdefs\u003e\n    \u003cstyle\u003e\n      .cls-1 {\n        fill: #ce211a;\n      }\n\n      .cls-2 {\n        fill: #a3191e;\n      }\n    \u003c/style\u003e\n  \u003c/defs\u003e\n  \u003cg id=\"Camada_2-2\" data-name=\"Camada 2\"\u003e\n    \u003cg id=\"Layer_1\" data-name=\"Layer 1\"\u003e\n      \u003cg\u003e\n        \u003cpath class=\"cls-1\" d=\"M476.28,393.63s-111.49,34.37-111.38,34.69l-31.58,205.53,266-126.04-123.04-114.17h0Z\"/\u003e\n        \u003cpolygon class=\"cls-2\" points=\"364.9 428.45 259.03 533.1 238 654.03 333.32 633.97 333.32 633.97 364.9 428.45 364.9 428.45\"/\u003e\n      \u003c/g\u003e\n      \u003cg\u003e\n        \u003cpath class=\"cls-1\" d=\"M820.88,143.67S650.54.23,650.54,0l-48.04,503.36,170.28-154.16,48.1-205.53h0Z\"/\u003e\n        \u003cpolygon class=\"cls-2\" points=\"650.72 .18 541.57 108.36 477.41 385.5 602.51 503.25 650.72 .18\"/\u003e\n      \u003c/g\u003e\n      \u003cg\u003e\n        \u003cpath class=\"cls-1\" d=\"M367.1,416.93l.1-.42,101.75-31,65.97-277.14h-171.51l-.14.41\"/\u003e\n        \u003cpolygon class=\"cls-2\" points=\"212.89 391.33 367.2 416.51 363.41 108.36 212.89 391.33\"/\u003e\n      \u003c/g\u003e\n      \u003cg\u003e\n        \u003cpolygon class=\"cls-1\" points=\"59.4 441.71 204.38 392.41 355.14 105.03 81.2 186.69 59.4 441.71\"/\u003e\n        \u003cpolygon class=\"cls-2\" points=\"0 365.51 60.06 441.52 81.45 186.4 0 277.07 0 365.51\"/\u003e\n      \u003c/g\u003e\n      \u003cg\u003e\n        \u003cpolygon class=\"cls-1\" points=\"185.88 550.74 84.22 550.96 62.1 448.88 211.51 398.04 185.88 550.74\"/\u003e\n        \u003cpolygon class=\"cls-2\" points=\"254.35 524.55 185.97 550.96 211.44 397.83 355.61 423.56 254.35 524.55\"/\u003e\n      \u003c/g\u003e\n    \u003c/g\u003e\n  \u003c/g\u003e\n\u003c/svg\u003e","name":"Conjunto 1"},{"svg":"\u003c?xml version=\"1.0\" encoding=\"UTF-8\"?\u003e\n\u003csvg id=\"Camada_2\" data-name=\"Camada 2\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 867.06 757.16\"\u003e\n  \u003cdefs\u003e\n    \u003cstyle\u003e\n      .cls-1 {\n        fill: #ce211a;\n      }\n\n      .cls-2 {\n        fill: #a3191e;\n      }\n    \u003c/style\u003e\n  \u003c/defs\u003e\n  \u003cg id=\"Camada_2-2\" data-name=\"Camada 2\"\u003e\n    \u003cpath class=\"cls-1\" d=\"M487.5,580.68c21.52-259.43-210.37-187.95,8.91-2.77-219.07-184.51-284.76,242.99,2.53-16.44-287.28,259.43,266-2.74-21.28,10.08,287.28-12.82,31.36-250.3,9.84,9.13Z\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M318.35,607.59c137.04-243.62-83.16-25.95,8.47-8.37-91.62-17.58-135.37,233.96,1.68-9.67-137.05,243.63,61.21,201.91-7.63,1.6q45.89,133.54,0,0c68.84,200.31,134.53-227.19-2.53,16.44q91.37-162.42,0,0h.01Z\"/\u003e\n    \u003cpath class=\"cls-1\" d=\"M724.93,317.65c235.85-233.3-118.46-531.66,13.63,11.49-132.08-543.63-232,503.36,3.84-40.27-235.85,543.63,118.33,222.97-13.62,12.33,131.95,210.64,232-216.86-3.85,16.44h0Z\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M579.11,329.17c187.18-543.31-39.85-318.3,8.73-8.65-48.59-309.64-182.05,266.82,5.13-22.17-187.18,288.99,73.04,533.89-10.01-9.42,83.05,543.31,183.32-503.06-3.86,40.25h.01Z\"/\u003e\n    \u003cpath class=\"cls-1\" d=\"M477.63,307.63q-118.08,222.17,0,.03c-176.89,332.34,34.74,267.86-8.14,2.48,42.88,265.38,180.1-311.08-5.28,22.17,126.6-333.25-159.29-333.25,13.72,0q-123.39-222.17.01-.03\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M318.19,309.45c-166.66,278.42,154.32,330.78-12.35-2.01,166.66,332.8,158.78-308.15.3,24.65,158.47-332.8-154.62,255.79,12.04-22.64h0Z\"/\u003e\n    \u003cpath class=\"cls-1\" d=\"M241.08,317.23c-319.4,363.61-17.85,261.07-11.6,3.94-6.25,257.13,307.34-340.62-12.06,22.99,319.4-363.61-250.41-193.75,21.92-6.53-272.33-187.21-317.66,343.21,1.74-20.4Z\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M65.96,367.17c-87.96,111.35,36.96,269.45-4.8-6.08,41.77,275.53,86.25-255.12-1.71,20.41,87.96-275.53-81.45-86.92,6.52-7.25-87.96-79.67-87.96,104.28,0-7.07h-.01Z\"/\u003e\n    \u003cpath class=\"cls-1\" d=\"M154.86,525.73c105.99,164.68-105.45,165.14,8.13-.02-113.58,165.16-159.59-47.17,1.77,8.17-161.36-55.33,149.41-161.09-11.95,4.07,161.36-165.16,108.04,152.47,2.05-12.22h0Z\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M294.08,527.72c-35.51,108.32-177.75,163.27,5.47-2.11-183.22,165.38-130.24-153.13-2.04,12.25-128.2-165.38,171.68-111.86-11.53-2.06,183.22-109.8-27.4,100.24,8.1-8.08h0Z\"/\u003e\n  \u003c/g\u003e\n\u003c/svg\u003e","name":"Conjunto 2"},{"svg":"\u003c?xml version=\"1.0\" encoding=\"UTF-8\"?\u003e\n\u003csvg id=\"Camada_2\" data-name=\"Camada 2\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 873.35 781.59\"\u003e\n  \u003cdefs\u003e\n    \u003cstyle\u003e\n      .cls-1 {\n        fill: #ce211a;\n      }\n\n      .cls-2 {\n        fill: #a3191e;\n      }\n    \u003c/style\u003e\n  \u003c/defs\u003e\n  \u003cg id=\"Camada_2-2\" data-name=\"Camada 2\"\u003e\n    \u003cpath class=\"cls-1\" d=\"M494.02,439.68c-6.97,84.07-79.44,106.41-150.37,46.82,70.99,59.8,50.47,193.39-42.63,277.46,93.1-84.07,266-166,359.11-170.16-93.1,4.16-173.08-70.05-166.1-154.13h-.01Z\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M401.35,477.05c-44.41,78.95-113.22,146.97-142.92,141.28,29.69,5.7,16.02,84.3-28.39,163.26,44.42-78.96,106.37-91.99,128.68-27.08q-14.87-43.27,0,0c-22.31-64.91-1.78-198.51,42.63-277.46q-29.61,52.64,0,0h0Z\"/\u003e\n    \u003cpath class=\"cls-1\" d=\"M873.35,193.95c-76.43,75.61-187.15-17.63-229.96-193.95,42.81,176.18,11.58,503.36-64.85,679.53,76.43-176.18,187.11-276.38,229.87-208.12-42.76-68.26-11.5-201.86,64.93-277.46h.01Z\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M695.3.22c-60.66,176.07-131.61,246.39-147.35,146.04,15.75,100.35-25.96,280.49-86.62,374.14,60.66-93.65,141.98-17.12,168.89,158.95-26.91-176.07,4.42-503.06,65.08-679.14h0Z\"/\u003e\n    \u003cpath class=\"cls-1\" d=\"M352.65,559.01q38.27-72,.14-.57c57.33-107.7,123.46-127.85,137.36-41.85-13.9-86,28.98-266.15,89.06-374.14-78.44,108-167.78,108-231.53,0q39.99,72-.18.56\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M200.13,524.53c54.01-90.23,154.32-73.87,208.33,33.98-54.01-107.85-56.47-308.15-5.12-416-51.36,107.85-149.2,291.78-203.21,382.01h0Z\"/\u003e\n    \u003cpath class=\"cls-1\" d=\"M21.9,588.71c103.51-117.84,197.74-149.88,195.72-66.55,2.03-83.33,100.02-270.13,203.53-387.96-103.51,117.84-281.58,170.92-369.83,110.25,88.25,60.67,74.09,226.43-29.42,344.27h0Z\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M0,471.64c28.51-36.09,67.55,13.32,81.08,102.61-13.54-89.29.37-255.12,28.87-344.41C81.45,319.13,28.51,378.06,0,352.25c28.51,25.82,28.51,83.3,0,119.39Z\"/\u003e\n    \u003cpath class=\"cls-1\" d=\"M217.3,665.51c-34.35-53.37-100.42-53.23-137.23.3,36.81-53.52,22.43-119.87-29.86-137.81,52.29,17.93,149.41-15.12,201.7-68.64-52.29,53.52-68.96,152.78-34.61,206.15Z\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M262.85,630.18c11.51-35.1-32.94-17.93-92.32,35.66,59.38-53.6,75.93-153.13,34.38-206.73,41.55,53.6,135.26,70.32,194.63,34.74-59.38,35.58-125.19,101.22-136.7,136.33h0Z\"/\u003e\n  \u003c/g\u003e\n\u003c/svg\u003e","name":"Conjunto 3"},{"svg":"\u003c?xml version=\"1.0\" encoding=\"UTF-8\"?\u003e\n\u003csvg id=\"Camada_2\" data-name=\"Camada 2\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 964.6 790.98\"\u003e\n  \u003cdefs\u003e\n    \u003cstyle\u003e\n      .cls-1 {\n        fill: #ce211a;\n      }\n\n      .cls-2 {\n        fill: #a3191e;\n      }\n    \u003c/style\u003e\n  \u003c/defs\u003e\n  \u003cg id=\"Camada_2-2\" data-name=\"Camada 2\"\u003e\n    \u003cpath class=\"cls-1\" d=\"M549.51,562.67c112.73,25.05-225.24,45.47-73.58-95.03,103.53,71.23-262.26,183.23-228.11,258.39,248.19-58.73,138.85-57.11,228.34-67.96,38.41,10.43,189.26-29.38,73.35-95.4Z\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M597.25,508.77c-193.22,34.73-284.3,42.91-356.47,112.24,158.98-34.09,15.02,63.41-142.56,71.05,131.29,24.27,194.36,20.91,312.93,98.92-134.35-132.67-104.44-85.04-201.84-89.52,83.21,22.24,140.58-79.59,247.84-247.18-39.87,42.41-166.66,69.27,140.09,54.49h.01Z\"/\u003e\n    \u003cpath class=\"cls-1\" d=\"M846.36,428.12c-174.17,169.73-78.98-204.2-25.93-279.46,218.31,308.85-305.18,544.16-425.15,594.31,60.17-28.07,417.02-147.06,551.59-27.62-55.6-256.86,3.58-130.16-100.52-287.22h.01Z\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M964.6,0c-144.15,281.97-104.85,282.46-444.93,112.2,441.98,309.3-103.96,581.63,148.13,283.25,70.96,277.64-119.16,209.87-253.73,304.69C794.72,444.23,885.96,178.64,964.6,0h0Z\"/\u003e\n    \u003cpath class=\"cls-1\" d=\"M412.68,685.96c-3.33-125.03-74.52-239.49,9.08-12.47-6.13-144.19,50.92-195.25,60.93-15.61,228.68-268.06,382.33-416.12,101.48-492.38-93.58,242.2-189.63,167.07,149.76-32.82-136,68.9-153.89,226.7-369.84,17.66\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M347.77,556.91c-105.52-194.03-16.46-205.38,113.45-65.47,80.81,78.09-104.53-258.53,277.61-256.51-117.67-7.5-476.06,280.54-391.07,321.99h.01Z\"/\u003e\n    \u003cpath class=\"cls-1\" d=\"M261.97,417.25c245.6-19.59,158.24-34.07,111.36-44.75,123.11,57.42,26.69-72.55,231.82-147.24-382.78,131.96-578.81,13.55-257.5,7.6-9.71,63.1-69.11,234.11-85.68,184.39Z\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M205.88,387.19c-77.22-129.11-64.23-84.93,34.13-18.92,21.81,82.14,16.05-48.24-23.53-203.27-50.54,53.01-51.55,127.93,8.49,137.02,64.71,35.64-106.66-82.84-19.1,85.17h.01Z\"/\u003e\n    \u003cpath class=\"cls-1\" d=\"M159.53,649.91c116.54-89.52-13.33-82.05-159.53-135.51,113.48,58.33,216.74-104.99,219.19-161.81-61.4,127.79,108.29,78.59,35.1,113.42-12.3,44.84,37.39,30.72-94.76,183.91h0Z\"/\u003e\n    \u003cpath class=\"cls-2\" d=\"M247.5,611.04c106.02-61.39-97.2-57.37-6.8-72.72,37.44,45.3,225.87-66.08-13.09-125.78,75.03,30.02,103.85,83.24,233.7,105.15,52.08,38.89-71.31,13.31-213.81,93.35h0Z\"/\u003e\n  \u003c/g\u003e\n\u003c/svg\u003e","name":"Conjunto 4"}];
+    const POINTS_PER_CONTOUR = 160;
+    const PAD = 72;
+    const SVG_NS = "http://www.w3.org/2000/svg";
+    const parser = new DOMParser();
+    const hiddenSvg = document.createElementNS(SVG_NS, "svg");
+    hiddenSvg.setAttribute("width", "0");
+    hiddenSvg.setAttribute("height", "0");
+    hiddenSvg.style.position = "absolute";
+    hiddenSvg.style.left = "-9999px";
+    hiddenSvg.style.top = "-9999px";
+    document.body.appendChild(hiddenSvg);
+
+    const $ = (id) => document.getElementById(id);
+    const output = $("output");
+    const fromShape = $("fromShape");
+    const toShape = $("toShape");
+    const progress = $("progress");
+    const progressLabel = $("progressLabel");
+    const duration = $("duration");
+    const durationLabel = $("durationLabel");
+    const loopButton = $("loop");
+
+    function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function easeInOut(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+    function distance(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+
+    function parseColor(hex) {
+      const clean = hex.replace("#", "").trim();
+      const value = clean.length === 3 ? clean.split("").map((c) => c + c).join("") : clean;
+      return [parseInt(value.slice(0, 2), 16), parseInt(value.slice(2, 4), 16), parseInt(value.slice(4, 6), 16)];
+    }
+
+    function mixColor(a, b, t) {
+      const ca = parseColor(a);
+      const cb = parseColor(b);
+      return `rgb(${Math.round(lerp(ca[0], cb[0], t))}, ${Math.round(lerp(ca[1], cb[1], t))}, ${Math.round(lerp(ca[2], cb[2], t))})`;
+    }
+
+    function styleMap(svgText) {
+      const styles = {};
+      [...svgText.matchAll(/\.([a-zA-Z0-9_-]+)\s*\{([^}]+)\}/g)].forEach((match) => {
+        const fill = match[2].match(/fill\s*:\s*(#[0-9a-fA-F]{3,6})/);
+        if (fill) styles[match[1]] = fill[1];
+      });
+      return styles;
+    }
+
+    function getFill(node, styles) {
+      const direct = node.getAttribute("fill");
+      if (direct && direct !== "none") return direct;
+      const cls = (node.getAttribute("class") || "").split(/\s+/).find((name) => styles[name]);
+      return cls ? styles[cls] : "#a3191e";
+    }
+
+    function readViewBox(svg) {
+      const values = (svg.getAttribute("viewBox") || "0 0 1000 1000").trim().split(/[\s,]+/).map(Number);
+      return { x: values[0], y: values[1], width: values[2], height: values[3] };
+    }
+
+    function normalizePoint(point, viewBox) {
+      const scale = Math.min((1000 - PAD * 2) / viewBox.width, (1000 - PAD * 2) / viewBox.height);
+      const extraX = (1000 - viewBox.width * scale) / 2;
+      const extraY = (1000 - viewBox.height * scale) / 2;
+      return { x: extraX + (point.x - viewBox.x) * scale, y: extraY + (point.y - viewBox.y) * scale };
+    }
+
+    function resampleClosedPolyline(points) {
+      if (!points.length) return [];
+      const closed = [...points, points[0]];
+      const lengths = [];
+      let total = 0;
+      for (let i = 0; i < closed.length - 1; i += 1) {
+        const len = distance(closed[i], closed[i + 1]);
+        lengths.push(len);
+        total += len;
+      }
+      return Array.from({ length: POINTS_PER_CONTOUR }, (_, i) => {
+        const target = (total * i) / POINTS_PER_CONTOUR;
+        let travelled = 0;
+        let index = 0;
+        while (index < lengths.length - 1 && travelled + lengths[index] < target) {
+          travelled += lengths[index];
+          index += 1;
+        }
+        const localT = lengths[index] === 0 ? 0 : (target - travelled) / lengths[index];
+        return { x: lerp(closed[index].x, closed[index + 1].x, localT), y: lerp(closed[index].y, closed[index + 1].y, localT) };
+      });
+    }
+
+    function samplePath(d, viewBox) {
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", d);
+      hiddenSvg.appendChild(path);
+      let length = 0;
+      try { length = path.getTotalLength(); } catch (error) { path.remove(); return []; }
+      const points = Array.from({ length: POINTS_PER_CONTOUR }, (_, i) => normalizePoint(path.getPointAtLength((length * i) / POINTS_PER_CONTOUR), viewBox));
+      path.remove();
+      return points;
+    }
+
+    function parsePolygonPoints(pointsAttr, viewBox) {
+      const numbers = pointsAttr.trim().split(/[\s,]+/).map(Number).filter((value) => !Number.isNaN(value));
+      const raw = [];
+      for (let i = 0; i < numbers.length; i += 2) raw.push(normalizePoint({ x: numbers[i], y: numbers[i + 1] }, viewBox));
+      return resampleClosedPolyline(raw);
+    }
+
+    function centroid(points) {
+      const sum = points.reduce((acc, point) => ({ x: acc.x + point.x, y: acc.y + point.y }), { x: 0, y: 0 });
+      return { x: sum.x / points.length, y: sum.y / points.length };
+    }
+
+    function polygonArea(points) {
+      let area = 0;
+      for (let i = 0; i < points.length; i += 1) {
+        const next = points[(i + 1) % points.length];
+        area += points[i].x * next.y - next.x * points[i].y;
+      }
+      return Math.abs(area / 2);
+    }
+
+    function parseSource(item) {
+      const doc = parser.parseFromString(item.svg, "image/svg+xml");
+      const svg = doc.querySelector("svg");
+      const viewBox = readViewBox(svg);
+      const styles = styleMap(item.svg);
+      const nodes = [...svg.querySelectorAll("path, polygon")];
+      const contours = nodes.map((node, index) => {
+        const tag = node.tagName.toLowerCase();
+        const points = tag === "path" ? samplePath(node.getAttribute("d"), viewBox) : parsePolygonPoints(node.getAttribute("points"), viewBox);
+        return { index, points, center: centroid(points), fill: getFill(node, styles), area: polygonArea(points) };
+      }).filter((contour) => contour.points.length);
+      return { ...item, contours };
+    }
+
+    function collapsedAt(contour) {
+      return { ...contour, points: Array.from({ length: POINTS_PER_CONTOUR }, () => ({ ...contour.center })), area: 0 };
+    }
+
+    function shiftedPoints(points, shift, reverse) {
+      const source = reverse ? [...points].reverse() : points;
+      return points.map((_, index) => source[(index + shift) % source.length]);
+    }
+
+    function alignmentCost(a, b, shift, reverse) {
+      const source = reverse ? [...b].reverse() : b;
+      let cost = 0;
+      for (let i = 0; i < a.length; i += 5) {
+        const point = source[(i + shift) % source.length];
+        cost += Math.hypot(a[i].x - point.x, a[i].y - point.y);
+      }
+      return cost;
+    }
+
+    function alignPoints(fromPoints, toPoints) {
+      let best = { shift: 0, reverse: false, cost: Infinity };
+      for (const reverse of [false, true]) {
+        for (let shift = 0; shift < toPoints.length; shift += 1) {
+          const cost = alignmentCost(fromPoints, toPoints, shift, reverse);
+          if (cost < best.cost) best = { shift, reverse, cost };
+        }
+      }
+      return shiftedPoints(toPoints, best.shift, best.reverse);
+    }
+
+    const morphPairCache = new Map();
+
+    function buildMorphPair(fromIndex, toIndex) {
+      const cacheKey = `${fromIndex}-${toIndex}`;
+      if (morphPairCache.has(cacheKey)) return morphPairCache.get(cacheKey);
+      const from = shapes[fromIndex];
+      const to = shapes[toIndex];
+      const count = Math.max(from.contours.length, to.contours.length);
+      const pairs = Array.from({ length: count }, (_, index) => {
+        const fromContour = from.contours[index] || collapsedAt(to.contours[index % to.contours.length]);
+        const toContour = to.contours[index] || collapsedAt(fromContour);
+        return { from: fromContour, to: { ...toContour, points: alignPoints(fromContour.points, toContour.points) } };
+      });
+      morphPairCache.set(cacheKey, pairs);
+      return pairs;
+    }
+
+    function contourPath(points) {
+      if (!points.length) return "";
+      let d = `M${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)}`;
+      for (let i = 1; i < points.length; i += 1) {
+        d += ` L${points[i].x.toFixed(2)} ${points[i].y.toFixed(2)}`;
+      }
+      return `${d} Z`;
+    }
+
+    function render() {
+      const fromIndex = Number(fromShape.value);
+      const toIndex = Number(toShape.value);
+      const t = Number(progress.value) / 1000;
+      output.replaceChildren();
+
+      buildMorphPair(fromIndex, toIndex).forEach((pair) => {
+        const mixed = pair.from.points.map((point, pointIndex) => ({
+          x: lerp(point.x, pair.to.points[pointIndex].x, t),
+          y: lerp(point.y, pair.to.points[pointIndex].y, t)
+        }));
+        if (polygonArea(mixed) < 4) return;
+        const path = document.createElementNS(SVG_NS, "path");
+        path.setAttribute("d", contourPath(mixed));
+        path.setAttribute("fill", mixColor(pair.from.fill, pair.to.fill, t));
+        output.appendChild(path);
+      });
+
+      progressLabel.textContent = `${Math.round(t * 100)}%`;
+    }
+
+    let animation = null;
+    let continuousAnimation = null;
+    let isLooping = false;
+
+    function stopAnimation() {
+      if (animation) cancelAnimationFrame(animation);
+      animation = null;
+    }
+
+    function stopLoop() {
+      if (continuousAnimation) cancelAnimationFrame(continuousAnimation);
+      continuousAnimation = null;
+      isLooping = false;
+      loopButton.textContent = "Loop 1-4";
+      loopButton.classList.remove("secondary");
+    }
+
+    function play() {
+      stopLoop();
+      stopAnimation();
+      const startValue = Number(progress.value);
+      const targetValue = startValue > 500 ? 0 : 1000;
+      const diff = targetValue - startValue;
+      const start = performance.now();
+      const ms = Number(duration.value);
+      function tick(now) {
+        const t = clamp((now - start) / ms, 0, 1);
+        progress.value = Math.round(startValue + diff * easeInOut(t));
+        render();
+        if (t < 1) animation = requestAnimationFrame(tick);
+      }
+      animation = requestAnimationFrame(tick);
+    }
+
+    function setPair(fromIndex, toIndex) {
+      fromShape.value = String(fromIndex);
+      toShape.value = String(toIndex);
+    }
+
+    function runLoopSegment(fromIndex, toIndex) {
+      setPair(fromIndex, toIndex);
+      const start = performance.now();
+      const ms = Number(duration.value);
+      function tick(now) {
+        if (!isLooping) return;
+        const t = clamp((now - start) / ms, 0, 1);
+        progress.value = Math.round(easeInOut(t) * 1000);
+        render();
+        if (t < 1) {
+          continuousAnimation = requestAnimationFrame(tick);
+          return;
+        }
+        progress.value = 0;
+        runLoopSegment(toIndex, (toIndex + 1) % shapes.length);
+      }
+      continuousAnimation = requestAnimationFrame(tick);
+    }
+
+    function toggleLoop() {
+      if (isLooping) { stopLoop(); return; }
+      stopAnimation();
+      isLooping = true;
+      loopButton.textContent = "Parar loop";
+      loopButton.classList.add("secondary");
+      progress.value = 0;
+      runLoopSegment(0, 1);
+    }
+
+    const shapes = RAW_SVGS.map(parseSource);
+
+    shapes.forEach((shape, index) => {
+      fromShape.add(new Option(shape.name, index));
+      toShape.add(new Option(shape.name, index));
+    });
+    toShape.value = "1";
+
+    [fromShape, toShape, progress].forEach((input) => input.addEventListener("input", () => { stopLoop(); render(); }));
+    duration.addEventListener("input", () => { durationLabel.textContent = `${(Number(duration.value) / 1000).toFixed(1)}s`; });
+    $("play").addEventListener("click", play);
+    $("loop").addEventListener("click", toggleLoop);
+    $("swap").addEventListener("click", () => {
+      stopLoop();
+      const oldFrom = fromShape.value;
+      fromShape.value = toShape.value;
+      toShape.value = oldFrom;
+      progress.value = 0;
+      render();
+    });
+    $("random").addEventListener("click", () => {
+      stopLoop();
+      const from = Math.floor(Math.random() * shapes.length);
+      let to = Math.floor(Math.random() * shapes.length);
+      if (to === from) to = (to + 1) % shapes.length;
+      setPair(from, to);
+      progress.value = 0;
+      render();
+      play();
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mattar Cursor Tilt</title>
+    <meta
+      name="description"
+      content="Ferramenta interativa para testar perspectiva por cursor no vetor Mattar."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="tool-shell" id="stage">
+      <section class="preview-area" aria-label="Preview interativo do vetor">
+        <div class="brand-mark" aria-hidden="true">Mattar</div>
+        <div class="perspective-space">
+          <div class="tilt-card" id="tiltCard">
+            <svg
+              class="m-vector"
+              id="mVector"
+              width="148"
+              height="111"
+              viewBox="0 0 148 111"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              role="img"
+              aria-labelledby="vectorTitle"
+            >
+              <title id="vectorTitle">Vetor M Mattar</title>
+              <path
+                d="M0 110.981H42.3366C44.7114 110.981 48.2467 109.864 50.1925 108.499L70.2158 94.4502C72.1615 93.0853 75.3453 93.0853 77.291 94.4502L97.3144 108.499C99.2601 109.864 102.795 110.981 105.17 110.981H147.507L138.501 0H95.2375C92.8628 0 89.9099 1.66506 88.6763 3.69898L75.9964 24.6131C74.7628 26.647 72.7441 26.647 71.5105 24.6131L58.8305 3.69898C57.5969 1.66506 54.6441 0 52.2693 0H9.00604L0 110.981Z"
+                fill="currentColor"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="cursor-readout" id="readout">X 50 / Y 50</div>
+      </section>
+
+      <aside class="controls" aria-label="Controles de movimento">
+        <div>
+          <p class="eyebrow">Cursor-driven perspective tilt</p>
+          <h1>Interação do vetor Mattar</h1>
+        </div>
+
+        <div class="control-list">
+          <label class="control-row">
+            <span>Rotação</span>
+            <input id="rotation" type="range" min="0" max="32" value="18" />
+            <output id="rotationValue">18°</output>
+          </label>
+
+          <label class="control-row">
+            <span>Deslocamento</span>
+            <input id="travel" type="range" min="0" max="70" value="34" />
+            <output id="travelValue">34px</output>
+          </label>
+
+          <label class="control-row">
+            <span>Escala</span>
+            <input id="scale" type="range" min="60" max="220" value="120" />
+            <output id="scaleValue">120%</output>
+          </label>
+
+          <label class="control-row">
+            <span>Perspectiva</span>
+            <input id="perspective" type="range" min="320" max="1200" value="680" />
+            <output id="perspectiveValue">680px</output>
+          </label>
+
+          <label class="control-row">
+            <span>Brilho</span>
+            <input id="glow" type="range" min="0" max="100" value="58" />
+            <output id="glowValue">58%</output>
+          </label>
+        </div>
+
+        <div class="palette-block">
+          <span>Vetor</span>
+          <div class="swatches" aria-label="Cores do vetor">
+            <button class="swatch vector-swatch is-active" data-color="#CE211A" style="--swatch: #ce211a">
+              <span>Vermelho</span>
+            </button>
+            <button class="swatch vector-swatch" data-color="#0E100F" style="--swatch: #0e100f">
+              <span>Preto</span>
+            </button>
+            <button class="swatch vector-swatch" data-color="#F7F4EE" style="--swatch: #f7f4ee">
+              <span>Claro</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="palette-block">
+          <span>Fundo</span>
+          <div class="swatches" aria-label="Cores do fundo">
+            <button class="swatch bg-swatch is-active" data-color="#10100F" style="--swatch: #10100f">
+              <span>Preto</span>
+            </button>
+            <button class="swatch bg-swatch" data-color="#F2EFE8" style="--swatch: #f2efe8">
+              <span>Claro</span>
+            </button>
+            <button class="swatch bg-swatch" data-color="#CE211A" style="--swatch: #ce211a">
+              <span>Vermelho</span>
+            </button>
+            <button class="swatch bg-swatch" data-color="#B8B0A3" style="--swatch: #b8b0a3">
+              <span>Cinza quente</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button class="action-button" id="autoMode" type="button">Modo automático</button>
+          <button class="ghost-button" id="reset" type="button">Resetar</button>
+        </div>
+      </aside>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

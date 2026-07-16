@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mattar 3D World Flows</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #211b19;
+      --muted: #6f6560;
+      --line: #ddd5ce;
+      --paper: #f6f1e9;
+      --panel: rgba(255, 253, 249, 0.82);
+      --panel-solid: #fffdf9;
+      --accent: #a3191e;
+      --accent-2: #ce211a;
+      --accent-soft: rgba(206, 33, 26, 0.13);
+      --ocean: #eee7dd;
+      --land: #d9d0c5;
+      --land-back: #c6bbb0;
+      --shadow: 0 18px 50px rgba(42, 30, 24, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 18%, rgba(163, 25, 30, 0.12), transparent 28%),
+        radial-gradient(circle at 82% 70%, rgba(206, 33, 26, 0.13), transparent 34%),
+        var(--paper);
+    }
+
+    main {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(280px, 344px) minmax(0, 1fr);
+    }
+
+    aside {
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 28px;
+      border-right: 1px solid var(--line);
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      box-shadow: 8px 0 36px rgba(42, 30, 24, 0.05);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .sub {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .controls,
+    .legend,
+    .selection {
+      display: grid;
+      gap: 10px;
+    }
+
+    .readout {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    label,
+    .eyebrow {
+      color: #4e4540;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: var(--ink);
+      background: var(--panel-solid);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease, color 160ms ease, border-color 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: #f7f1ea;
+    }
+
+    button[aria-pressed="true"],
+    button.primary {
+      color: #fffdf9;
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .legend-item {
+      display: grid;
+      grid-template-columns: 14px 1fr;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 5px var(--accent-soft);
+    }
+
+    .selection {
+      min-height: 116px;
+      margin-top: auto;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-solid);
+      box-shadow: var(--shadow);
+    }
+
+    .selection h2 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .selection p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .stage {
+      position: relative;
+      min-width: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      overflow: hidden;
+    }
+
+    .map-wrap {
+      position: relative;
+      width: min(100%, 1120px);
+      aspect-ratio: 1.25;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    svg:active { cursor: grabbing; }
+
+    .sphere {
+      fill: var(--ocean);
+      stroke: rgba(33, 27, 25, 0.22);
+      stroke-width: 1.2;
+    }
+
+    .glow {
+      fill: none;
+      stroke: rgba(163, 25, 30, 0.14);
+      stroke-width: 16;
+    }
+
+    .graticule {
+      fill: none;
+      stroke: rgba(33, 27, 25, 0.11);
+      stroke-width: 0.7;
+    }
+
+    .country {
+      fill: var(--land);
+      stroke: rgba(33, 27, 25, 0.2);
+      stroke-width: 0.45;
+    }
+
+    .country.back {
+      fill: var(--land-back);
+      opacity: 0.28;
+      stroke: none;
+    }
+
+    .route {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 2.1;
+      stroke-linecap: round;
+      opacity: 0.78;
+      filter: drop-shadow(0 8px 12px rgba(163, 25, 30, 0.16));
+      pointer-events: stroke;
+      cursor: pointer;
+    }
+
+    .route.is-muted { opacity: 0.24; }
+    .route.is-active { stroke: var(--accent-2); opacity: 1; stroke-width: 3; }
+
+    .city {
+      fill: var(--ink);
+      stroke: var(--paper);
+      stroke-width: 1.5;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .particle {
+      fill: var(--accent-2);
+      stroke: #fffdf9;
+      stroke-width: 1.4;
+      filter: drop-shadow(0 6px 10px rgba(163, 25, 30, 0.32));
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .particle-ring {
+      fill: rgba(206, 33, 26, 0.12);
+      stroke: rgba(206, 33, 26, 0.32);
+      stroke-width: 1;
+      pointer-events: none;
+    }
+
+    .tooltip {
+      position: absolute;
+      z-index: 3;
+      width: min(260px, calc(100% - 24px));
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: rgba(255, 253, 249, 0.95);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      transform: translate(-50%, calc(-100% - 14px));
+      pointer-events: none;
+    }
+
+    .tooltip[hidden] { display: none; }
+
+    .tooltip strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .tooltip span,
+    .tooltip small {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .hint {
+      position: absolute;
+      right: 24px;
+      bottom: 18px;
+      color: rgba(33, 27, 25, 0.5);
+      font-size: 12px;
+      pointer-events: none;
+    }
+
+    @media (max-width: 860px) {
+      body { overflow: auto; }
+
+      main {
+        min-height: 100vh;
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .selection { margin-top: 0; }
+      .stage { min-height: 58vh; padding: 14px; }
+      .map-wrap { aspect-ratio: 0.9; }
+      .hint { display: none; }
+    }
+
+    body.is-embed {
+      background: transparent;
+    }
+    body.is-embed main {
+      min-height: 100vh;
+      display: block;
+      background: transparent;
+    }
+    body.is-embed aside,
+    body.is-embed .tooltip,
+    body.is-embed .hint {
+      display: none !important;
+    }
+    body.is-embed .stage {
+      min-height: 100vh;
+      padding: 0;
+      background: transparent;
+    }
+    body.is-embed .map-wrap {
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      aspect-ratio: auto;
+      display: grid;
+      place-items: center;
+    }
+    body.is-embed svg {
+      width: min(100vw, 1120px);
+      height: min(100vh, 880px);
+    }
+    body.is-red-embed,
+    body.is-red-embed main,
+    body.is-red-embed .stage,
+    body.is-red-embed .map-wrap {
+      background:#ce211a !important;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    const worldParams = new URLSearchParams(window.location.search);
+    if (worldParams.has("embed")) document.body.classList.add("is-embed");
+    if (worldParams.get("theme") === "red") document.body.classList.add("is-red-embed");
+    window.addEventListener("wheel", (event) => {
+      if (window.parent === window) return;
+      window.parent.postMessage({ type: event.deltaY > 0 ? "mattar-next" : "mattar-prev" }, "*");
+    }, { passive: true });
+  </script>
+  <main>
+    <aside>
+      <section>
+        <h1>Mapa mundi 3D naveg&aacute;vel</h1>
+        <p class="sub">Arraste o globo, acompanhe os fluxos e clique nas bolinhas em movimento para fixar o detalhe.</p>
+      </section>
+
+      <div class="controls">
+        <div class="readout">
+          <label for="speed">Velocidade</label>
+          <span id="speedLabel">1.0x</span>
+        </div>
+        <input id="speed" type="range" min="0" max="240" value="100">
+        <div class="button-row">
+          <button id="rotate" type="button" aria-pressed="true">Rota&ccedil;&atilde;o</button>
+          <button id="reset" type="button">Centralizar</button>
+        </div>
+      </div>
+
+      <div class="legend" aria-label="Legenda">
+        <div class="eyebrow">Camadas</div>
+        <div class="legend-item"><span class="swatch"></span><span>Fluxos clic&aacute;veis com part&iacute;culas animadas</span></div>
+        <div class="legend-item"><span class="swatch" style="background: var(--ink); box-shadow: 0 0 0 5px rgba(33,27,25,0.08);"></span><span>Origem e hubs globais</span></div>
+      </div>
+
+      <section class="selection" aria-live="polite">
+        <span class="eyebrow">Sele&ccedil;&atilde;o</span>
+        <h2 id="selectionTitle">Mattar Global Studio</h2>
+        <p id="selectionText">Passe o mouse ou clique em um fluxo, hub ou bolinha para abrir o detalhe.</p>
+      </section>
+    </aside>
+
+    <section class="stage">
+      <div class="map-wrap" id="mapWrap">
+        <svg id="map" viewBox="0 0 1100 880" role="img" aria-label="Globo naveg&aacute;vel com fluxos globais da marca Mattar"></svg>
+        <div class="tooltip" id="tooltip" hidden></div>
+        <div class="hint">Arraste para navegar &middot; Clique nas bolinhas</div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { geoOrthographic, geoPath, geoGraticule10, geoInterpolate } from "https://esm.sh/d3-geo@3.1.1";
+    import { select, pointer } from "https://esm.sh/d3-selection@3.0.0";
+    import { drag } from "https://esm.sh/d3-drag@3.0.0";
+    import { feature } from "https://esm.sh/topojson-client@3.1.0";
+    import world from "https://esm.sh/@d3-maps/atlas@1.0.0/world/countries/countries-110m";
+
+    const svg = select("#map");
+    const wrap = document.getElementById("mapWrap");
+    const tooltip = document.getElementById("tooltip");
+    const selectionTitle = document.getElementById("selectionTitle");
+    const selectionText = document.getElementById("selectionText");
+    const speedInput = document.getElementById("speed");
+    const speedLabel = document.getElementById("speedLabel");
+    const rotateButton = document.getElementById("rotate");
+    const resetButton = document.getElementById("reset");
+
+    const width = 1100;
+    const height = 880;
+    const countries = feature(world, world.objects.features).features;
+    const projection = geoOrthographic()
+      .translate([width / 2, height / 2])
+      .scale(365)
+      .rotate([42, -18, 0])
+      .precision(0.35)
+      .clipAngle(90);
+    const path = geoPath(projection);
+    const graticule = geoGraticule10();
+
+    const flows = [
+      {
+        id: "lisbon",
+        from: "S\u00e3o Paulo",
+        to: "Lisboa",
+        coords: [[-46.6333, -23.5505], [-9.1393, 38.7223]],
+        label: "S\u00e3o Paulo \u2192 Lisboa",
+        detail: "Estrat\u00e9gia, identidade e sistemas editoriais atravessando o Atl\u00e2ntico."
+      },
+      {
+        id: "new-york",
+        from: "S\u00e3o Paulo",
+        to: "Nova York",
+        coords: [[-46.6333, -23.5505], [-74.006, 40.7128]],
+        label: "S\u00e3o Paulo \u2192 Nova York",
+        detail: "Narrativas de marca, tecnologia criativa e presen\u00e7a digital."
+      },
+      {
+        id: "london",
+        from: "S\u00e3o Paulo",
+        to: "Londres",
+        coords: [[-46.6333, -23.5505], [-0.1276, 51.5072]],
+        label: "S\u00e3o Paulo \u2192 Londres",
+        detail: "Dire\u00e7\u00e3o visual, pesquisa e experi\u00eancias para p\u00fablicos internacionais."
+      },
+      {
+        id: "dubai",
+        from: "S\u00e3o Paulo",
+        to: "Dubai",
+        coords: [[-46.6333, -23.5505], [55.2708, 25.2048]],
+        label: "S\u00e3o Paulo \u2192 Dubai",
+        detail: "Fluxos de inova\u00e7\u00e3o, arquitetura de apresenta\u00e7\u00e3o e expans\u00e3o."
+      },
+      {
+        id: "tokyo",
+        from: "S\u00e3o Paulo",
+        to: "T\u00f3quio",
+        coords: [[-46.6333, -23.5505], [139.6917, 35.6895]],
+        label: "S\u00e3o Paulo \u2192 T\u00f3quio",
+        detail: "Cultura visual, movimento e prototipagem para novas interfaces."
+      },
+      {
+        id: "cape-town",
+        from: "Lisboa",
+        to: "Cidade do Cabo",
+        coords: [[-9.1393, 38.7223], [18.4241, -33.9249]],
+        label: "Lisboa \u2192 Cidade do Cabo",
+        detail: "Rede editorial e desdobramentos de campanha em mercados emergentes."
+      }
+    ];
+
+    const hubs = [
+      { name: "S\u00e3o Paulo", coords: [-46.6333, -23.5505], detail: "Origem Mattar e centro dos fluxos." },
+      { name: "Lisboa", coords: [-9.1393, 38.7223], detail: "Ponte editorial e estrat\u00e9gica." },
+      { name: "Nova York", coords: [-74.006, 40.7128], detail: "Hub de presen\u00e7a e tecnologia." },
+      { name: "Londres", coords: [-0.1276, 51.5072], detail: "Hub de pesquisa e design." },
+      { name: "Dubai", coords: [55.2708, 25.2048], detail: "Hub de expans\u00e3o." },
+      { name: "T\u00f3quio", coords: [139.6917, 35.6895], detail: "Hub de cultura visual e motion." },
+      { name: "Cidade do Cabo", coords: [18.4241, -33.9249], detail: "Hub de campanha." }
+    ];
+
+    let autoRotate = true;
+    let locked = null;
+    let activeId = null;
+    let lastTime = performance.now();
+
+    const sphereLayer = svg.append("g");
+    const backLayer = svg.append("g");
+    const countryLayer = svg.append("g");
+    const routeLayer = svg.append("g");
+    const cityLayer = svg.append("g");
+    const particleLayer = svg.append("g");
+
+    sphereLayer.append("path").attr("class", "glow").datum({ type: "Sphere" });
+    sphereLayer.append("path").attr("class", "sphere").datum({ type: "Sphere" });
+    sphereLayer.append("path").attr("class", "graticule").datum(graticule);
+
+    backLayer.selectAll("path")
+      .data(countries)
+      .join("path")
+      .attr("class", "country back");
+
+    countryLayer.selectAll("path")
+      .data(countries)
+      .join("path")
+      .attr("class", "country");
+
+    const routePaths = routeLayer.selectAll("path")
+      .data(flows)
+      .join("path")
+      .attr("class", "route")
+      .on("mouseenter focus", (event, flow) => showFlow(flow, event, false))
+      .on("click", (event, flow) => {
+        event.stopPropagation();
+        showFlow(flow, event, true);
+      });
+
+    const cities = cityLayer.selectAll("circle")
+      .data(hubs)
+      .join("circle")
+      .attr("class", "city")
+      .attr("r", 4.8)
+      .on("mouseenter focus", (event, hub) => showHub(hub, event, false))
+      .on("click", (event, hub) => {
+        event.stopPropagation();
+        showHub(hub, event, true);
+      });
+
+    const particles = particleLayer.selectAll("g")
+      .data(flows)
+      .join("g")
+      .attr("role", "button")
+      .attr("aria-label", (d) => d.label)
+      .on("mouseenter focus", (event, flow) => showFlow(flow, event, false))
+      .on("click", (event, flow) => {
+        event.stopPropagation();
+        showFlow(flow, event, true);
+      });
+
+    particles.append("circle").attr("class", "particle-ring").attr("r", 12);
+    particles.append("circle").attr("class", "particle").attr("r", 5.8);
+
+    svg.on("click", () => {
+      locked = null;
+      activeId = null;
+      tooltip.hidden = true;
+      setSelection("Mattar Global Studio", "Passe o mouse ou clique em um fluxo, hub ou bolinha para abrir o detalhe.");
+      updateActiveStyles();
+    });
+
+    svg.call(drag()
+      .on("start", () => { autoRotate = false; syncRotateButton(); })
+      .on("drag", (event) => {
+        const rotate = projection.rotate();
+        const factor = 0.42;
+        projection.rotate([rotate[0] + event.dx * factor, rotate[1] - event.dy * factor, rotate[2]]);
+        draw(performance.now());
+      }));
+
+    rotateButton.addEventListener("click", () => {
+      autoRotate = !autoRotate;
+      syncRotateButton();
+    });
+
+    resetButton.addEventListener("click", () => {
+      projection.rotate([42, -18, 0]);
+      draw(performance.now());
+    });
+
+    speedInput.addEventListener("input", () => {
+      const value = Number(speedInput.value) / 100;
+      speedLabel.textContent = `${value.toFixed(1)}x`;
+    });
+
+    function syncRotateButton() {
+      rotateButton.setAttribute("aria-pressed", String(autoRotate));
+    }
+
+    function setSelection(title, text) {
+      selectionTitle.textContent = title;
+      selectionText.textContent = text;
+    }
+
+    function emit(payload) {
+      if (window.parent !== window) window.parent.postMessage({ type: "mattar-world-point", payload }, "*");
+    }
+
+    function emitSelection(entry, coords, meta = {}) {
+      const point = projection(coords);
+      emit(Object.assign({}, meta, {
+        id: entry.id || entry.name || entry.label,
+        project: entry.label || entry.name,
+        title: entry.label || entry.name,
+        city: entry.to || entry.name,
+        place: entry.to || entry.name,
+        description: entry.detail || "",
+        text: entry.detail || "",
+        screenX: point?.[0],
+        screenY: point?.[1],
+        visible: Boolean(point && isVisible(coords))
+      }));
+    }
+
+    function isVisible(coords) {
+      const rotate = projection.rotate();
+      const center = [-rotate[0], -rotate[1]];
+      return d3GeoDistance(center, coords) < Math.PI / 2;
+    }
+
+    function d3GeoDistance(a, b) {
+      const lambda1 = a[0] * Math.PI / 180;
+      const phi1 = a[1] * Math.PI / 180;
+      const lambda2 = b[0] * Math.PI / 180;
+      const phi2 = b[1] * Math.PI / 180;
+      const sinPhi = Math.sin((phi2 - phi1) / 2);
+      const sinLambda = Math.sin((lambda2 - lambda1) / 2);
+      return 2 * Math.asin(Math.sqrt(sinPhi * sinPhi + Math.cos(phi1) * Math.cos(phi2) * sinLambda * sinLambda));
+    }
+
+    function routeFeature(flow) {
+      const interp = geoInterpolate(flow.coords[0], flow.coords[1]);
+      const coords = Array.from({ length: 72 }, (_, index) => interp(index / 71));
+      return { type: "LineString", coordinates: coords };
+    }
+
+    function routePoint(flow, phase) {
+      const interp = geoInterpolate(flow.coords[0], flow.coords[1]);
+      return interp(phase);
+    }
+
+    function showTooltip(title, text, screenPoint) {
+      tooltip.innerHTML = `<strong>${title}</strong><span>${text}</span><small>Clique para fixar, clique fora para limpar.</small>`;
+      tooltip.hidden = false;
+      const bounds = wrap.getBoundingClientRect();
+      const x = Math.max(130, Math.min(bounds.width - 130, screenPoint[0]));
+      const y = Math.max(80, Math.min(bounds.height - 14, screenPoint[1]));
+      tooltip.style.left = `${x}px`;
+      tooltip.style.top = `${y}px`;
+    }
+
+    function showFlow(flow, event, shouldLock) {
+      const [x, y] = pointer(event, wrap);
+      activeId = flow.id;
+      if (shouldLock) locked = flow;
+      showTooltip(flow.label, flow.detail, [x, y]);
+      setSelection(flow.label, flow.detail);
+      emitSelection(flow, Array.isArray(flow.coords?.[0]) ? flow.coords[1] : flow.coords, { id: flow.id, kind: 'flow', locked: Boolean(shouldLock) });
+      updateActiveStyles();
+    }
+
+    function showHub(hub, event, shouldLock) {
+      const [x, y] = pointer(event, wrap);
+      activeId = 'hub-' + hub.name;
+      if (shouldLock) locked = hub;
+      showTooltip(hub.name, hub.detail, [x, y]);
+      setSelection(hub.name, hub.detail);
+      emitSelection({ id: 'hub-' + hub.name, label: hub.name, detail: hub.detail, to: hub.name }, hub.coords, { id: 'hub-' + hub.name, kind: 'hub', locked: Boolean(shouldLock) });
+      updateActiveStyles();
+    }
+
+    function updateActiveStyles() {
+      routePaths
+        .classed("is-active", (d) => activeId === d.id)
+        .classed("is-muted", (d) => activeId && activeId !== d.id);
+      particles.style("opacity", (d) => !activeId || activeId === d.id ? 1 : 0.34);
+      cities.style("opacity", (d) => !activeId || activeId === `hub-${d.name}` ? 1 : 0.52);
+    }
+
+    function draw(now) {
+      const dt = now - lastTime;
+      lastTime = now;
+      if (autoRotate) {
+        const rotate = projection.rotate();
+        const speed = Number(speedInput.value) / 100;
+        projection.rotate([rotate[0] + dt * 0.0045 * speed, rotate[1], rotate[2]]);
+      }
+
+      sphereLayer.selectAll("path").attr("d", path);
+      backLayer.selectAll("path").attr("d", path);
+      countryLayer.selectAll("path").attr("d", path);
+
+      routePaths
+        .attr("d", (d) => path(routeFeature(d)))
+        .style("display", (d) => isVisible(d.coords[0]) || isVisible(d.coords[1]) ? null : "none");
+
+      cities
+        .attr("cx", (d) => projection(d.coords)?.[0] ?? -999)
+        .attr("cy", (d) => projection(d.coords)?.[1] ?? -999)
+        .style("display", (d) => isVisible(d.coords) ? null : "none");
+
+      particles.each(function(flow, index) {
+        const t = ((now * 0.00012 * (Number(speedInput.value) / 100 + 0.18)) + index * 0.17) % 1;
+        const coords = routePoint(flow, t);
+        const point = projection(coords);
+        const visible = point && isVisible(coords);
+        select(this)
+          .attr("transform", visible ? `translate(${point[0]},${point[1]})` : "translate(-999,-999)")
+          .style("display", visible ? null : "none");
+      });
+
+      if (locked && locked.coords) {
+        const coords = Array.isArray(locked.coords[0]) ? routePoint(locked, 0.5) : locked.coords;
+        const point = projection(coords);
+        if (point && isVisible(coords)) {
+          showTooltip(locked.label || locked.name, locked.detail, point);
+          emitSelection(locked.label ? { id: locked.id || locked.label, label: locked.label, detail: locked.detail, to: locked.to } : { id: locked.name, label: locked.name, detail: locked.detail, to: locked.name }, coords, { id: locked.id || locked.name });
+        }
+      }
+
+      updateActiveStyles();
+    }
+
+    function frame(now) {
+      draw(now);
+      requestAnimationFrame(frame);
+    }
+
+    syncRotateButton();
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
+
+

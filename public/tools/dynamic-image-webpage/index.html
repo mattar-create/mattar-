@@ -1,0 +1,377 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Imagens dinamicas</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #12100d;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    main {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      padding: 0;
+    }
+
+    .item {
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      z-index: 1;
+      width: clamp(6.5rem, 11vw, 10rem);
+      height: clamp(9.5rem, 17vw, 14rem);
+      list-style: none;
+      overflow: hidden;
+      border-radius: .5rem;
+      background-position: center;
+      background-size: cover;
+      box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, .36);
+      opacity: 0;
+      transform: translateY(-50%);
+      transition:
+        left .75s ease,
+        top .75s ease,
+        width .75s ease,
+        height .75s ease,
+        border-radius .75s ease,
+        box-shadow .75s ease,
+        opacity .35s ease,
+        transform .75s ease;
+    }
+
+    .item::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(8, 7, 6, .56), rgba(8, 7, 6, .08) 45%, rgba(8, 7, 6, .42)),
+        linear-gradient(0deg, rgba(8, 7, 6, .3), rgba(8, 7, 6, 0) 42%);
+      opacity: .9;
+      pointer-events: none;
+    }
+
+    .item:nth-child(1),
+    .item:nth-child(2) {
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      box-shadow: none;
+      opacity: 1;
+      transform: none;
+    }
+
+    .item:nth-child(3) {
+      left: max(50%, calc(100% - 45rem));
+      opacity: 1;
+    }
+
+    .item:nth-child(4) {
+      left: calc(max(50%, calc(100% - 45rem)) + clamp(7.25rem, 12.5vw, 11.5rem));
+      opacity: 1;
+    }
+
+    .item:nth-child(5) {
+      left: calc(max(50%, calc(100% - 45rem)) + clamp(14.5rem, 25vw, 23rem));
+      opacity: 1;
+    }
+
+    .item:nth-child(6) {
+      left: calc(max(50%, calc(100% - 45rem)) + clamp(21.75rem, 37.5vw, 34.5rem));
+      opacity: 0;
+    }
+
+    .item:nth-child(n + 7) {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .content {
+      position: absolute;
+      left: clamp(1.25rem, 5vw, 4.5rem);
+      bottom: clamp(5.25rem, 10vw, 8rem);
+      z-index: 2;
+      width: min(27rem, calc(100vw - 2.5rem));
+      color: #fff;
+      text-shadow: 0 .25rem 1rem rgba(0, 0, 0, .45);
+      opacity: 0;
+      transform: translateY(1.5rem);
+      pointer-events: none;
+    }
+
+    .content .kicker {
+      margin: 0 0 .8rem;
+      font-size: .72rem;
+      font-weight: 750;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .content .title {
+      margin: 0;
+      font-size: clamp(2.4rem, 8vw, 6.6rem);
+      line-height: .88;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .content .counter {
+      display: inline-flex;
+      min-width: 4.4rem;
+      margin-top: 1rem;
+      padding: .55rem .7rem;
+      border: 1px solid rgba(255, 255, 255, .42);
+      border-radius: .45rem;
+      background: rgba(0, 0, 0, .18);
+      backdrop-filter: blur(.7rem);
+      font-size: .78rem;
+      font-weight: 700;
+    }
+
+    .item:nth-child(2) .content {
+      animation: reveal .75s ease .24s forwards;
+    }
+
+    @keyframes reveal {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .nav {
+      position: absolute;
+      left: 50%;
+      bottom: clamp(1rem, 4vw, 2rem);
+      z-index: 5;
+      display: flex;
+      gap: .65rem;
+      transform: translateX(-50%);
+      user-select: none;
+    }
+
+    .btn {
+      display: grid;
+      width: 3rem;
+      height: 3rem;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, .56);
+      border-radius: 999px;
+      color: #111;
+      background: rgba(255, 255, 255, .74);
+      box-shadow: 0 .8rem 1.7rem rgba(0, 0, 0, .22);
+      cursor: pointer;
+      transition: transform .2s ease, background .2s ease;
+    }
+
+    .btn:hover {
+      background: #fff;
+      transform: translateY(-.08rem);
+    }
+
+    .btn svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      stroke-width: 2.4;
+    }
+
+    .shuffle {
+      position: absolute;
+      top: clamp(1rem, 3vw, 1.75rem);
+      right: clamp(1rem, 3vw, 1.75rem);
+      z-index: 5;
+    }
+
+    @media (max-width: 760px) {
+      .item {
+        width: 6rem;
+        height: 8.75rem;
+      }
+
+      .item:nth-child(3) {
+        left: 44%;
+        top: 70%;
+      }
+
+      .item:nth-child(4) {
+        left: calc(44% + 6.6rem);
+        top: 70%;
+      }
+
+      .item:nth-child(5),
+      .item:nth-child(6) {
+        left: calc(44% + 13.2rem);
+        top: 70%;
+        opacity: 0;
+      }
+
+      .content {
+        bottom: 14rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main aria-label="Galeria dinamica">
+    <ul class="slider" id="slider"></ul>
+
+    <button class="btn shuffle" hidden type="button" id="shuffle" aria-label="Sortear imagens">
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m16 3 4 4-4 4"></path>
+        <path d="M4 7h5c2 0 3.2 1.1 4.4 2.7"></path>
+        <path d="m16 13 4 4-4 4"></path>
+        <path d="M4 17h5c4 0 5.3-10 11-10"></path>
+      </svg>
+    </button>
+
+    <nav class="nav" aria-label="Navegacao da galeria">
+      <button class="btn prev" type="button" aria-label="Imagem anterior">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m15 18-6-6 6-6"></path>
+        </svg>
+      </button>
+      <button class="btn next" type="button" aria-label="Proxima imagem">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m9 18 6-6-6-6"></path>
+        </svg>
+      </button>
+    </nav>
+  </main>
+
+  <script>
+    const imageDir = "../../../assets/image/";
+    const imageNames = [
+      "213__DSF2886 1.png",
+      "imageye___-_imgi_11_fc_30bienal_13-copia-1024x683 1.png",
+      "imageye___-_imgi_1_bc6bb143-76b8-4163-9425-6a29743deeb4 1.png",
+      "imageye___-_imgi_1_beluzco2-copia 1.png",
+      "imageye___-_imgi_1_Copia-de-25_04_2016_6077-1-scaled 1.png",
+      "imageye___-_imgi_1_Migraflix-Overview-v-2.00_00_07_10.Quadro006-e1760977785415 1.png",
+      "imageye___-_imgi_2_8152968c-583b-498d-b5c7-ff1ab8eee30f 2.png",
+      "imageye___-_imgi_2_beluzco_03-copia-2048x884 1.png",
+      "imageye___-_imgi_2_IMG_5728-scaled 1.png",
+      "imageye___-_imgi_30_Captura-de-Tela-2023-12-21-as-08.26.23-copia-1024x702 1.png",
+      "imageye___-_imgi_33_Migraflix-Overview-v-2.00_00_01_20.Quadro003-800x1423 1.png",
+      "imageye___-_imgi_38_Captura-de-Tela-2023-12-21-as-08.26.41-copia-768x768 1.png",
+      "imageye___-_imgi_3_Concha-Y-Toro-Simone-Copiar-06.00_00_30_28.Quadro024-scaled 1.png",
+      "imageye___-_imgi_3_fc_30bienal_05-copia 1.png",
+      "imageye___-_imgi_41_Migraflix-Overview-v-2.00_00_06_20.Quadro005-864x1536 1.png",
+      "imageye___-_imgi_42_geluminas_16-copia-1024x720 1.png",
+      "imageye___-_imgi_4_geluminas_06-copia-2048x1365 1.png",
+      "imageye___-_imgi_60_Selecao-24_05.00_55_43_01.Quadro025-1400x2489 1.png",
+      "imageye___-_imgi_7_Concha-Y-Toro-Simone-Copiar-06.00_00_28_23.Quadro020-scaled 1.png",
+      "imageye___-_imgi_9_Dadiva-Selecao-Total.00_17_03_06.Quadro004-scaled 1.png",
+      "JG0A0215 1.png",
+      "JG0A0408 1.png",
+      "_DSF6711 1.png",
+      "_DSF7104 1.png",
+      "_DSF8072 1.png"
+    ];
+
+    const slider = document.querySelector("#slider");
+    const shuffleButton = document.querySelector("#shuffle");
+    const nextButton = document.querySelector(".next");
+    const prevButton = document.querySelector(".prev");
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let index = copy.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];
+      }
+      return copy;
+    }
+
+    function createItem(name, index, total) {
+      const item = document.createElement("li");
+      item.className = "item";
+      item.style.backgroundImage = `url("${imageDir + encodeURIComponent(name)}")`;
+      item.dataset.name = name;
+      item.setAttribute("aria-label", name);
+      item.innerHTML = `
+        <div class="content">
+          <p class="kicker">Arquivo ${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}</p>
+          <h1 class="title">Imagem ${String(index + 1).padStart(2, "0")}</h1>
+          <span class="counter">Imagem</span>
+        </div>
+      `;
+      return item;
+    }
+
+    function renderRandomOrder() {
+      const order = shuffle(imageNames);
+      slider.replaceChildren(...order.map((name, index) => createItem(name, index, order.length)));
+    }
+
+    function next() {
+      const firstItem = slider.querySelector(".item");
+      if (firstItem) {
+        slider.append(firstItem);
+      }
+    }
+
+    function previous() {
+      const items = slider.querySelectorAll(".item");
+      const lastItem = items[items.length - 1];
+      if (lastItem) {
+        slider.prepend(lastItem);
+      }
+    }
+
+    nextButton.addEventListener("click", next);
+    prevButton.addEventListener("click", previous);
+    shuffleButton.addEventListener("click", renderRandomOrder);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight") {
+        next();
+      }
+      if (event.key === "ArrowLeft") {
+        previous();
+      }
+      if (event.key.toLowerCase() === "r") {
+        renderRandomOrder();
+      }
+    });
+
+    slider.addEventListener("click", (event) => {
+      const clickedItem = event.target.closest(".item");
+      if (clickedItem && [...slider.children].indexOf(clickedItem) > 1) {
+        while ([...slider.children].indexOf(clickedItem) > 2) {
+          next();
+        }
+        next();
+      }
+    });
+
+    renderRandomOrder();
+  </script>
+</body>
+</html>
+
+

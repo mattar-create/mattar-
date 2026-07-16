@@ -1,0 +1,62 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lab Mattar | Transition Lab 12 / 16</title>
+    <link rel="stylesheet" href="transition-lab-12-16.css" />
+  </head>
+  <body>
+    <main class="lab-shell" aria-label="Laboratório de transições 12 e 16">
+      <header class="lab-chrome">
+        <div>
+          <p class="lab-kicker">Transition Lab</p>
+          <h1>12 / 16</h1>
+        </div>
+        <nav class="lab-actions" aria-label="Controles do laboratório">
+          <button type="button" data-run="12">Transição 12</button>
+          <button type="button" data-run="16">Transição 16</button>
+          <button type="button" data-run="back">Voltar</button>
+        </nav>
+      </header>
+
+      <section class="lab-stage" aria-live="polite">
+        <article class="lab-slide lab-slide--a is-current" data-slide="a">
+          <div class="slide-field">
+            <p class="slide-number">Tela A</p>
+            <h2>Gastroperformance</h2>
+            <p>Comida, imagem, som e presença estruturados como experiência.</p>
+          </div>
+        </article>
+
+        <article class="lab-slide lab-slide--b" data-slide="b">
+          <div class="slide-field">
+            <p class="slide-number">Tela B</p>
+            <h2>A Artista</h2>
+            <p>Uma prática que atravessa design, performance, alimentação e espaço.</p>
+          </div>
+        </article>
+
+        <div class="transition-layer transition-layer--12" aria-hidden="true">
+          <span class="wipe-band wipe-band--ivory"></span>
+          <span class="wipe-band wipe-band--red"></span>
+          <span class="wipe-band wipe-band--oxide"></span>
+        </div>
+
+        <div class="transition-layer transition-layer--16" aria-hidden="true">
+          <span class="door-pair door-pair--one"><i></i><i></i></span>
+          <span class="door-pair door-pair--two"><i></i><i></i></span>
+          <span class="door-pair door-pair--three"><i></i><i></i></span>
+        </div>
+      </section>
+
+      <footer class="lab-footer">
+        <span data-state>Atual: Tela A</span>
+        <span>Teclas: 1 = 12, 2 = 16, Backspace = voltar</span>
+      </footer>
+    </main>
+
+    <script src="../vendor/slideshow/gsap.min.js"></script>
+    <script src="transition-lab-12-16.js"></script>
+  </body>
+</html>

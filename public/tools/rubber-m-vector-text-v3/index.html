@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>M Text Contour V3</title>
+  <style>
+    :root {
+      --bg: transparent;
+      --panel: rgba(255, 255, 255, 0.9);
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #ce211a;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background: #ce211a;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    canvas:active { cursor: grabbing; }
+
+
+    .vector-text-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      width: 100vw;
+      height: 100vh;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .vector-text-layer text {
+      fill: #f6f3ef;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 340;
+      letter-spacing: 0;
+    }
+    .interaction-hint {
+      display: none;
+      position: fixed;
+      left: clamp(24px, 4vw, 58px);
+      bottom: clamp(24px, 5vh, 52px);
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px 10px 12px;
+      border: 1px solid rgba(246, 243, 239, .34);
+      border-radius: 999px;
+      color: rgba(246, 243, 239, .92);
+      background: rgba(104, 13, 10, .22);
+      box-shadow: 0 16px 42px rgba(84, 9, 7, .18);
+      font-size: clamp(12px, 1vw, 15px);
+      line-height: 1;
+      pointer-events: none;
+      opacity: .94;
+      transition: opacity .22s ease, transform .22s ease;
+    }
+
+    .interaction-hint::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #f6f3ef;
+      box-shadow: 0 0 0 0 rgba(246, 243, 239, .34);
+      animation: hintPulse 1.6s ease infinite;
+    }
+
+    body.is-interacting .interaction-hint {
+      display: none;
+      opacity: .18;
+      transform: translateY(6px);
+    }
+
+    @keyframes hintPulse {
+      0% { box-shadow: 0 0 0 0 rgba(246, 243, 239, .42); }
+      100% { box-shadow: 0 0 0 14px rgba(246, 243, 239, 0); }
+    }
+
+
+    .vector-text-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      width: 100vw;
+      height: 100vh;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .vector-text-layer text {
+      fill: #f6f3ef;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 340;
+      letter-spacing: 0;
+    }
+    .interaction-hint { display:none !important; }
+
+    .pane { display:none !important;
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      width: min(348px, calc(100vw - 32px));
+      max-height: calc(100vh - 32px);
+      overflow: auto;
+      padding: 14px;
+      color: #1e1e1e;
+      background: var(--panel);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.12);
+      backdrop-filter: blur(14px);
+    }
+
+    .pane h1 {
+      margin: 0 0 11px;
+      font-size: 13px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .control {
+      display: grid;
+      grid-template-columns: 106px 1fr 46px;
+      align-items: center;
+      gap: 9px;
+      min-height: 30px;
+      margin: 7px 0;
+      font-size: 11px;
+      color: #666;
+    }
+
+    .control output {
+      color: #1f1f1f;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #070707;
+    }
+
+    input[type="text"] {
+      grid-column: 2 / 4;
+      width: 100%;
+      min-width: 0;
+      height: 30px;
+      padding: 0 8px;
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      border-radius: 6px;
+      color: #111;
+      background: rgba(255, 255, 255, 0.86);
+      font: inherit;
+      font-size: 12px;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      background: #ce211a;
+    }
+
+    .switch {
+      grid-template-columns: 1fr auto;
+      color: #1f1f1f;
+    }
+
+    .switch input {
+      width: 18px;
+      height: 18px;
+      accent-color: #070707;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    button {
+      height: 32px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 6px;
+      color: #111;
+      background: rgba(255, 255, 255, 0.68);
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #fff; }
+
+    @media (max-width: 760px) {
+  
+    .vector-text-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      width: 100vw;
+      height: 100vh;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .vector-text-layer text {
+      fill: #f6f3ef;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 340;
+      letter-spacing: 0;
+    }
+    .interaction-hint { display:none !important; }
+
+    .pane { display:none !important;
+        inset: auto 12px 12px;
+        width: auto;
+        max-height: 46vh;
+      }
+
+      .control {
+        grid-template-columns: 92px 1fr 38px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stage" aria-label="Texto interativo no contorno do M"></canvas>
+  <svg class="vector-text-layer" id="vectorTextLayer" aria-hidden="true">
+    <path id="vectorWordPath" fill="none"></path>
+    <text id="vectorWordText" lengthAdjust="spacing">
+      <textPath id="vectorWordTextPath" href="#vectorWordPath" startOffset="4%">GASTROPERFORMANCE</textPath>
+    </text>
+  </svg>
+  <div class="interaction-hint" aria-hidden="true">clique ou arraste o M</div>
+
+  <aside class="pane" hidden aria-label="Controles">
+    <h1>Texto no contorno</h1>
+    <label class="control">Texto <input id="text" type="text" value="design matter motion "></label>
+    <label class="control">Escala M <input id="mScale" type="range" min="60" max="190" step="1" value="118"><output></output></label>
+    <label class="control">Fonte <input id="fontSize" type="range" min="16" max="96" step="1" value="42"><output></output></label>
+    <label class="control">Espaco <input id="spacing" type="range" min="0" max="120" step="1" value="64"><output></output></label>
+    <label class="control">Para fora <input id="outward" type="range" min="-80" max="220" step="1" value="88"><output></output></label>
+    <label class="control">Offset <input id="offset" type="range" min="-200" max="200" step="1" value="18"><output></output></label>
+    <label class="control">Fluxo <input id="flow" type="range" min="-220" max="220" step="1" value="18"><output></output></label>
+    <label class="control">Peso <input id="fontWeight" type="range" min="300" max="900" step="50" value="760"><output></output></label>
+    <label class="control">Mola <input id="elasticity" type="range" min="0" max="100" step="1" value="28"><output></output></label>
+    <label class="control">Bolinhas <input id="ballCount" type="range" min="1" max="24" step="1" value="9"><output></output></label>
+    <label class="control">Raio bola <input id="ballRadius" type="range" min="4" max="34" step="1" value="14"><output></output></label>
+    <label class="control">Cor texto <input id="textColor" type="color" value="#050505"><output></output></label>
+    <label class="control">Fundo <input id="bgColor" type="color" value="#ce211a"><output></output></label>
+    <label class="control switch">Interacao bolinhas <input id="ballsAffect" type="checkbox" checked></label>
+    <label class="control switch">Ver bolinhas <input id="showBalls" type="checkbox"></label>
+    <label class="control switch">Guias <input id="showGuides" type="checkbox" checked></label>
+    <label class="control switch">Pontos <input id="showPoints" type="checkbox"></label>
+    <div class="buttons">
+      <button id="reset" type="button">Reset</button>
+      <button id="shuffle" type="button">Shuffle</button>
+    </div>
+  </aside>
+
+  <script>
+    const sourceOutline = [
+      [70, 215], [180, 190], [300, 180], [380, 184], [430, 192],
+      [470, 200], [500, 202], [530, 200], [570, 192], [620, 184],
+      [700, 180], [820, 190], [930, 215]
+    ];
+
+    const viewBox = { width: 1000, height: 900 };
+    const center = { x: viewBox.width * 0.5, y: viewBox.height * 0.5 };
+    const canvas = document.querySelector("#stage");
+    const ctx = canvas.getContext("2d");
+    const vectorWordPath = document.querySelector("#vectorWordPath");
+    const vectorWordText = document.querySelector("#vectorWordText");
+
+    const WORD = "GASTROPERFORMANCE";
+    const SHAPE_COUNT = 192;
+    const RED = "#ce211a";
+    const PAPER = "#f6f3ef";
+
+    const state = {
+      width: 0,
+      height: 0,
+      dpr: 1,
+      scale: 1,
+      ox: 0,
+      oy: 0,
+      time: 0,
+      flow: 0,
+      flowVelocity: 0,
+      shape: 0,
+      tension: 0,
+      pointer: { active: false, dragging: false, x: 0, y: 0, lastX: 0, lastY: 0, downX: 0, downY: 0 },
+      pulls: []
+    };
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+    function smoothstep(t) { return t * t * (3 - 2 * t); }
+
+    function normalizeAngle(angle) {
+      let a = angle;
+      while (a > Math.PI) a -= Math.PI * 2;
+      while (a < -Math.PI) a += Math.PI * 2;
+      return a;
+    }
+
+    function polylineLength(points, closed = true) {
+      let total = 0;
+      const end = closed ? points.length : points.length - 1;
+      for (let i = 0; i < end; i++) {
+        const a = points[i];
+        const b = points[(i + 1) % points.length];
+        total += Math.hypot(b.x - a.x, b.y - a.y);
+      }
+      return total;
+    }
+
+    function pointOnPolyline(points, distance, closed = true) {
+      const total = polylineLength(points, closed) || 1;
+      let d = closed ? ((distance % total) + total) % total : clamp(distance, 0, total);
+      const end = closed ? points.length : points.length - 1;
+      for (let i = 0; i < end; i++) {
+        const a = points[i];
+        const b = points[(i + 1) % points.length];
+        const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+        if (d <= len) {
+          const t = d / len;
+          return {
+            x: lerp(a.x, b.x, t),
+            y: lerp(a.y, b.y, t),
+            angle: Math.atan2(b.y - a.y, b.x - a.x)
+          };
+        }
+        d -= len;
+      }
+      const p = closed ? points[0] : points[points.length - 1];
+      return { x: p.x, y: p.y, angle: 0 };
+    }
+
+    function resample(points, count, closed = true) {
+      const total = polylineLength(points, closed);
+      const sampled = [];
+      for (let i = 0; i < count; i++) sampled.push(pointOnPolyline(points, (i / (closed ? count : count - 1)) * total, closed));
+      return sampled.map((p) => ({ x: p.x, y: p.y }));
+    }
+
+    const mShape = resample(sourceOutline.map(([x, y]) => ({ x, y })), SHAPE_COUNT, false);
+
+    function radialShape(fn) {
+      const points = [];
+      for (let i = 0; i < SHAPE_COUNT; i++) {
+        const a = -Math.PI / 2 + (i / SHAPE_COUNT) * Math.PI * 2;
+        const r = fn(a, i / SHAPE_COUNT);
+        points.push({ x: center.x + Math.cos(a) * r.x, y: center.y + Math.sin(a) * r.y });
+      }
+      return points;
+    }
+
+    const circleShape = radialShape(() => ({ x: 330, y: 300 }));
+    const diamondShape = radialShape((a) => {
+      const c = Math.max(Math.abs(Math.cos(a)), Math.abs(Math.sin(a))) || 1;
+      return { x: 330 / c, y: 285 / c };
+    });
+    const foldedShape = radialShape((a) => {
+      const mMemory = 1 + Math.cos(a * 3) * 0.16 - Math.sin(a * 5) * 0.08;
+      return { x: 335 * mMemory, y: 285 * (1 + Math.sin(a * 4) * 0.12) };
+    });
+    const ribbonShape = radialShape((a, t) => {
+      const band = 1 + Math.sin(t * Math.PI * 6) * 0.18;
+      return { x: 330 * band, y: 155 + Math.cos(t * Math.PI * 4) * 78 };
+    });
+
+    function resize() {
+      state.dpr = Math.min(2, window.devicePixelRatio || 1);
+      state.width = window.innerWidth;
+      state.height = window.innerHeight;
+      canvas.width = Math.floor(state.width * state.dpr);
+      canvas.height = Math.floor(state.height * state.dpr);
+      ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+      const targetWidth = Math.min(state.width * (state.width < 760 ? 0.82 : 0.72), state.width < 760 ? 520 : 980);
+      const targetHeight = targetWidth * 111 / 148;
+      const targetCenterX = state.width * (state.width < 760 ? 0.52 : 0.60);
+      const targetCenterY = state.height * (state.width < 760 ? 0.38 : 0.43);
+      state.scale = targetWidth / viewBox.width;
+      state.ox = targetCenterX - center.x * state.scale;
+      state.oy = targetCenterY - 245 * state.scale;
+    }
+
+    function toScreen(p) {
+      return { x: state.ox + p.x * state.scale, y: state.oy + p.y * state.scale };
+    }
+
+    function fromScreen(x, y) {
+      return { x: (x - state.ox) / state.scale, y: (y - state.oy) / state.scale };
+    }
+
+    function blendedPath() {
+      const points = [];
+      const pulse = Math.sin(state.time * 0.0012) * 0.006;
+      for (let i = 0; i < SHAPE_COUNT; i++) {
+        const a = mShape[i];
+        const angle = (i / SHAPE_COUNT) * Math.PI * 2;
+        let x = a.x;
+        let y = a.y;
+        const dx = x - center.x;
+        const dy = y - center.y;
+        x += dx * pulse;
+        y += dy * pulse;
+        x += Math.cos(angle * 5 + state.time * 0.001) * state.tension * 7;
+        y += Math.sin(angle * 4 - state.time * 0.0012) * state.tension * 6;
+        for (const pull of state.pulls) {
+          const dist = Math.hypot(x - pull.x, y - pull.y) || 1;
+          const radius = pull.radius;
+          if (dist < radius) {
+            const falloff = (1 - dist / radius) ** 2;
+            x += (pull.x - x) * falloff * pull.force;
+            y += (pull.y - y) * falloff * pull.force;
+          }
+        }
+        points.push(toScreen({ x, y }));
+      }
+      return points;
+    }
+
+    function drawPath(path) {
+      ctx.save();
+      ctx.beginPath();
+      path.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
+
+      ctx.strokeStyle = "rgba(246,243,239,.13)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([1, 10]);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+
+    function drawWordAlongPath(path, start, word, fontSize, alpha = 1) {
+      const chars = Array.from(word);
+      const tracking = fontSize * 0.02;
+      let cursor = start;
+
+      for (const char of chars) {
+        const width = Math.max(ctx.measureText(char).width, fontSize * 0.34);
+        cursor += width * 0.5;
+        const p = pointOnPolyline(path, cursor, false);
+        const tangent = pointOnPolyline(path, cursor + 2.5, false);
+        const angle = Math.atan2(tangent.y - p.y, tangent.x - p.x);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(angle);
+        ctx.fillText(char, 0, 0);
+        ctx.restore();
+        cursor += width * 0.5 + tracking;
+      }
+    }
+
+    function drawTextOnPath(path) {
+      const total = polylineLength(path, false);
+      const fontSize = clamp(total / (WORD.length * 0.74), state.width < 760 ? 20 : 38, state.width < 760 ? 26 : 56);
+      ctx.save();
+      ctx.font = `340 ${fontSize}px Arial, Helvetica, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = PAPER;
+      ctx.shadowColor = "rgba(88, 0, 0, .12)";
+      ctx.shadowBlur = 3;
+
+      drawWordAlongPath(path, state.flow, WORD, fontSize, 1);
+      ctx.restore();
+    }
+
+
+    function updateSvgTextPath(path) {
+      if (!vectorWordPath || !vectorWordText || path.length < 2) return;
+      const d = path.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(2)} ${point.y.toFixed(2)}`).join(" ");
+      const total = polylineLength(path, false);
+      const fontSize = clamp(total / (WORD.length * 0.74), state.width < 760 ? 20 : 38, state.width < 760 ? 26 : 56);
+      vectorWordPath.setAttribute("d", d);
+      vectorWordText.setAttribute("font-size", fontSize.toFixed(2));
+      vectorWordText.setAttribute("textLength", Math.max(1, total * 0.90).toFixed(2));
+    }
+    function drawAnchorHint(path) {
+      if (!state.pointer.active) return;
+      const p = { x: state.pointer.x, y: state.pointer.y };
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 18 + state.tension * 34, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(246,243,239,${0.18 + state.tension * 0.2})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function step(time) {
+      const delta = Math.min(40, time - state.time || 16);
+      state.time = time;
+      state.tension += ((state.pointer.dragging ? 1 : 0) - state.tension) * 0.08;
+
+      for (const pull of state.pulls) {
+        pull.life -= delta * 0.0018;
+        pull.force *= 0.982;
+        pull.radius += delta * 0.02;
+      }
+      state.pulls = state.pulls.filter((pull) => pull.life > 0.02);
+
+      ctx.clearRect(0, 0, state.width, state.height);
+      const path = blendedPath();
+      drawPath(path);
+      updateSvgTextPath(path);
+      drawAnchorHint(path);
+      requestAnimationFrame(step);
+    }
+
+    function pushPull(clientX, clientY, force = 0.38, radius = 180) {
+      const p = fromScreen(clientX, clientY);
+      state.pulls.push({ x: p.x, y: p.y, force, radius: radius / state.scale, life: 1 });
+    }
+
+    canvas.addEventListener("pointerdown", (event) => {
+      state.pointer.active = true;
+      state.pointer.dragging = true;
+      state.pointer.x = event.clientX;
+      state.pointer.y = event.clientY;
+      state.pointer.lastX = event.clientX;
+      state.pointer.lastY = event.clientY;
+      state.pointer.downX = event.clientX;
+      state.pointer.downY = event.clientY;
+      state.flowVelocity = 0;
+      pushPull(event.clientX, event.clientY, 0.42, 230);
+      document.body.classList.add("is-interacting");
+      canvas.setPointerCapture?.(event.pointerId);
+      event.preventDefault();
+    });
+
+    canvas.addEventListener("pointermove", (event) => {
+      state.pointer.active = true;
+      state.pointer.x = event.clientX;
+      state.pointer.y = event.clientY;
+      if (state.pointer.dragging) {
+        const dx = event.clientX - state.pointer.lastX;
+        const dy = event.clientY - state.pointer.lastY;
+
+
+        pushPull(event.clientX, event.clientY, 0.12, 150);
+      }
+      state.pointer.lastX = event.clientX;
+      state.pointer.lastY = event.clientY;
+    });
+
+    function release(event) {
+      const moved = Math.hypot(state.pointer.x - state.pointer.downX, state.pointer.y - state.pointer.downY);
+      if (moved < 8) {
+        pushPull(state.pointer.x, state.pointer.y, 0.7, 270);
+      }
+      state.pointer.dragging = false;
+      state.flowVelocity = 0;
+      document.body.classList.remove("is-interacting");
+      canvas.releasePointerCapture?.(event.pointerId);
+    }
+
+    canvas.addEventListener("pointerup", release);
+    canvas.addEventListener("pointercancel", release);
+    canvas.addEventListener("pointerleave", () => { state.pointer.active = false; });
+
+    window.addEventListener("resize", resize);
+    resize();
+    requestAnimationFrame(step);
+  </script>  <script>
+    window.addEventListener("wheel", (event) => {
+      if (window.parent === window) return;
+      window.parent.postMessage({ type: event.deltaY > 0 ? "mattar-next" : "mattar-prev" }, "*");
+    }, { passive: true });
+  </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>M Text Contour V3</title>
+  <style>
+    :root {
+      --bg: #f2f0ec;
+      --panel: rgba(255, 255, 255, 0.9);
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg);
+      cursor: grab;
+      touch-action: none;
+    }
+
+    canvas:active { cursor: grabbing; }
+
+    .pane {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      width: min(348px, calc(100vw - 32px));
+      max-height: calc(100vh - 32px);
+      overflow: auto;
+      padding: 14px;
+      color: #1e1e1e;
+      background: var(--panel);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.12);
+      backdrop-filter: blur(14px);
+    }
+
+    .pane h1 {
+      margin: 0 0 11px;
+      font-size: 13px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .control {
+      display: grid;
+      grid-template-columns: 106px 1fr 46px;
+      align-items: center;
+      gap: 9px;
+      min-height: 30px;
+      margin: 7px 0;
+      font-size: 11px;
+      color: #666;
+    }
+
+    .control output {
+      color: #1f1f1f;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #070707;
+    }
+
+    input[type="text"] {
+      grid-column: 2 / 4;
+      width: 100%;
+      min-width: 0;
+      height: 30px;
+      padding: 0 8px;
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      border-radius: 6px;
+      color: #111;
+      background: rgba(255, 255, 255, 0.86);
+      font: inherit;
+      font-size: 12px;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+    .switch {
+      grid-template-columns: 1fr auto;
+      color: #1f1f1f;
+    }
+
+    .switch input {
+      width: 18px;
+      height: 18px;
+      accent-color: #070707;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    button {
+      height: 32px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 6px;
+      color: #111;
+      background: rgba(255, 255, 255, 0.68);
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #fff; }
+
+    @media (max-width: 760px) {
+      .pane {
+        inset: auto 12px 12px;
+        width: auto;
+        max-height: 46vh;
+      }
+
+      .control {
+        grid-template-columns: 92px 1fr 38px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stage"></canvas>
+
+  <aside class="pane" aria-label="Controles">
+    <h1>Texto no contorno</h1>
+    <label class="control">Texto <input id="text" type="text" value="design matter motion "></label>
+    <label class="control">Escala M <input id="mScale" type="range" min="60" max="190" step="1" value="118"><output></output></label>
+    <label class="control">Fonte <input id="fontSize" type="range" min="16" max="96" step="1" value="42"><output></output></label>
+    <label class="control">Espaco <input id="spacing" type="range" min="0" max="120" step="1" value="64"><output></output></label>
+    <label class="control">Para fora <input id="outward" type="range" min="-80" max="220" step="1" value="88"><output></output></label>
+    <label class="control">Offset <input id="offset" type="range" min="-200" max="200" step="1" value="18"><output></output></label>
+    <label class="control">Fluxo <input id="flow" type="range" min="-220" max="220" step="1" value="18"><output></output></label>
+    <label class="control">Peso <input id="fontWeight" type="range" min="300" max="900" step="50" value="760"><output></output></label>
+    <label class="control">Mola <input id="elasticity" type="range" min="0" max="100" step="1" value="28"><output></output></label>
+    <label class="control">Bolinhas <input id="ballCount" type="range" min="1" max="24" step="1" value="9"><output></output></label>
+    <label class="control">Raio bola <input id="ballRadius" type="range" min="4" max="34" step="1" value="14"><output></output></label>
+    <label class="control">Cor texto <input id="textColor" type="color" value="#050505"><output></output></label>
+    <label class="control">Fundo <input id="bgColor" type="color" value="#f2f0ec"><output></output></label>
+    <label class="control switch">Interacao bolinhas <input id="ballsAffect" type="checkbox" checked></label>
+    <label class="control switch">Ver bolinhas <input id="showBalls" type="checkbox"></label>
+    <label class="control switch">Guias <input id="showGuides" type="checkbox" checked></label>
+    <label class="control switch">Pontos <input id="showPoints" type="checkbox"></label>
+    <div class="buttons">
+      <button id="reset" type="button">Reset</button>
+      <button id="shuffle" type="button">Shuffle</button>
+    </div>
+  </aside>
+
+  <script>
+    const sourceOutline = [
+      [0, 110.981], [42.3366, 110.981], [50.1925, 108.499],
+      [70.2158, 94.4502], [77.291, 94.4502], [97.3144, 108.499],
+      [105.17, 110.981], [147.507, 110.981], [138.501, 0],
+      [95.2375, 0], [88.6763, 3.69898], [75.9964, 24.6131],
+      [73.7534, 26.1379], [71.5105, 24.6131], [58.8305, 3.69898],
+      [52.2693, 0], [9.00604, 0]
+    ];
+
+    const viewBox = { width: 147.507, height: 110.981 };
+    const center = { x: viewBox.width / 2, y: viewBox.height * 0.56 };
+    const canvas = document.querySelector("#stage");
+    const ctx = canvas.getContext("2d");
+
+    const defaults = {
+      text: "design matter motion ",
+      mScale: 1.18,
+      fontSize: 42,
+      spacing: 64,
+      outward: 88,
+      offset: 18,
+      flow: 18,
+      fontWeight: 760,
+      elasticity: 0.28,
+      ballCount: 9,
+      ballRadius: 14,
+      textColor: "#050505",
+      bgColor: "#f2f0ec",
+      ballsAffect: true,
+      showBalls: false,
+      showGuides: true,
+      showPoints: false
+    };
+
+    const settings = { ...defaults };
+    const state = {
+      width: 0,
+      height: 0,
+      dpr: 1,
+      baseScale: 1,
+      scale: 1,
+      ox: 0,
+      oy: 0,
+      nodes: [],
+      balls: [],
+      pointer: { active: false, x: 0, y: 0, lastX: 0, lastY: 0 },
+      grabbedNode: null,
+      grabbedBall: null,
+      drift: 0,
+      lastTime: 0
+    };
+
+    const controls = {};
+
+    function pointInPolygon(x, y) {
+      let inside = false;
+      for (let i = 0, j = sourceOutline.length - 1; i < sourceOutline.length; j = i++) {
+        const xi = sourceOutline[i][0], yi = sourceOutline[i][1];
+        const xj = sourceOutline[j][0], yj = sourceOutline[j][1];
+        if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+      }
+      return inside;
+    }
+
+    function randomInsideM() {
+      for (let i = 0; i < 1200; i++) {
+        const x = 8 + Math.random() * (viewBox.width - 16);
+        const y = 7 + Math.random() * (viewBox.height - 14);
+        if (pointInPolygon(x, y)) return { x, y };
+      }
+      return { x: center.x, y: viewBox.height * 0.72 };
+    }
+
+    function closestInside(x, y) {
+      if (pointInPolygon(x, y)) return { x, y };
+      for (let radius = 1; radius < 90; radius += 2) {
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 18) {
+          const p = { x: x + Math.cos(a) * radius, y: y + Math.sin(a) * radius };
+          if (pointInPolygon(p.x, p.y)) return p;
+        }
+      }
+      return { x: center.x, y: viewBox.height * 0.72 };
+    }
+
+    class Ball {
+      constructor() { this.reset(); }
+
+      reset() {
+        const p = randomInsideM();
+        this.x = p.x;
+        this.y = p.y;
+        this.vx = (Math.random() - 0.5) * 1.8;
+        this.vy = (Math.random() - 0.5) * 1.8;
+        this.phase = Math.random() * Math.PI * 2;
+      }
+    }
+
+    function buildNodes() {
+      state.nodes = [];
+      for (let i = 0; i < sourceOutline.length; i++) {
+        const a = sourceOutline[i];
+        const b = sourceOutline[(i + 1) % sourceOutline.length];
+        const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        const steps = Math.max(2, Math.ceil(length / 22));
+        for (let s = 0; s < steps; s++) {
+          const t = s / steps;
+          const x = a[0] + (b[0] - a[0]) * t;
+          const y = a[1] + (b[1] - a[1]) * t;
+          state.nodes.push({
+            baseX: x,
+            baseY: y,
+            x,
+            y,
+            vx: 0,
+            vy: 0,
+            pin: s === 0 ? 0.9 : 0.2 + Math.random() * 0.1
+          });
+        }
+      }
+    }
+
+    function updateBallCount() {
+      while (state.balls.length < settings.ballCount) state.balls.push(new Ball());
+      while (state.balls.length > settings.ballCount) state.balls.pop();
+    }
+
+    function resize() {
+      state.dpr = Math.min(2, window.devicePixelRatio || 1);
+      state.width = window.innerWidth;
+      state.height = window.innerHeight;
+      canvas.width = Math.floor(state.width * state.dpr);
+      canvas.height = Math.floor(state.height * state.dpr);
+      ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+      const sidePad = state.width < 760 ? 42 : 170;
+      const yPad = state.width < 760 ? 72 : 110;
+      state.baseScale = Math.min((state.width - sidePad * 2) / viewBox.width, (state.height - yPad * 2) / viewBox.height);
+      updateTransform();
+    }
+
+    function updateTransform() {
+      state.scale = state.baseScale * settings.mScale;
+      state.ox = (state.width - viewBox.width * state.scale) / 2;
+      state.oy = (state.height - viewBox.height * state.scale) / 2;
+    }
+
+    function toScreen(node) {
+      return {
+        x: state.ox + node.x * state.scale,
+        y: state.oy + node.y * state.scale
+      };
+    }
+
+    function fromScreen(x, y) {
+      return {
+        x: (x - state.ox) / state.scale,
+        y: (y - state.oy) / state.scale
+      };
+    }
+
+    function stepBalls(delta, time) {
+      const radius = settings.ballRadius / state.scale;
+      for (const ball of state.balls) {
+        if (ball !== state.grabbedBall) {
+          ball.vx += Math.sin(time * 0.002 + ball.phase) * 0.006;
+          ball.vy += Math.cos(time * 0.0018 + ball.phase) * 0.006;
+          ball.x += ball.vx * delta * 0.045;
+          ball.y += ball.vy * delta * 0.045;
+          ball.vx *= 0.99;
+          ball.vy *= 0.99;
+        }
+
+        const safe = closestInside(ball.x, ball.y);
+        if (safe.x !== ball.x || safe.y !== ball.y) {
+          ball.x = safe.x;
+          ball.y = safe.y;
+          ball.vx *= -0.74;
+          ball.vy *= -0.74;
+        }
+
+        for (const other of state.balls) {
+          if (other === ball) continue;
+          const dx = ball.x - other.x;
+          const dy = ball.y - other.y;
+          const distance = Math.hypot(dx, dy) || 1;
+          const minDistance = radius * 2.25;
+          if (distance >= minDistance) continue;
+          const push = (minDistance - distance) * 0.012;
+          ball.vx += (dx / distance) * push;
+          ball.vy += (dy / distance) * push;
+        }
+      }
+    }
+
+    function stepNodes(delta, time) {
+      const spring = 0.004 + settings.elasticity * 0.018;
+      const damp = 0.82 + settings.elasticity * 0.12;
+      const pointerRadius = 80 / state.scale;
+      const wobble = 0.0015 + settings.elasticity * 0.004;
+
+      for (let i = 0; i < state.nodes.length; i++) {
+        const node = state.nodes[i];
+        if (node === state.grabbedNode) continue;
+
+        const dx = node.baseX - node.x;
+        const dy = node.baseY - node.y;
+        let fx = dx * spring * node.pin;
+        let fy = dy * spring * node.pin;
+
+        if (state.pointer.active) {
+          const px = node.x - state.pointer.x;
+          const py = node.y - state.pointer.y;
+          const distance = Math.hypot(px, py) || 1;
+          if (distance < pointerRadius) {
+            const falloff = (1 - distance / pointerRadius) ** 2;
+            const dragX = state.pointer.x - state.pointer.lastX;
+            const dragY = state.pointer.y - state.pointer.lastY;
+            fx += dragX * falloff * 0.24;
+            fy += dragY * falloff * 0.24;
+          }
+        }
+
+        if (settings.ballsAffect) {
+          for (const ball of state.balls) {
+            const bx = node.x - ball.x;
+            const by = node.y - ball.y;
+            const distance = Math.hypot(bx, by) || 1;
+            const radius = 48 / state.scale + settings.ballRadius / state.scale;
+            if (distance < radius) {
+              const falloff = (1 - distance / radius) ** 2;
+              const ox = node.baseX - center.x;
+              const oy = node.baseY - center.y;
+              const length = Math.hypot(ox, oy) || 1;
+              fx += (ox / length) * falloff * 0.18;
+              fy += (oy / length) * falloff * 0.18;
+            }
+          }
+        }
+
+        fx += Math.sin(time * 0.002 + i * 0.7) * wobble * (1 - node.pin);
+        fy += Math.cos(time * 0.0017 + i * 0.61) * wobble * (1 - node.pin);
+        node.vx = (node.vx + fx * delta) * damp;
+        node.vy = (node.vy + fy * delta) * damp;
+        node.x += node.vx * delta * 0.014;
+        node.y += node.vy * delta * 0.014;
+      }
+    }
+
+    function getPath() {
+      const points = state.nodes.map(toScreen);
+      let total = 0;
+      const lengths = [];
+      for (let i = 0; i < points.length; i++) {
+        const a = points[i];
+        const b = points[(i + 1) % points.length];
+        const length = Math.hypot(b.x - a.x, b.y - a.y);
+        lengths.push(length);
+        total += length;
+      }
+      return { points, lengths, total };
+    }
+
+    function pointAtDistance(path, distance) {
+      const wrapped = ((distance % path.total) + path.total) % path.total;
+      let cursor = 0;
+      for (let i = 0; i < path.points.length; i++) {
+        const length = path.lengths[i];
+        if (cursor + length >= wrapped) {
+          const a = path.points[i];
+          const b = path.points[(i + 1) % path.points.length];
+          const t = length === 0 ? 0 : (wrapped - cursor) / length;
+          return {
+            x: a.x + (b.x - a.x) * t,
+            y: a.y + (b.y - a.y) * t,
+            angle: Math.atan2(b.y - a.y, b.x - a.x)
+          };
+        }
+        cursor += length;
+      }
+      return { x: path.points[0].x, y: path.points[0].y, angle: 0 };
+    }
+
+    function normalizedReadableAngle(angle) {
+      let a = ((angle + Math.PI) % (Math.PI * 2)) - Math.PI;
+      if (a > Math.PI / 2) a -= Math.PI;
+      if (a < -Math.PI / 2) a += Math.PI;
+      return a;
+    }
+
+    function outwardVectorAt(point) {
+      const screenCenter = {
+        x: state.ox + center.x * state.scale,
+        y: state.oy + center.y * state.scale
+      };
+      const dx = point.x - screenCenter.x;
+      const dy = point.y - screenCenter.y;
+      const length = Math.hypot(dx, dy) || 1;
+      return { x: dx / length, y: dy / length };
+    }
+
+    function drawGuides(path) {
+      if (!settings.showGuides) return;
+      ctx.save();
+      ctx.beginPath();
+      for (let i = 0; i < path.points.length; i++) {
+        const p = path.points[i];
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.closePath();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.23)";
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawBalls() {
+      if (!settings.showBalls) return;
+      ctx.save();
+      for (const ball of state.balls) {
+        const p = toScreen(ball);
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.36)";
+        ctx.lineWidth = 1.5;
+        ctx.arc(p.x, p.y, settings.ballRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawPoints(path) {
+      if (!settings.showPoints) return;
+      ctx.save();
+      for (let i = 0; i < path.points.length; i += 2) {
+        const p = path.points[i];
+        ctx.beginPath();
+        ctx.fillStyle = settings.bgColor;
+        ctx.strokeStyle = "#1688ff";
+        ctx.lineWidth = 1.4;
+        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawText(path) {
+      const source = settings.text.trim() ? settings.text : " ";
+      const chars = Array.from(source.repeat(60));
+      let cursor = settings.offset + state.drift;
+      let lastX = -9999;
+      let lastY = -9999;
+      const minGap = settings.fontSize * 0.62;
+
+      ctx.save();
+      ctx.fillStyle = settings.textColor;
+      ctx.font = `${settings.fontWeight} ${settings.fontSize}px Arial, Helvetica, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      for (const char of chars) {
+        const width = Math.max(8, ctx.measureText(char).width);
+        cursor += width / 2;
+        const p = pointAtDistance(path, cursor);
+        const outward = outwardVectorAt(p);
+        const x = p.x + outward.x * settings.outward;
+        const y = p.y + outward.y * settings.outward;
+        const screenGap = Math.hypot(x - lastX, y - lastY);
+
+        if (char !== " " && screenGap > minGap) {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(normalizedReadableAngle(p.angle));
+          ctx.fillText(char, 0, 0);
+          ctx.restore();
+          lastX = x;
+          lastY = y;
+        }
+
+        cursor += width / 2 + settings.spacing;
+        if (cursor > path.total + settings.offset + state.drift + settings.fontSize * 6) break;
+      }
+      ctx.restore();
+    }
+
+    function draw(time = 0) {
+      const delta = Math.min(34, time - state.lastTime || 16);
+      state.lastTime = time;
+      state.drift += settings.flow * delta * 0.00055;
+      stepBalls(delta, time);
+      stepNodes(delta, time);
+
+      document.documentElement.style.setProperty("--bg", settings.bgColor);
+      ctx.clearRect(0, 0, state.width, state.height);
+
+      const path = getPath();
+      drawGuides(path);
+      drawBalls();
+      drawText(path);
+      drawPoints(path);
+      requestAnimationFrame(draw);
+    }
+
+    function bindControls() {
+      const keys = ["text", "mScale", "fontSize", "spacing", "outward", "offset", "flow", "fontWeight", "elasticity", "ballCount", "ballRadius", "textColor", "bgColor", "ballsAffect", "showBalls", "showGuides", "showPoints"];
+      for (const key of keys) {
+        const input = document.getElementById(key);
+        controls[key] = input;
+        input.addEventListener("input", () => {
+          if (input.type === "checkbox") settings[key] = input.checked;
+          else if (input.type === "color" || input.type === "text") settings[key] = input.value;
+          else if (key === "mScale" || key === "elasticity") settings[key] = Number(input.value) / 100;
+          else settings[key] = Number(input.value);
+          if (key === "ballCount") updateBallCount();
+          updateTransform();
+          updateControls();
+        });
+      }
+
+      document.getElementById("reset").addEventListener("click", () => {
+        Object.assign(settings, defaults);
+        buildNodes();
+        updateBallCount();
+        updateTransform();
+        updateControls();
+      });
+
+      document.getElementById("shuffle").addEventListener("click", () => {
+        for (const node of state.nodes) {
+          node.vx += (Math.random() - 0.5) * 0.18;
+          node.vy += (Math.random() - 0.5) * 0.18;
+        }
+        for (const ball of state.balls) ball.reset();
+      });
+
+      updateControls();
+    }
+
+    function updateControls() {
+      for (const [key, input] of Object.entries(controls)) {
+        if (input.type === "checkbox") {
+          input.checked = settings[key];
+        } else if (input.type === "color" || input.type === "text") {
+          input.value = settings[key];
+          if (input.nextElementSibling) input.nextElementSibling.textContent = "";
+        } else {
+          input.value = key === "mScale" || key === "elasticity" ? Math.round(settings[key] * 100) : settings[key];
+          input.nextElementSibling.textContent = input.value;
+        }
+      }
+    }
+
+    function pointerLocal(event) {
+      const rect = canvas.getBoundingClientRect();
+      return fromScreen(event.clientX - rect.left, event.clientY - rect.top);
+    }
+
+    canvas.addEventListener("pointerdown", (event) => {
+      const p = pointerLocal(event);
+      state.pointer.active = true;
+      state.pointer.x = p.x;
+      state.pointer.y = p.y;
+      state.pointer.lastX = p.x;
+      state.pointer.lastY = p.y;
+
+      if (settings.ballsAffect) {
+        let nearestBall = null;
+        let ballDistance = Infinity;
+        for (const ball of state.balls) {
+          const distance = Math.hypot(ball.x - p.x, ball.y - p.y) * state.scale;
+          if (distance < ballDistance) {
+            nearestBall = ball;
+            ballDistance = distance;
+          }
+        }
+        if (nearestBall && ballDistance < settings.ballRadius * 2.2) {
+          state.grabbedBall = nearestBall;
+          canvas.setPointerCapture(event.pointerId);
+          return;
+        }
+      }
+
+      let nearest = null;
+      let nearestDistance = Infinity;
+      for (const node of state.nodes) {
+        const distance = Math.hypot(node.x - p.x, node.y - p.y);
+        if (distance < nearestDistance) {
+          nearest = node;
+          nearestDistance = distance;
+        }
+      }
+      if (nearest && nearestDistance * state.scale < 36) state.grabbedNode = nearest;
+      canvas.setPointerCapture(event.pointerId);
+    });
+
+    canvas.addEventListener("pointermove", (event) => {
+      if (!state.pointer.active) return;
+      const p = pointerLocal(event);
+      state.pointer.lastX = state.pointer.x;
+      state.pointer.lastY = state.pointer.y;
+      state.pointer.x = p.x;
+      state.pointer.y = p.y;
+
+      if (state.grabbedBall) {
+        const safe = closestInside(p.x, p.y);
+        state.grabbedBall.vx = (safe.x - state.grabbedBall.x) * 0.45;
+        state.grabbedBall.vy = (safe.y - state.grabbedBall.y) * 0.45;
+        state.grabbedBall.x += (safe.x - state.grabbedBall.x) * 0.66;
+        state.grabbedBall.y += (safe.y - state.grabbedBall.y) * 0.66;
+        return;
+      }
+
+      if (state.grabbedNode) {
+        state.grabbedNode.x += (p.x - state.grabbedNode.x) * 0.64;
+        state.grabbedNode.y += (p.y - state.grabbedNode.y) * 0.64;
+        state.grabbedNode.vx = (state.pointer.x - state.pointer.lastX) * 0.28;
+        state.grabbedNode.vy = (state.pointer.y - state.pointer.lastY) * 0.28;
+      }
+    });
+
+    canvas.addEventListener("pointerup", (event) => {
+      state.pointer.active = false;
+      state.grabbedNode = null;
+      state.grabbedBall = null;
+      canvas.releasePointerCapture(event.pointerId);
+    });
+
+    canvas.addEventListener("pointercancel", () => {
+      state.pointer.active = false;
+      state.grabbedNode = null;
+      state.grabbedBall = null;
+    });
+
+    window.addEventListener("resize", resize);
+    buildNodes();
+    updateBallCount();
+    bindControls();
+    resize();
+    requestAnimationFrame(draw);
+  </script>
+</body>
+</html>

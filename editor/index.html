@@ -1,0 +1,96 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Editor visual | Lab Mattar</title>
+    <link rel="icon" href="../assets/brand/m-Vector.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="editor.css?v=20260714-body-text-editing-2" />
+  </head>
+  <body>
+    <div class="editor-shell" data-editor-shell>
+      <header class="editor-topbar">
+        <div class="editor-title">
+          <p>LAB MATTAR</p>
+          <h1>Editor visual</h1>
+        </div>
+        <div class="editor-current" aria-live="polite">
+          <span data-current-index>01</span>
+          <strong data-current-title>Gastroperformance</strong>
+          <span data-current-type>cover</span>
+        </div>
+        <div class="editor-actions">
+          <button class="icon-action" type="button" data-toggle-nav title="Recolher ou mostrar paginas" aria-label="Recolher ou mostrar paginas">Paginas</button>
+          <button class="icon-action" type="button" data-toggle-inspector title="Recolher ou mostrar inspector" aria-label="Recolher ou mostrar inspector">Inspector</button>
+          <button class="icon-action" type="button" data-undo title="Desfazer" aria-label="Desfazer">Undo</button>
+          <button class="icon-action" type="button" data-redo title="Refazer" aria-label="Refazer">Redo</button>
+          <label class="page-jump-control">
+            <span>Pagina ativa</span>
+            <select data-page-jump aria-label="Selecionar pagina ativa"></select>
+          </label>
+          <label class="zoom-control">
+            <span>Zoom</span>
+            <select data-zoom-select aria-label="Zoom do canvas">
+              <option value="fit">Ajustar</option>
+              <option value="1">100%</option>
+              <option value="0.75">75%</option>
+              <option value="0.5">50%</option>
+            </select>
+          </label>
+          <button class="ghost-link" type="button" data-export-project title="Exportar projeto JSON">Exportar</button>
+          <button class="ghost-link" type="button" data-import-project title="Importar projeto JSON">Importar</button>
+          <button class="ghost-link" type="button" data-reset-project title="Restaurar apresentacao original">Restaurar</button>
+          <input type="file" accept="application/json,.json" data-import-file hidden />
+          <a class="ghost-link" href="../index.html" target="_blank" rel="noreferrer" title="Abrir apresentacao original">Original</a>
+          <button class="primary-action" type="button" data-preview-toggle title="Entrar no preview">Preview</button>
+        </div>
+      </header>
+
+      <aside class="page-navigator" aria-label="Navegador de paginas">
+        <div class="panel-heading">
+          <span>Paginas</span>
+          <strong data-page-count>0</strong>
+        </div>
+        <div class="page-list" data-page-list></div>
+      </aside>
+
+      <main class="editor-main">
+        <section class="canvas-region" aria-label="Canvas da apresentacao">
+          <div class="canvas-toolbar">
+            <span data-canvas-label>Canvas real</span>
+            <span data-canvas-size>1440 x 900</span>
+          </div>
+          <div class="canvas-viewport" data-canvas-viewport>
+            <div class="frame-shell" data-frame-shell>
+              <iframe class="presentation-frame" data-presentation-frame title="Preview real da apresentacao" src="../index.html?slide=0&editorCache=20260714-body-text-editing-2"></iframe>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="context-panel" aria-label="Inspector contextual">
+        <div class="panel-heading">
+          <span data-inspector-title>Inspector</span>
+        </div>
+        <div class="property-empty" data-empty-state hidden>Nenhuma pagina selecionada.</div>
+        <div class="property-list" data-property-list></div>
+      </aside>
+
+      <button class="return-action" type="button" data-preview-return>Voltar ao editor</button>
+    </div>
+
+    <script src="../data/slides.js?v=20260714-body-text-editing-2"></script>
+    <script src="editor.js?v=20260714-body-text-editing-2"></script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+

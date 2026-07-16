@@ -1,0 +1,210 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carrossel vertical 3D</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body,
+    .scene,
+    .a3d {
+      display: grid;
+    }
+
+    html,
+    body,
+    .scene {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #0f0e0c;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .scene {
+      overflow: hidden;
+      perspective: 72em;
+      perspective-origin: 50% 50%;
+      mask: linear-gradient(180deg, #0000, red 8% 92%, #0000);
+    }
+
+    .a3d {
+      place-self: center;
+      --scale: .82;
+      transform-style: preserve-3d;
+      animation: rx 32s linear infinite;
+    }
+
+    .a3d:hover {
+      animation-play-state: paused;
+    }
+
+    @keyframes rx {
+      to {
+        rotate: x 1turn;
+      }
+    }
+
+    .card {
+      --base-w: clamp(7rem, 16vw, 15rem);
+      --w: calc(var(--base-w) * var(--scale));
+      --ratio-w: 4;
+      --ratio-h: 5;
+      --h: calc(var(--w) * var(--ratio-h) / var(--ratio-w));
+      --ba: calc(1turn / var(--n));
+      grid-area: 1 / 1;
+      width: var(--w);
+      aspect-ratio: var(--ratio-w) / var(--ratio-h);
+      object-fit: cover;
+      border-radius: .85em;
+      box-shadow: 0 1.8em 4em rgba(0, 0, 0, 0.42);
+      backface-visibility: hidden;
+      transform:
+        rotateX(calc(var(--i) * var(--ba)))
+        translateZ(calc((.5 * var(--h) + .9em) / tan(.5 * var(--ba))));
+    }
+
+    .tools {
+      position: fixed;
+      right: 1rem;
+      bottom: 1rem;
+      z-index: 2;
+      display: flex;
+      gap: .625rem;
+      align-items: center;
+    }
+
+    button,
+    input {
+      accent-color: #111;
+    }
+
+    button {
+      min-width: 2.75rem;
+      height: 2.75rem;
+      border: 0;
+      border-radius: .6rem;
+      color: #0f0e0c;
+      background: #fff3ed;
+      cursor: pointer;
+    }
+
+    input {
+      width: 6.5rem;
+    }
+
+    .control {
+      display: flex;
+      gap: .45rem;
+      align-items: center;
+      color: #fff3ed;
+      font-size: .75rem;
+      letter-spacing: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .a3d {
+        animation-duration: 128s;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="a3d" id="carousel"></div>
+  </div>
+
+  <div class="tools" aria-label="Controles">
+    <button type="button" id="shuffle" aria-label="Sortear imagens">R</button>
+    <label class="control">vel <input id="speed" type="range" min="16" max="80" value="32" aria-label="Velocidade"></label>
+    <label class="control">esc <input id="scale" type="range" min="48" max="120" value="82" aria-label="Escala"></label>
+  </div>
+
+  <script>
+    const imageDir = "../../../assets/image/";
+    const imageNames = [
+      "213__DSF2886 1.png",
+      "imageye___-_imgi_11_fc_30bienal_13-copia-1024x683 1.png",
+      "imageye___-_imgi_1_bc6bb143-76b8-4163-9425-6a29743deeb4 1.png",
+      "imageye___-_imgi_1_beluzco2-copia 1.png",
+      "imageye___-_imgi_1_Copia-de-25_04_2016_6077-1-scaled 1.png",
+      "imageye___-_imgi_1_Migraflix-Overview-v-2.00_00_07_10.Quadro006-e1760977785415 1.png",
+      "imageye___-_imgi_2_8152968c-583b-498d-b5c7-ff1ab8eee30f 2.png",
+      "imageye___-_imgi_2_beluzco_03-copia-2048x884 1.png",
+      "imageye___-_imgi_2_IMG_5728-scaled 1.png",
+      "imageye___-_imgi_30_Captura-de-Tela-2023-12-21-as-08.26.23-copia-1024x702 1.png",
+      "imageye___-_imgi_33_Migraflix-Overview-v-2.00_00_01_20.Quadro003-800x1423 1.png",
+      "imageye___-_imgi_38_Captura-de-Tela-2023-12-21-as-08.26.41-copia-768x768 1.png",
+      "imageye___-_imgi_3_Concha-Y-Toro-Simone-Copiar-06.00_00_30_28.Quadro024-scaled 1.png",
+      "imageye___-_imgi_3_fc_30bienal_05-copia 1.png",
+      "imageye___-_imgi_41_Migraflix-Overview-v-2.00_00_06_20.Quadro005-864x1536 1.png",
+      "imageye___-_imgi_42_geluminas_16-copia-1024x720 1.png",
+      "imageye___-_imgi_4_geluminas_06-copia-2048x1365 1.png",
+      "imageye___-_imgi_60_Selecao-24_05.00_55_43_01.Quadro025-1400x2489 1.png",
+      "imageye___-_imgi_7_Concha-Y-Toro-Simone-Copiar-06.00_00_28_23.Quadro020-scaled 1.png",
+      "imageye___-_imgi_9_Dadiva-Selecao-Total.00_17_03_06.Quadro004-scaled 1.png",
+      "JG0A0215 1.png",
+      "JG0A0408 1.png",
+      "_DSF6711 1.png",
+      "_DSF7104 1.png",
+      "_DSF8072 1.png"
+    ];
+
+    const carousel = document.querySelector("#carousel");
+    const shuffleButton = document.querySelector("#shuffle");
+    const speed = document.querySelector("#speed");
+    const scale = document.querySelector("#scale");
+    const count = 18;
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function render() {
+      const selected = shuffle(imageNames).slice(0, count);
+      carousel.style.setProperty("--n", selected.length);
+      carousel.replaceChildren(...selected.map((name, index) => {
+        const img = document.createElement("img");
+        img.className = "card";
+        img.src = imageDir + encodeURIComponent(name);
+        img.style.setProperty("--i", index);
+        img.alt = "";
+        return img;
+      }));
+    }
+
+    speed.addEventListener("input", () => {
+      carousel.style.animationDuration = `${speed.value}s`;
+    });
+
+    scale.addEventListener("input", () => {
+      carousel.style.setProperty("--scale", `${scale.value / 100}`);
+    });
+
+    shuffleButton.addEventListener("click", render);
+    render();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
