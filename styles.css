@@ -2956,6 +2956,9 @@ body:has(.section-portal-reference.is-active) .progress-line {
 }
 .section-closing-reference .closing-download {
   display: grid;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
   justify-items: start;
 }
 .section-closing-reference .closing-download span {
